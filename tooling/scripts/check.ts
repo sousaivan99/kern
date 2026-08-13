@@ -15,6 +15,7 @@ const steps: readonly WorkflowStep[] = [
   { command: run("test:timezones"), name: "Timezone matrix" },
   { command: run("test:compat"), name: "Runtime compatibility" },
   { command: run("test:browser"), name: "Browser compatibility" },
+  { command: run("test:frameworks"), name: "Framework tutorials" },
   { command: run("package:check"), name: "Packed package" },
   { command: run("audit"), name: "Dependency audit" },
 ]

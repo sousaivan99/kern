@@ -24,7 +24,7 @@ const extractSnippets = (source: string, file: string): Snippet[] => {
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index] as string
     if (openingLine === -1) {
-      if (/^```(?:ts|typescript)(?:\s.*)?$/u.test(line)) {
+      if (/^```(?:ts|typescript)(?:\s.*)?$/u.test(line) && !/\bframework-only\b/u.test(line)) {
         openingLine = index + 2
         code = []
       }

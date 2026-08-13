@@ -7,6 +7,10 @@ const outputRoot = join(repositoryRoot, "apps", "docs", "dist")
 const routes = [
   "/",
   "/getting-started/installation/",
+  "/frameworks/javascript-typescript/",
+  "/frameworks/vue/",
+  "/frameworks/nuxt/",
+  "/frameworks/react/",
   "/modules/validation/",
   "/modules/money/",
   "/modules/date/",
@@ -60,7 +64,13 @@ const server = Bun.serve({
 const browser = await chromium.launch({ headless: true })
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  const browserErrors: string[] = []
+  page.on("console", (message) => {
+    if (message.type() === "error") browserErrors.push(message.text())
+  })
+  page.on("pageerror", (error) => browserErrors.push(error.message))
   for (const route of routes) {
+    browserErrors.length = 0
     const response = await page.goto(new URL(route, server.url).href)
     if (!response?.ok()) throw new Error(`${route} returned ${response?.status() ?? "no response"}`)
     if ((await page.locator("main h1").count()) !== 1)
@@ -74,6 +84,9 @@ try {
       () => document.documentElement.scrollWidth > window.innerWidth,
     )
     if (overflow) throw new Error(`${route} overflows horizontally at desktop width`)
+    if (browserErrors.length > 0) {
+      throw new Error(`${route} reported browser errors:\n${browserErrors.join("\n")}`)
+    }
   }
 
   await page.setViewportSize({ width: 2048, height: 1200 })

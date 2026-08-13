@@ -21,6 +21,7 @@
     "test:compat": "bun --filter @kern/core test:compat",
     "test:deno": "bun --filter @kern/core test:deno",
     "test:browser": "bun --filter @kern/core test:browser",
+    "test:frameworks": "bun --filter @kern/tooling test:frameworks",
     "typecheck": "bun run --parallel --workspaces --if-present typecheck",
     "typecheck:minimum": "bun --filter @kern/core typecheck:minimum",
     "lint": "bun --filter @kern/tooling lint",

@@ -49,9 +49,10 @@ If you are new to Kern, use this order:
 
 1. **Installation** explains ESM, TypeScript module resolution, supported runtimes, and imports.
 2. **Quick start** builds one validated order flow step by step.
-3. **Core ideas** explains unknown input, immutability, explicit units/defaults, and failure rules.
-4. **Module guides** document every helper, option, default, return value, error, and edge case.
-5. **API reference** provides generated signatures and source links for exact lookup.
+3. **Framework tutorials** provide tested JavaScript, TypeScript, Vue, Nuxt, and React examples.
+4. **Core ideas** explains unknown input, immutability, explicit units/defaults, and failure rules.
+5. **Module guides** document every helper, option, default, return value, error, and edge case.
+6. **API reference** provides generated signatures and source links for exact lookup.
 
 The full guide source lives in
 [`apps/docs/src/content/docs`](https://github.com/sousaivan99/kern/tree/main/apps/docs/src/content/docs).

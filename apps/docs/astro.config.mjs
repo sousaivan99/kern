@@ -34,6 +34,15 @@ export default defineConfig({
           ],
         },
         {
+          label: "Framework tutorials",
+          items: [
+            { label: "JavaScript and TypeScript", slug: "frameworks/javascript-typescript" },
+            { label: "Vue", slug: "frameworks/vue" },
+            { label: "Nuxt", slug: "frameworks/nuxt" },
+            { label: "React", slug: "frameworks/react" },
+          ],
+        },
+        {
           label: "Concepts",
           items: [
             { label: "Native first", slug: "concepts/native-first" },
