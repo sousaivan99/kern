@@ -1,55 +1,110 @@
 ---
 title: Money arithmetic
-description: Perform checked arithmetic, exact finance rounding, percentages, discounts, and allocation.
+description: Add, scale, discount, round, and allocate integer minor units exactly.
 sidebar:
   order: 2
 ---
 
+Every amount on this page is a safe-integer count of minor units.
+
+## Add, subtract, and sum
+
 ```ts
-import {
-  addMoney,
-  allocateMoney,
-  applyDiscount,
-  multiplyMoney,
-  percentageOf,
-  roundMoney,
-  subtractMoney,
-  sumMoney,
-} from "@kern/core/money"
+import { addMoney, subtractMoney, sumMoney } from "@kern/core/money"
 
-const subtotal = sumMoney([1_499, 2_999, -500])
-const tax = percentageOf(subtotal, 17, { roundingMode: "halfEven" })
-const discounted = applyDiscount(subtotal, 10)
-const cashTotal = roundMoney(discounted, { roundingIncrement: 5 })
-const shares = allocateMoney(cashTotal, [1, 1, 1])
-
-console.log(addMoney(subtotal, tax), subtractMoney(discounted, tax), multiplyMoney(1_499, 3), shares)
+addMoney(1_099, 250) // 1349
+subtractMoney(1_099, 100) // 999
+sumMoney([1_099, 250, -100]) // 1249
+sumMoney([]) // 0
 ```
 
-All amounts are safe-integer minor units. `addMoney` and `subtractMoney` check operands and output;
-`sumMoney` checks every intermediate total and returns zero for an empty input. `percentageOf`
-uses percentage points (`15` means 15%) without restricting the percentage. `applyDiscount`
-accepts only finite percentages from 0 through 100.
+`addMoney` and `subtractMoney` validate both operands and the result. `sumMoney` uses checked
+addition for every value, so an unsafe intermediate total throws even if later values would bring
+the final total back into range.
 
-## Exact rounding
+## Multiply an amount
 
-The default is `halfExpand`: nearest value, with exact ties away from zero. Every calculation uses
-integer/`bigint` quotient and remainder arithmetic, including negative values and ties.
+```ts
+import { multiplyMoney } from "@kern/core/money"
 
-| Mode | `1 × 1.5` | `-1 × 1.5` | Exact-tie direction |
+multiplyMoney(1_499, 3) // 4497
+multiplyMoney(100, 1.5) // 150
+multiplyMoney(1, 0.5) // 1 with the default halfExpand mode
+```
+
+`multiplyMoney(minorUnits, multiplier, options?)` converts the finite JavaScript multiplier to an
+exact decimal ratio based on its source representation, then rounds to the requested minor-unit
+increment. Negative and zero multipliers are allowed. `NaN` and infinities throw `RangeError`.
+
+## Calculate percentages and discounts
+
+```ts
+import { applyDiscount, percentageOf } from "@kern/core/money"
+
+percentageOf(10_000, 17.5) // 1750
+percentageOf(10_000, -10) // -1000
+applyDiscount(1_099, 15) // 934
+applyDiscount(1_099, 100) // 0
+```
+
+`percentageOf(minorUnits, percentage, options?)` is intentionally unrestricted: negative or above
+100 percentages may be useful for deltas, taxes, and ratios. The percentage must still be finite.
+
+`applyDiscount(minorUnits, percentage, options?)` accepts only finite values from `0` through `100`
+inclusive. It calculates the rounded discount with `percentageOf`, then subtracts it from the
+original amount. Invalid percentages throw `RangeError`.
+
+## Rounding options
+
+The following functions accept `MoneyRoundingOptions`:
+
+- `multiplyMoney`
+- `percentageOf`
+- `applyDiscount`
+- `roundMoney`
+- `parseMoney`
+
+| Option | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `roundingMode` | `MoneyRoundingMode` | `"halfExpand"` | Select how a fractional result moves. |
+| `roundingIncrement` | positive safe integer | `1` | Round to a multiple of this many minor units. |
+
+Unknown mode strings and zero, negative, fractional, infinite, `NaN`, or unsafe increments throw
+`RangeError`.
+
+## All rounding modes
+
+The non-`half` modes always choose one direction when a result is not exact. The `half` modes round
+to the nearest value and differ only at an exact tie.
+
+| Mode | Positive `1.5` | Negative `-1.5` | Rule |
 | --- | ---: | ---: | --- |
-| `ceil` | 2 | -1 | toward positive infinity |
-| `expand` | 2 | -2 | away from zero |
-| `floor` | 1 | -2 | toward negative infinity |
-| `halfCeil` | 2 | -1 | nearest, ties toward positive infinity |
-| `halfEven` | 2 | -2 | nearest, ties to an even quotient |
-| `halfExpand` | 2 | -2 | nearest, ties away from zero |
-| `halfFloor` | 1 | -2 | nearest, ties toward negative infinity |
-| `halfTrunc` | 1 | -1 | nearest, ties toward zero |
-| `trunc` | 1 | -1 | toward zero |
+| `ceil` | 2 | -1 | Toward positive infinity. |
+| `expand` | 2 | -2 | Away from zero. |
+| `floor` | 1 | -2 | Toward negative infinity. |
+| `trunc` | 1 | -1 | Toward zero. |
+| `halfCeil` | 2 | -1 | Nearest; ties toward positive infinity. |
+| `halfEven` | 2 | -2 | Nearest; ties to the even quotient. |
+| `halfExpand` | 2 | -2 | Nearest; ties away from zero. |
+| `halfFloor` | 1 | -2 | Nearest; ties toward negative infinity. |
+| `halfTrunc` | 1 | -1 | Nearest; ties toward zero. |
 
-`multiplyMoney`, `percentageOf`, `applyDiscount`, `roundMoney`, and `parseMoney` accept the same
-rounding vocabulary. `roundingIncrement` is a positive safe-integer count of minor units:
+For half modes, values below half move to the nearer lower-magnitude result and values above half
+move to the nearer higher-magnitude result. Only exact ties use the named tie rule.
+
+```ts
+import { multiplyMoney } from "@kern/core/money"
+
+multiplyMoney(1, 1.4, { roundingMode: "halfEven" }) // 1
+multiplyMoney(1, 1.5, { roundingMode: "halfEven" }) // 2
+multiplyMoney(1, 2.5, { roundingMode: "halfEven" }) // 2
+multiplyMoney(1, 1.6, { roundingMode: "halfEven" }) // 2
+```
+
+`halfEven` is often called bankers' rounding. Whether it is appropriate is a business decision;
+Kern does not select a jurisdictional policy for you.
+
+## Round to a cash increment
 
 ```ts
 import { roundMoney } from "@kern/core/money"
@@ -59,21 +114,45 @@ roundMoney(103, { roundingIncrement: 5 }) // 105
 roundMoney(-102, { roundingIncrement: 5, roundingMode: "ceil" }) // -100
 ```
 
-An increment of `5` can model rounding to the nearest five minor units. Zero, negative,
-fractional, unsafe, or unknown options throw `RangeError`.
+`roundMoney(minorUnits, options?)` rounds an already-integer amount to an increment. An increment of
+`5` means the nearest multiple of five minor units, commonly used for cash settlement where the
+smallest coin is five cents. An increment of `100` rounds to whole major units only when the
+currency has two minor digits.
 
-## Exact allocation
+The increment is a unit count, not a decimal scale or list of ECMA-402-permitted increments. Any
+positive safe integer is accepted.
+
+## Allocate an amount exactly
 
 ```ts
 import { allocateMoney } from "@kern/core/money"
 
 allocateMoney(100, [1, 1, 1]) // [34, 33, 33]
+allocateMoney(10, [1, 2, 3]) // [2, 3, 5]
 allocateMoney(-10, [1, 2, 3]) // [-2, -3, -5]
 allocateMoney(10, [0, 1, 0, 1]) // [0, 5, 0, 5]
+allocateMoney(0, [1, 1]) // [0, 0]
 ```
 
-Ratios are non-negative safe-integer weights and at least one must be positive. Kern calculates
-exact proportions, then distributes leftover one-minor-unit amounts by largest fractional
-remainder. Equal remainders keep input order. The returned shares preserve positive, negative, and
-zero totals exactly; zero-weight entries stay zero. Allocation deliberately ignores cash-rounding
-increments so it never loses a minor unit.
+`allocateMoney(minorUnits, ratios)` treats ratios as relative weights. `[1, 1]`, `[50, 50]`, and
+`[2, 2]` all represent equal shares.
+
+Rules:
+
+1. `ratios` must not be empty.
+2. Every ratio must be a non-negative safe integer.
+3. At least one ratio must be positive.
+4. Zero-weight positions always receive zero.
+5. Kern calculates exact proportions with `bigint`.
+6. Remaining one-minor-unit amounts go to the largest fractional remainders.
+7. Equal remainders use stable input order, so earlier recipients win ties.
+8. Positive, negative, and zero totals are preserved exactly.
+
+Allocation always uses one-minor-unit resolution and ignores cash-rounding increments. Apply cash
+rounding to the final settlement amount only when your domain rules require it.
+
+## Error summary
+
+All money arithmetic throws `RangeError` for invalid numeric configuration, non-safe-integer
+amounts, non-finite factors/percentages, unsafe results, or invalid allocation ratios. Callback
+errors are not involved; these helpers are deterministic synchronous functions.

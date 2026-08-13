@@ -1,32 +1,105 @@
 ---
 title: Number
-description: Small numeric calculations and Intl-based display helpers.
+description: Small numeric calculations and native Intl-based display formatting.
 sidebar:
   order: 4
 ---
 
+Use `@kern/core/number` for ordinary numbers. Use `@kern/core/money` for financial amounts because
+money requires integer units and exact rounding rules.
+
+## At a glance
+
+| Helper | Result | Important default |
+| --- | --- | --- |
+| `clamp` | A value limited to a range | Bounds are inclusive. |
+| `round` | A value rounded to decimal places | `precision = 0` |
+| `isBetween` | Whether a value is inside a range | `inclusive = true` |
+| `percentageOfTotal` | Percentage points | `1, 4` returns `25` |
+| `formatNumber` | Locale-formatted number | Runtime default locale |
+| `formatCompact` | Compact locale text | Native compact notation |
+| `formatPercentage` | Locale-formatted percentage | Input uses percentage points |
+
+## Clamp a value
+
 ```ts
-import { clamp, formatCompact, formatNumber, formatPercentage, isBetween, percentageOfTotal, round } from "@kern/core/number"
+import { clamp } from "@kern/core/number"
 
-const completion = percentageOfTotal(42, 50)
-
-console.log(clamp(130, 0, 100))
-console.log(round(12.3456, 2))
-console.log(isBetween(18, 13, 19, { inclusive: false }))
-console.log(formatNumber(1_234_567.89, { locale: "de-DE" }))
-console.log(formatCompact(1_250_000, { locale: "en-US" }))
-console.log(formatPercentage(completion, { locale: "en-US" }))
+clamp(130, 0, 100) // 100
+clamp(-10, 0, 100) // 0
+clamp(50, 0, 100) // 50
 ```
 
-## Calculations
+The bounds are inclusive. `minimum` may equal `maximum`. Reversed bounds or `NaN` bounds throw
+`RangeError`. A `NaN` value remains `NaN`; infinities are clamped normally.
 
-- `clamp(value, minimum, maximum)` uses inclusive bounds. `NaN` remains `NaN`; reversed or `NaN` bounds throw `RangeError`.
-- `round(value, precision = 0)` performs decimal-place rounding for positive or negative precision.
-- `isBetween(value, minimum, maximum, { inclusive = true })` supports inclusive or strict boundaries and rejects `NaN` or reversed bounds.
-- `percentageOfTotal(part, total)` returns percentage points, so `42 / 50` returns `84`. It rejects non-finite values and zero totals.
+## Round decimal places
 
-## Formatting
+```ts
+import { round } from "@kern/core/number"
 
-`formatNumber`, `formatCompact`, and `formatPercentage` delegate locale behavior to
-`Intl.NumberFormat`. Their options colocate `locale` with native formatter options. Percentage
-inputs are percentage points: `84` formats as `84%`, not `8,400%`.
+round(12.3456, 2) // 12.35
+round(1499, -2) // 1500
+round(12.5) // 13
+```
+
+Positive precision rounds digits after the decimal point. Negative precision rounds tens,
+hundreds, and larger positions. Precision must be an integer from `-100` through `100`; otherwise
+`round()` throws `RangeError`. `NaN`, `Infinity`, and `-Infinity` are returned unchanged.
+
+This helper follows `Math.round` tie behavior. It is not a finance rounding API; use `roundMoney`
+for explicit modes such as `halfEven`.
+
+## Check a range
+
+```ts
+import { isBetween } from "@kern/core/number"
+
+isBetween(18, 18, 65) // true
+isBetween(18, 18, 65, { inclusive: false }) // false
+```
+
+`BetweenOptions` has one option:
+
+| Option | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `inclusive` | `boolean` | `true` | Include both minimum and maximum boundaries. |
+
+Reversed or `NaN` bounds throw `RangeError`. A `NaN` input value simply returns `false`.
+
+## Calculate a percentage
+
+```ts
+import { percentageOfTotal } from "@kern/core/number"
+
+percentageOfTotal(42, 50) // 84
+percentageOfTotal(1, 4) // 25
+```
+
+The result is in **percentage points**: `25` means 25%. Both operands must be finite and `total`
+cannot be zero. Invalid operands throw `RangeError`. Negative inputs are allowed when the
+mathematics is meaningful for your domain.
+
+## Format numbers
+
+```ts
+import { formatCompact, formatNumber, formatPercentage } from "@kern/core/number"
+
+formatNumber(1_234_567.89, { locale: "de-DE" })
+formatCompact(1_250_000, { locale: "en-US" })
+formatPercentage(84, { locale: "en-US" })
+```
+
+All formatting delegates to `Intl.NumberFormat`. `NumberFormatOptions` accepts:
+
+- `locale`, such as `"en-US"`, `"de-DE"`, or an array of preferred locales;
+- every native `Intl.NumberFormatOptions` property, including `minimumFractionDigits`,
+  `maximumFractionDigits`, `useGrouping`, `signDisplay`, `numberingSystem`, and `roundingMode` when
+  supported by the runtime.
+
+`formatCompact` forces `notation: "compact"`; another supplied `notation` value is ignored.
+`formatPercentage` forces `style: "percent"` and divides its input by 100, so `84` displays as
+`84%`, not `8,400%`. Other compatible native formatting options remain available.
+
+When `locale` is omitted, the runtime's default locale is used. Pass it explicitly for snapshots,
+stored display text, or user-specific output.

@@ -1,47 +1,140 @@
 ---
 title: Array
-description: Small immutable collection operations with explicit native equivalents.
+description: Select, deduplicate, group, split, and chunk arrays without changing the input.
 sidebar:
   order: 6
 ---
 
-Import array helpers from `@kern/core/array`. None mutate the input array.
+Import array helpers from `@kern/core/array`. Every helper returns a new value and leaves the input
+array unchanged.
+
+## At a glance
+
+| Helper | Use it when you need to | Empty input |
+| --- | --- | --- |
+| `first` | Read the first item | `undefined` |
+| `last` | Read the last item | `undefined` |
+| `unique` | Remove duplicate values | `[]` |
+| `uniqueBy` | Remove duplicates using an ID/key | `[]` |
+| `groupBy` | Collect values under calculated keys | Empty null-prototype object |
+| `partition` | Split values into matches and non-matches | `[[], []]` |
+| `chunk` | Split values into fixed-size pages/batches | `[]` |
+| `withoutFalsy` | Remove JavaScript-falsy values | `[]` |
+
+## First and last
 
 ```ts
-import { chunk, first, groupBy, last, partition, unique, uniqueBy, withoutFalsy } from "@kern/core/array"
+import { first, last } from "@kern/core/array"
+
+const queue = ["build", "test", "deploy"]
+
+first(queue) // "build"
+last(queue) // "deploy"
+first([]) // undefined
+```
+
+These are semantic forms of `values[0]` and `values.at(-1)`. For a known non-empty tuple,
+TypeScript preserves the exact first or last element type.
+
+## Remove duplicates
+
+Use `unique(values)` when equality should follow JavaScript `Set` rules. The first occurrence wins
+and order is preserved.
+
+```ts
+import { unique, uniqueBy } from "@kern/core/array"
+
+unique(["vue", "react", "vue"]) // ["vue", "react"]
+
+const users = [
+  { id: 1, name: "Ada" },
+  { id: 2, name: "Grace" },
+  { id: 1, name: "Ada (duplicate)" },
+]
+
+uniqueBy(users, (user) => user.id)
+// [{ id: 1, name: "Ada" }, { id: 2, name: "Grace" }]
+```
+
+`uniqueBy(values, selector)` calls `selector(value, index)` once for each input item. The selector
+may return strings, numbers, object identities, or any other value supported by `Map`/`Set`
+equality. It keeps the first item for each selector result.
+
+## Group values
+
+```ts
+import { groupBy } from "@kern/core/array"
 
 const events = [
   { id: "evt-1", category: "billing" },
   { id: "evt-2", category: "security" },
-  { id: "evt-1", category: "billing" },
+  { id: "evt-3", category: "billing" },
 ]
 
-const distinct = uniqueBy(events, (event) => event.id)
-const grouped = groupBy(distinct, (event) => event.category)
-const [billing, other] = partition(distinct, (event) => event.category === "billing")
-
-console.log(first(events), last(events), grouped, billing, other)
-console.log(chunk([1, 2, 3, 4, 5], 2))
-console.log(unique(["vue", "react", "vue"]))
-console.log(withoutFalsy([0, 1, false, "ready", null, undefined]))
+const grouped = groupBy(events, (event) => event.category)
+console.log(grouped.billing)
 ```
 
-## Selection and uniqueness
+`groupBy(values, selector)` calls the selector with `(value, index)` and accepts any property key:
+strings, numbers, or symbols. It returns a **null-prototype object**, so an input key such as
+`"__proto__"` is treated as data and cannot change the result's prototype.
 
-- `first(values)` returns the first value or `undefined`; native equivalent: `values[0]`.
-- `last(values)` returns the last value or `undefined`; native equivalent: `values.at(-1)`.
-- `unique(values)` uses `Set` equality, preserves first-seen order, and returns a new array.
-- `uniqueBy(values, selector)` keeps the first value for every selector result.
+The closest native API is `Object.groupBy(values, selector)`. Kern provides predictable typing and
+the same safe result shape across its supported runtimes.
 
-Tuple-aware overloads preserve exact first and last element types when the input is a known
-non-empty tuple.
+## Split by a condition
 
-## Organization
+```ts
+import { partition } from "@kern/core/array"
 
-- `groupBy(values, selector)` returns a null-prototype object, making keys such as `__proto__` safe.
-- `partition(values, predicate)` returns `[matches, nonMatches]` and supports type-guard predicates.
-- `chunk(values, size)` creates new arrays and throws `RangeError` unless size is a positive safe integer.
-- `withoutFalsy(values)` removes `false`, `0`, `0n`, `""`, `null`, `undefined`, and `NaN` according to JavaScript truthiness.
+const [adults, minors] = partition(
+  [12, 21, 17, 40],
+  (age) => age >= 18,
+)
 
-`Object.groupBy()` is the native alternative to `groupBy`, but Kern provides stable typing and a
-safe null-prototype result across its supported runtimes.
+console.log(adults) // [21, 40]
+console.log(minors) // [12, 17]
+```
+
+`partition(values, predicate)` always returns `[matching, remaining]`. Both arrays preserve input
+order. The predicate receives `(value, index)` and can be a TypeScript type guard, in which case the
+matching array is narrowed.
+
+## Create batches with `chunk`
+
+```ts
+import { chunk } from "@kern/core/array"
+
+chunk([1, 2, 3, 4, 5], 2) // [[1, 2], [3, 4], [5]]
+chunk([], 3) // []
+```
+
+`size` is the maximum number of values in each returned array. It must be a positive safe integer.
+Zero, negative, fractional, `NaN`, infinite, and unsafe sizes throw `RangeError`.
+
+The returned chunks are new arrays. Their contained values are not cloned.
+
+## Remove falsy values
+
+```ts
+import { withoutFalsy } from "@kern/core/array"
+
+withoutFalsy([0, 1, false, "ready", "", null, undefined])
+// [1, "ready"]
+```
+
+This is the typed equivalent of `values.filter(Boolean)`. It removes `false`, `0`, `-0`, `0n`,
+`""`, `null`, `undefined`, and `NaN` according to JavaScript truthiness. It does **not** remove
+empty arrays or empty objects because both are truthy.
+
+`NonFalsy<T>` is the exported type that removes statically representable falsy members from a
+union. TypeScript cannot represent `NaN` as its own literal type, so runtime removal of `NaN` is
+more precise than static narrowing for that value.
+
+## Mutation and errors
+
+| Helper | Mutates input? | Can throw because of its options? |
+| --- | --- | --- |
+| `first`, `last`, `unique`, `withoutFalsy` | No | No |
+| `uniqueBy`, `groupBy`, `partition` | No | A selector/predicate exception passes through. |
+| `chunk` | No | `RangeError` for an invalid size. |

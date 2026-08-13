@@ -1,38 +1,68 @@
 ---
 title: Installation
-description: Install Kern and select the smallest public entrypoint for your code.
+description: Install Kern, configure TypeScript, and choose the right import path.
 sidebar:
   order: 1
 ---
 
-Kern is published as the ESM-only package `@kern/core`. It has no runtime dependencies.
+Kern is the ESM-only package `@kern/core`. It has no runtime dependencies and works with any
+framework that can consume modern JavaScript modules.
+
+Kern is currently in unreleased MVP development. The commands below describe the intended package
+setup; the completed MVP will be the first 1.0 release.
+
+## Install the package
+
+Choose the command for your package manager:
 
 ```bash
 bun add @kern/core
 ```
 
-The package also works with npm, pnpm, and yarn:
-
 ```bash
 npm install @kern/core
 ```
 
+```bash
+pnpm add @kern/core
+```
+
+```bash
+yarn add @kern/core
+```
+
+You do not need to install type packages. Kern includes its TypeScript declarations.
+
 ## Requirements
 
-| Environment | Supported baseline |
-| --- | --- |
-| TypeScript | 5.0 or newer |
-| Node.js | 22 or newer |
-| Bun | 1.3 or newer |
-| Deno | Current stable |
-| Browsers | Modern evergreen browsers with ES2022, `Intl`, and Web Abort APIs |
+| Environment | Supported baseline | What that means |
+| --- | --- | --- |
+| TypeScript | 5.0 or newer | Inference and type tests support TypeScript 5+. |
+| Node.js | 22 or newer | Use ESM imports, not CommonJS `require()`. |
+| Bun | 1.3 or newer | Bun can run Kern directly. |
+| Deno | Current stable | Use the package through Deno's npm support. |
+| Browsers | Modern evergreen | ES2022, `Intl`, and Web Abort APIs must be available. |
 
-TypeScript projects must use `Bundler`, `Node16`, or `NodeNext` module resolution. CommonJS
-`require()` and legacy `Node10` resolution are not supported.
+TypeScript projects must use `Bundler`, `Node16`, or `NodeNext` module resolution. A typical
+application configuration looks like this:
 
-## Prefer subpath imports
+```json
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "target": "ES2022"
+  }
+}
+```
 
-Import from the module that owns the operation:
+`strict: true` is recommended because it gives you the best schema inference and catches missing
+null/undefined handling.
+
+## Import from a module
+
+Prefer the subpath that owns the helper:
 
 ```ts
 import { addDays } from "@kern/core/date"
@@ -42,8 +72,37 @@ import { object, string } from "@kern/core/validation"
 const Account = object({ name: string().trim().min(2) })
 const account = Account.parse({ name: " Ada " })
 
-console.log(account.name, formatMoney(1999, "EUR"), addDays(new Date(), 1))
+console.log(account.name)
+console.log(formatMoney(1999, "EUR", { locale: "en-GB" }))
+console.log(addDays(new Date(), 1))
 ```
 
-The root entrypoint remains available, but subpaths make boundaries explicit and reduce the chance
-that an application or its tooling retains unrelated code.
+The imports are ordinary JavaScript imports—Kern does not add framework plugins or auto-imports.
+Subpath imports make ownership obvious and help bundlers discard modules you do not use.
+
+The root entrypoint also works:
+
+```ts
+import { addDays, formatMoney, object, string } from "@kern/core"
+```
+
+Use it when convenience matters more than making module boundaries visible. Both forms are
+side-effect free and tree-shakeable in supported bundlers.
+
+## Confirm the setup
+
+Create a small TypeScript file and run it with your normal toolchain:
+
+```ts
+import { object, string } from "@kern/core/validation"
+
+const Greeting = object({ message: string().min(1) })
+const result = Greeting.safeParse({ message: "Kern is ready" })
+
+if (result.success) console.log(result.data.message)
+else console.error(result.issues)
+```
+
+If your tool reports that it cannot resolve the package, first check that it uses modern module
+resolution and ESM. Kern does not support legacy TypeScript `Node10` resolution or CommonJS
+`require()`.

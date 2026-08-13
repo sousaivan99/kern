@@ -1,27 +1,63 @@
 ---
 title: String
-description: Focused Unicode-aware case conversion, slugs, grapheme truncation, and blank checks.
+description: Unicode-aware casing, slugs, grapheme-safe truncation, and blank checks.
 sidebar:
   order: 5
 ---
 
-```ts
-import { camelCase, capitalize, isBlank, kebabCase, slugify, snakeCase, truncate, uncapitalize } from "@kern/core/string"
+Kern's string module focuses on operations whose Unicode behavior is easy to get wrong.
 
-console.log(capitalize("hello, world"))
-console.log(uncapitalize("Hello, world"))
-console.log(camelCase("customer account-ID"))
-console.log(kebabCase("customerAccount ID"))
-console.log(snakeCase("customerAccount ID"))
-console.log(slugify("Crème brûlée & Café!"))
-console.log(truncate("👨‍👩‍👧‍👦 family account", 10))
-console.log(isBlank("  \n"))
+## At a glance
+
+| Helper | Example result |
+| --- | --- |
+| `capitalize("hello")` | `"Hello"` |
+| `uncapitalize("Hello")` | `"hello"` |
+| `camelCase("account owner")` | `"accountOwner"` |
+| `kebabCase("accountOwner")` | `"account-owner"` |
+| `snakeCase("accountOwner")` | `"account_owner"` |
+| `slugify("Crème brûlée")` | `"creme-brulee"` |
+| `truncate("Hello world", 8)` | `"Hello w…"` |
+| `isBlank("  \n")` | `true` |
+
+## Capitalize and uncapitalize
+
+```ts
+import { capitalize, uncapitalize } from "@kern/core/string"
+
+capitalize("hello, world") // "Hello, world"
+uncapitalize("Hello, world") // "hello, world"
+capitalize("") // ""
 ```
 
-## Deterministic and locale-aware case
+Only the first Unicode code point is cased; the remainder is left unchanged. These functions do
+not trim whitespace, so `capitalize(" hello")` still starts with a space.
 
-Case helpers use deterministic `toUpperCase()`/`toLowerCase()` behavior by default, so output does
-not depend on the machine's host locale. Pass a locale only when linguistic casing is intended:
+## Convert identifier and URL cases
+
+```ts
+import { camelCase, kebabCase, snakeCase } from "@kern/core/string"
+
+camelCase("customer account-ID") // "customerAccountId"
+kebabCase("customerAccount ID") // "customer-account-id"
+snakeCase("customerAccount ID") // "customer_account_id"
+```
+
+Case conversion first normalizes with Unicode NFKC, splits letter/number words, lowercases them,
+and joins them in the requested form. It understands common camel-case and acronym boundaries, but
+it is not a natural-language tokenizer. Punctuation acts as a separator and is not preserved.
+
+## Deterministic and locale-aware casing
+
+`capitalize`, `uncapitalize`, `camelCase`, `kebabCase`, `snakeCase`, and `slugify` accept the same
+`StringCaseOptions`:
+
+| Option | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `locale` | `Intl.LocalesArgument` | None | Use locale-sensitive upper/lower casing. |
+
+Without a locale, Kern uses deterministic `toUpperCase()` and `toLowerCase()` behavior. Output does
+not depend on the machine's host locale.
 
 ```ts
 import { capitalize, slugify } from "@kern/core/string"
@@ -31,17 +67,58 @@ capitalize("istanbul", { locale: "tr" }) // "İstanbul"
 slugify("IĞDIR", { locale: "tr" }) // "ıgdır"
 ```
 
-`capitalize`, `uncapitalize`, `camelCase`, `kebabCase`, `snakeCase`, and `slugify` accept the same
-`StringCaseOptions`. Word splitting is Unicode-aware but is not a natural-language segmenter.
+Pass a locale only when linguistic casing is intended. A locale changes casing rules; it does not
+translate text.
 
-## Grapheme-safe truncation and slugs
+## Create slugs
 
-`truncate(value, maximumLength, omission = "…")` counts `Intl.Segmenter` grapheme clusters. It
-never splits a combining sequence, flag, or joined emoji. The positional omission remains inside
-the limit, zero length returns an empty string, and an invalid limit throws `RangeError`.
+```ts
+import { slugify } from "@kern/core/string"
 
-`slugify` normalizes and removes combining marks, lowercases words, and joins them with hyphens.
-`isBlank` is equivalent to checking `value.trim().length === 0` with native whitespace rules.
+slugify("Crème brûlée & Café!") // "creme-brulee-cafe"
+slugify("  Product  2026  ") // "product-2026"
+```
 
-Validation string schemas intentionally use UTF-16 code units for `.min()`, `.max()`, and
-`.length()`; grapheme counting is specific to display-oriented `truncate()`.
+`slugify` performs Unicode NFKD normalization, removes combining marks, applies lowercase word
+conversion, and joins words with hyphens. It is useful for readable identifiers, but it does not
+guarantee uniqueness. Add an ID when two records may have the same title.
+
+Some writing systems cannot be represented by simple diacritic removal or Latin transliteration;
+Kern deliberately does not provide a language transliteration engine.
+
+## Truncate visible characters safely
+
+```ts
+import { truncate } from "@kern/core/string"
+
+truncate("Hello world", 8) // "Hello w…"
+truncate("Hello world", 8, "...") // "Hello..."
+truncate("👨‍👩‍👧‍👦 family", 2) // "👨‍👩‍👧‍👦…"
+truncate("anything", 0) // ""
+```
+
+`truncate(value, maximumLength, omission = "…")` counts grapheme clusters with `Intl.Segmenter`.
+A grapheme is roughly one user-perceived character, so Kern does not split joined emoji, flags, or
+a letter plus combining marks.
+
+The omission is included in `maximumLength`. If the omission itself is as long as or longer than
+the limit, Kern returns the portion of the omission that fits. If the input already fits, the
+original string is returned unchanged.
+
+`maximumLength` must be a non-negative safe integer. Invalid values throw `RangeError`.
+
+Validation string schemas use JavaScript UTF-16 code units for `.min()`, `.max()`, and `.length()`.
+Grapheme counting is specific to display-oriented `truncate()`.
+
+## Check blank text
+
+```ts
+import { isBlank } from "@kern/core/string"
+
+isBlank("") // true
+isBlank("  \n") // true
+isBlank("  hello  ") // false
+```
+
+`isBlank(value)` is equivalent to `value.trim().length === 0` and follows native JavaScript
+whitespace rules. It accepts strings only; it does not coerce `null`, numbers, or other values.

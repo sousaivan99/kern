@@ -1,59 +1,180 @@
 ---
 title: Async
-description: Cancellation-aware timing, retry, memoized execution, debounce, and throttle.
+description: Sleep, retry, run once, debounce, and throttle with predictable cancellation.
 sidebar:
   order: 8
 ---
 
-## Sleep and retry
+The async module contains small control-flow primitives. Time values are always milliseconds.
+
+## At a glance
+
+| Helper | What it does |
+| --- | --- |
+| `sleep` | Waits for a delay, optionally cancellable. |
+| `retry` | Repeats a failing operation under explicit rules. |
+| `once` | Runs a function once and replays its result or error. |
+| `debounce` | Waits until calls stop, then runs the latest call. |
+| `throttle` | Runs immediately, then at most once per interval. |
+
+## Wait with `sleep`
 
 ```ts
-import { retry, sleep } from "@kern/core/async"
+import { sleep } from "@kern/core/async"
 
-await sleep(10)
-
-const attempts: number[] = []
-const response = await retry(
-  (attempt) => {
-    attempts.push(attempt)
-    if (attempt < 3) throw new Error("Temporary failure")
-    return { ok: true }
-  },
-  { attempts: 4, delay: 5 },
-)
-
-console.log(response, attempts)
+await sleep(250)
+console.log("250 ms have passed")
 ```
 
-`sleep(milliseconds, { signal })` rejects with the signal reason when cancelled and throws
-`RangeError` for negative or non-finite delays. `retry(operation, options)` counts the initial call
-as an attempt, accepts fixed or callback-based delay, optionally filters errors with `shouldRetry`,
-and observes cancellation between attempts.
+The signature is `sleep(milliseconds, { signal? })`. The delay must be a non-negative finite
+number. Negative values, `NaN`, and infinities throw `RangeError` before a timer starts.
 
-## Once, debounce, and throttle
+Use an `AbortSignal` when the caller may cancel the work:
 
 ```ts
-import { debounce, once, throttle } from "@kern/core/async"
+import { sleep } from "@kern/core/async"
+
+const controller = new AbortController()
+const waiting = sleep(10_000, { signal: controller.signal })
+
+controller.abort(new Error("Request closed"))
+
+try {
+  await waiting
+} catch (error) {
+  console.log(error)
+}
+```
+
+If the signal is already aborted, or aborts during the wait, the promise rejects with
+`signal.reason`. When no reason exists it uses a native `AbortError` DOM exception.
+
+## Retry an operation
+
+```ts
+import { retry } from "@kern/core/async"
+
+const response = await retry(
+  async (attempt) => {
+    const response = await fetch("https://example.com/api")
+    if (!response.ok) throw new Error(`Attempt ${attempt} failed`)
+    return response.json()
+  },
+  { attempts: 4, delay: 250 },
+)
+
+console.log(response)
+```
+
+`retry(operation, options)` passes the one-based attempt number to `operation` and returns its first
+successful result.
+
+| Option | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `attempts` | positive safe integer | `3` | Total calls, including the initial call. |
+| `delay` | number or `(attempt, error) => number` | `0` | Wait between failed calls. |
+| `shouldRetry` | `(error, attempt) => boolean` | Retry | Return `false` to stop and rethrow. |
+| `signal` | `AbortSignal` | None | Cancel before an attempt or during a delay. |
+
+```ts
+import { retry } from "@kern/core/async"
+
+const value = await retry(
+  (attempt) => {
+    if (attempt < 3) throw new TypeError("Temporary example")
+    return "ready"
+  },
+  {
+    attempts: 5,
+    delay: (attempt) => attempt * 100,
+    shouldRetry: (error) => error instanceof TypeError,
+  },
+)
+
+console.log(value)
+```
+
+The final operation error is rethrown unchanged. Invalid `attempts` or delay values throw
+`RangeError`. Exceptions from `delay` or `shouldRetry` also pass through. Kern does not assume which
+errors are safe to retry; use `shouldRetry` for application policy and avoid retrying non-idempotent
+work unless the operation supports it.
+
+## Run a function once
+
+```ts
+import { once } from "@kern/core/async"
 
 let generated = 0
 const getRequestId = once(() => `request-${++generated}`)
 
+getRequestId() // "request-1"
+getRequestId() // "request-1"
+```
+
+`once(callback)` remembers the first returned value and never calls the callback again. If the
+first call throws, it remembers and rethrows the same error on every later call. Arguments from
+later calls are ignored because there is no later callback execution.
+
+This works for synchronous return values. If the callback returns a promise, the promise itself is
+cached, so all callers share the same pending/fulfilled/rejected promise. Recursive invocation
+before the first call completes throws `Error`.
+
+## Debounce calls
+
+Debouncing is useful for search fields, autosave, and resize work where only the latest call after
+a quiet period matters.
+
+```ts
+import { debounce } from "@kern/core/async"
+
 const saved: string[] = []
-const saveSearch = debounce((query: string) => saved.push(query), 100)
+const saveSearch = debounce((query: string) => saved.push(query), 300)
+
 saveSearch("ker")
 saveSearch("kern")
-saveSearch.flush()
+
+const result = saveSearch.flush()
+console.log(saved, result)
+```
+
+Each call replaces the pending arguments and restarts the timer. The callback normally runs once
+`wait` milliseconds have passed without another call.
+
+## Throttle calls
+
+Throttling is useful for scroll, pointer, and progress events where the first update should be
+immediate but later updates should be limited.
+
+```ts
+import { throttle } from "@kern/core/async"
 
 const positions: number[] = []
 const trackScroll = throttle((position: number) => positions.push(position), 100)
-trackScroll(10)
-trackScroll(20)
-trackScroll.flush()
 
-console.log(getRequestId(), getRequestId(), saved, positions)
+trackScroll(10) // immediate
+trackScroll(20) // retained as the trailing call
+trackScroll(30) // replaces the trailing arguments
+
+trackScroll.flush()
+console.log(positions) // [10, 30]
 ```
 
-`once` caches the first return value or thrown error and never calls the function again.
-`debounce` invokes after calls settle; `throttle` invokes at most once per interval with leading and
-trailing behavior. Both scheduled wrappers return `void`, expose synchronous `cancel()` and
-`flush()` methods, and can be cancelled permanently by an `AbortSignal`.
+`throttle` invokes immediately when no interval is active. During the interval it retains at most
+one trailing call, using the latest arguments.
+
+## Scheduled function controls
+
+Both `debounce` and `throttle` return a `ScheduledFunction`:
+
+| Member | Behavior |
+| --- | --- |
+| Calling it | Schedules work and returns `void`. |
+| `.cancel()` | Clears pending work and returns `void`. |
+| `.flush()` | Runs pending work synchronously and returns its result, or `undefined`. |
+
+They accept `{ signal?: AbortSignal }`. Aborting cancels pending work and makes later wrapper calls
+no-ops. Calling `.cancel()` only cancels the current pending work; you can schedule the wrapper
+again unless its signal is aborted.
+
+The `wait` value must be a non-negative finite number or construction throws `RangeError`. Callback
+exceptions thrown by `.flush()` or timer execution are not swallowed.

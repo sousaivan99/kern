@@ -17,6 +17,25 @@ importable modules for validation, money, date, number, string, array, object, a
 flow. See [`packages/kern/README.md`](./packages/kern/README.md) for the npm-facing package guide or
 [`apps/docs/src/content/docs`](./apps/docs/src/content/docs) for the complete documentation source.
 
+## Start here
+
+The documentation is written as a progressive guide: begin with installation, follow one complete
+order example, then learn the six shared ideas before choosing a module. Every module guide lists
+its functions, options, defaults, return values, errors, mutation behavior, edge cases, and native
+equivalents where relevant.
+
+- [Installation](./apps/docs/src/content/docs/getting-started/installation.md)
+- [Quick start](./apps/docs/src/content/docs/getting-started/quick-start.md)
+- [Core ideas](./apps/docs/src/content/docs/getting-started/core-ideas.md)
+- [Validation](./apps/docs/src/content/docs/modules/validation/index.md)
+- [Money](./apps/docs/src/content/docs/modules/money/index.md)
+- [Date](./apps/docs/src/content/docs/modules/date/index.md)
+- [Number](./apps/docs/src/content/docs/modules/number.mdx)
+- [String](./apps/docs/src/content/docs/modules/string.mdx)
+- [Array](./apps/docs/src/content/docs/modules/array.mdx)
+- [Object](./apps/docs/src/content/docs/modules/object.mdx)
+- [Async](./apps/docs/src/content/docs/modules/async.mdx)
+
 ## Development
 
 ```bash

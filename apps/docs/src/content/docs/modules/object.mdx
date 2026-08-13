@@ -1,46 +1,131 @@
 ---
 title: Object
-description: Descriptor-preserving selection, safe own paths, and deep freezing for plain data.
+description: Safely inspect, select, omit, traverse, and freeze plain object data.
 sidebar:
   order: 7
 ---
 
+The object module is intentionally narrow. It works with own properties and plain data while
+avoiding arbitrary path writes and prototype-pollution hazards.
+
+## At a glance
+
+| Helper | Purpose | Input restriction |
+| --- | --- | --- |
+| `hasOwn` | Safely test one own key | Accepts `unknown` |
+| `hasOwnPath` | Safely test a nested own path | Accepts `unknown` |
+| `pick` | Copy selected own properties | Plain/null-prototype object |
+| `omit` | Copy everything except selected properties | Plain/null-prototype object |
+| `deepFreeze` | Recursively freeze plain data | Primitives, arrays, plain objects |
+
+## Check one own property
+
 ```ts
-import { deepFreeze, hasOwn, hasOwnPath, omit, pick } from "@kern/core/object"
+import { hasOwn } from "@kern/core/object"
+
+hasOwn({ name: "Ada" }, "name") // true
+hasOwn(Object.create({ inherited: true }), "inherited") // false
+hasOwn(null, "name") // false
+hasOwn("text", "length") // false
+```
+
+`hasOwn(value, key)` accepts `unknown` and never coerces primitives. It checks string, number, and
+symbol keys. It is similar to `Object.hasOwn(value, key)`, with the object/null guard included.
+
+Use it for narrowing untrusted values one property at a time. It checks presence, not the
+property's value type.
+
+## Pick or omit properties
+
+```ts
+import { omit, pick } from "@kern/core/object"
 
 const account = {
   id: "acct-42",
   email: "ada@example.com",
   passwordHash: "never-return-this",
-  profile: { preferences: { theme: "dark" } },
 }
 
-const publicAccount = pick(account, ["id", "email"])
-const withoutSecret = omit(account, ["passwordHash"])
-const configuration = deepFreeze({ api: { timeout: 5_000 }, features: ["search"] })
+const summary = pick(account, ["id", "email"])
+const safeAccount = omit(account, ["passwordHash"])
 
-console.log(publicAccount, withoutSecret)
-console.log(hasOwn(account, "email"))
-console.log(hasOwnPath(account, "profile.preferences.theme"))
-console.log(Object.isFrozen(configuration.api))
+console.log(summary, safeAccount)
 ```
 
-## Own-property operations
+Both helpers:
 
-`hasOwn(value, key)` safely accepts `unknown`, returning `false` for primitives and `null` instead
-of throwing. `pick` and `omit` accept only plain or null-prototype objects, preserve own property
-descriptors and symbol keys, and return a new object with the source prototype. Arrays and class
-instances are rejected with `TypeError`.
+- return a new object;
+- preserve the source's normal or null prototype;
+- copy own property descriptors rather than reading and reassigning values;
+- preserve non-enumerable and symbol properties when selected;
+- leave nested values shared rather than deeply cloning them;
+- accept only plain objects and null-prototype objects.
 
-## Safe paths
+Arrays, dates, maps, sets, functions, and class instances throw `TypeError`. Keys that do not exist
+are ignored. TypeScript restricts the key list to known keys when the source type is known.
 
-`hasOwnPath(value, path)` traverses own properties only. It accepts dotted strings or an explicit
-segment array. Use an array when a real key contains a dot. The segments `__proto__`, `prototype`,
-and `constructor` are always rejected to close prototype-pollution paths.
+`pick` and `omit` are data-shaping tools, not authorization by themselves. Decide which fields are
+safe to expose in the domain layer and test that policy.
 
-## Deep freezing
+## Check a nested own path
 
-`deepFreeze` validates the complete graph before freezing it, supports cycles, and returns a
-deeply readonly type. It supports primitives, arrays, plain objects, and null-prototype objects.
-Accessors, functions, class instances, `Map`, `Set`, `Date`, typed arrays, promises, and other
-mutable built-ins throw `TypeError`. This is an immutability helper for plain data, not a sandbox.
+```ts
+import { hasOwnPath } from "@kern/core/object"
+
+const account = {
+  profile: {
+    preferences: { theme: "dark" },
+    "display.name": "Ada",
+  },
+}
+
+hasOwnPath(account, "profile.preferences.theme") // true
+hasOwnPath(account, ["profile", "display.name"]) // true
+hasOwnPath(account, "profile.missing") // false
+```
+
+The path can be:
+
+- a dotted string such as `"profile.preferences.theme"`; or
+- an array of string/number segments such as `["users", 0, "email"]`.
+
+Use an array when a real key contains a dot. Empty paths return `false`. The segments
+`__proto__`, `prototype`, and `constructor` are always rejected to prevent traversal into
+prototype-sensitive locations.
+
+Only own properties are followed. A missing segment, primitive intermediate value, or `null`
+returns `false`. A getter is read during traversal and can throw; this helper is not a validation
+sandbox for hostile objects.
+
+## Deeply freeze plain data
+
+```ts
+import { deepFreeze } from "@kern/core/object"
+
+const configuration = deepFreeze({
+  api: { timeout: 5_000 },
+  features: ["search", "billing"],
+})
+
+console.log(Object.isFrozen(configuration)) // true
+console.log(Object.isFrozen(configuration.api)) // true
+```
+
+`deepFreeze(value)` validates the complete graph first, then freezes it recursively. That means an
+unsupported nested value causes a `TypeError` before any part of the graph has been frozen.
+
+Supported values:
+
+- primitives;
+- arrays and tuples;
+- plain objects;
+- null-prototype objects;
+- cycles made only from those containers.
+
+Rejected values include functions, accessors/getters/setters, class instances, `Date`, `RegExp`,
+`Map`, `Set`, weak collections, promises, typed arrays, `ArrayBuffer`, errors, and `URL` objects.
+These values have internal mutable state that `Object.freeze()` does not reliably make immutable.
+
+The function freezes the caller-owned graph in place and returns the same value with the exported
+`DeepReadonly<T>` type. This mutation is the explicit purpose of the API. It is an immutability
+helper for trusted plain data, not a security sandbox or deep clone.
