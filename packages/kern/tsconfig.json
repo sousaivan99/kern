@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "paths": {
+      "@kern/core": ["./src/index.ts"],
+      "@kern/core/*": ["./src/*/index.ts"]
+    }
+  },
+  "include": ["src", "tests"]
+}

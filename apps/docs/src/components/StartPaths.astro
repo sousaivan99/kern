@@ -1,0 +1,138 @@
+---
+import { ArrowRight } from "lucide-astro"
+
+const paths = [
+  {
+    label: "Installation",
+    detail: "Package installation, ESM imports, supported runtimes, and TypeScript requirements.",
+    href: "/getting-started/installation/",
+  },
+  {
+    label: "Quick start",
+    detail: "A complete typed example using validation, exact money operations, and dates.",
+    href: "/getting-started/quick-start/",
+  },
+  {
+    label: "API reference",
+    detail: "Generated signatures, parameters, return types, exceptions, and source links.",
+    href: "/reference/readme/",
+  },
+]
+---
+
+<section class="kern-start not-content" aria-labelledby="start-heading">
+  <header>
+    <p class="kern-start-kicker">Getting started</p>
+    <h2 id="start-heading">Start using Kern</h2>
+  </header>
+  <div class="kern-start-links">
+    {paths.map((path) => (
+      <a href={path.href}>
+        <h3>{path.label}</h3>
+        <p>{path.detail}</p>
+        <span>Read guide <ArrowRight aria-hidden="true" size={13} /></span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+.kern-start {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.42fr) minmax(0, 1.58fr);
+  gap: clamp(2rem, 5vw, 6rem);
+  border-top: 1px solid var(--sl-color-hairline);
+  border-bottom: 1px solid var(--sl-color-hairline);
+  padding: 2.75rem 0;
+}
+
+.kern-start-kicker {
+  margin: 0 0 0.55rem;
+  color: var(--kern-color-text-muted);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.kern-start h2 {
+  margin: 0;
+  color: var(--kern-color-text-strong);
+  font-size: clamp(1.45rem, 2.4vw, 1.9rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.kern-start-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.kern-start-links > a {
+  display: flex;
+  min-height: 9rem;
+  flex-direction: column;
+  border-left: 1px solid var(--sl-color-hairline);
+  padding: 0 1.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.kern-start-links h3 {
+  margin: 0;
+  color: var(--kern-color-text-strong);
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.kern-start-links p {
+  max-width: 29rem;
+  margin: 0.55rem 0 0;
+  color: var(--kern-color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.kern-start-links span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: auto;
+  color: var(--kern-color-interactive);
+  font-size: 0.8125rem;
+  font-weight: 620;
+}
+
+.kern-start-links > a:hover h3 {
+  color: var(--kern-color-interactive);
+}
+
+.kern-start-links > a:hover span svg {
+  transform: translateX(2px);
+}
+
+@media (max-width: 54rem) {
+  .kern-start {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 38rem) {
+  .kern-start-links {
+    grid-template-columns: 1fr;
+  }
+
+  .kern-start-links > a {
+    min-height: 0;
+    border-top: 1px solid var(--sl-color-hairline);
+    border-left: 0;
+    padding: 1.25rem 0;
+  }
+
+  .kern-start-links span {
+    margin-top: 0.7rem;
+  }
+}
+</style>

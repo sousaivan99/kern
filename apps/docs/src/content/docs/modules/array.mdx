@@ -1,0 +1,47 @@
+---
+title: Array
+description: Small immutable collection operations with explicit native equivalents.
+sidebar:
+  order: 6
+---
+
+Import array helpers from `@kern/core/array`. None mutate the input array.
+
+```ts
+import { chunk, first, groupBy, last, partition, unique, uniqueBy, withoutFalsy } from "@kern/core/array"
+
+const events = [
+  { id: "evt-1", category: "billing" },
+  { id: "evt-2", category: "security" },
+  { id: "evt-1", category: "billing" },
+]
+
+const distinct = uniqueBy(events, (event) => event.id)
+const grouped = groupBy(distinct, (event) => event.category)
+const [billing, other] = partition(distinct, (event) => event.category === "billing")
+
+console.log(first(events), last(events), grouped, billing, other)
+console.log(chunk([1, 2, 3, 4, 5], 2))
+console.log(unique(["vue", "react", "vue"]))
+console.log(withoutFalsy([0, 1, false, "ready", null, undefined]))
+```
+
+## Selection and uniqueness
+
+- `first(values)` returns the first value or `undefined`; native equivalent: `values[0]`.
+- `last(values)` returns the last value or `undefined`; native equivalent: `values.at(-1)`.
+- `unique(values)` uses `Set` equality, preserves first-seen order, and returns a new array.
+- `uniqueBy(values, selector)` keeps the first value for every selector result.
+
+Tuple-aware overloads preserve exact first and last element types when the input is a known
+non-empty tuple.
+
+## Organization
+
+- `groupBy(values, selector)` returns a null-prototype object, making keys such as `__proto__` safe.
+- `partition(values, predicate)` returns `[matches, nonMatches]` and supports type-guard predicates.
+- `chunk(values, size)` creates new arrays and throws `RangeError` unless size is a positive safe integer.
+- `withoutFalsy(values)` removes `false`, `0`, `0n`, `""`, `null`, `undefined`, and `NaN` according to JavaScript truthiness.
+
+`Object.groupBy()` is the native alternative to `groupBy`, but Kern provides stable typing and a
+safe null-prototype result across its supported runtimes.

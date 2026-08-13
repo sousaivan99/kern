@@ -1,112 +1,50 @@
 {
-  "name": "@kern/core",
-  "version": "0.1.0",
-  "description": "Zero-dependency, TypeScript-first utility primitives for modern JavaScript runtimes.",
+  "name": "kern-workspace",
+  "private": true,
   "type": "module",
   "packageManager": "bun@1.3.14",
-  "sideEffects": false,
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sousaivan99/kern.git"
-  },
-  "homepage": "https://github.com/sousaivan99/kern#readme",
-  "bugs": {
-    "url": "https://github.com/sousaivan99/kern/issues"
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "SECURITY.md",
-    "LICENSE"
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tooling"
   ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./validation": {
-      "types": "./dist/validation/index.d.ts",
-      "import": "./dist/validation/index.js"
-    },
-    "./money": {
-      "types": "./dist/money/index.d.ts",
-      "import": "./dist/money/index.js"
-    },
-    "./date": {
-      "types": "./dist/date/index.d.ts",
-      "import": "./dist/date/index.js"
-    },
-    "./number": {
-      "types": "./dist/number/index.d.ts",
-      "import": "./dist/number/index.js"
-    },
-    "./string": {
-      "types": "./dist/string/index.d.ts",
-      "import": "./dist/string/index.js"
-    },
-    "./array": {
-      "types": "./dist/array/index.d.ts",
-      "import": "./dist/array/index.js"
-    },
-    "./object": {
-      "types": "./dist/object/index.d.ts",
-      "import": "./dist/object/index.js"
-    },
-    "./async": {
-      "types": "./dist/async/index.d.ts",
-      "import": "./dist/async/index.js"
-    },
-    "./package.json": "./package.json"
-  },
   "scripts": {
-    "build": "bun scripts/build.ts",
-    "test": "bun test",
-    "test:watch": "bun test --watch",
-    "test:coverage": "bun test --coverage",
-    "test:timezones": "bun scripts/test-timezones.ts",
-    "test:compat": "bun run build && bun tests/compat/runtime-smoke.mjs && node tests/compat/runtime-smoke.mjs",
-    "test:deno": "deno run --allow-read tests/compat/runtime-smoke.mjs",
-    "test:browser": "bun run build && bun scripts/browser-smoke.ts",
-    "typecheck": "tsc --noEmit",
-    "typecheck:minimum": "node node_modules/typescript-5/bin/tsc --noEmit",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "format:check": "biome format .",
-    "size": "bun scripts/size.ts",
-    "size:check": "bun scripts/size.ts --check",
-    "benchmark": "bun benchmarks/validation.bench.ts",
-    "example": "bun run build && bun examples/index.ts",
-    "example:basic": "bun run build && bun examples/basic.ts",
-    "package:check": "bun run build && publint --strict && attw --pack . --profile esm-only && bun scripts/package-smoke.ts && bun run pack:dry",
+    "dev": "bun run docs:dev",
+    "docs:dev": "bun --filter @kern/docs dev",
+    "build": "bun tooling/scripts/build.ts",
+    "build:kern": "bun --filter @kern/core build",
+    "build:docs": "bun --filter @kern/docs build",
+    "test": "bun tooling/scripts/test.ts",
+    "test:watch": "bun --filter @kern/core test:watch",
+    "test:coverage": "bun --filter @kern/core test:coverage",
+    "test:timezones": "bun --filter @kern/core test:timezones",
+    "test:compat": "bun --filter @kern/core test:compat",
+    "test:deno": "bun --filter @kern/core test:deno",
+    "test:browser": "bun --filter @kern/core test:browser",
+    "typecheck": "bun run --parallel --workspaces --if-present typecheck",
+    "typecheck:minimum": "bun --filter @kern/core typecheck:minimum",
+    "lint": "bun --filter @kern/tooling lint",
+    "format": "bun --filter @kern/tooling format",
+    "format:check": "bun --filter @kern/tooling format:check",
+    "size": "bun --filter @kern/core size",
+    "size:check": "bun --filter @kern/core size:check",
+    "benchmark": "bun --filter @kern/tooling benchmark",
+    "benchmark:primitives": "bun --filter @kern/tooling benchmark:primitives",
+    "benchmark:validation": "bun --filter @kern/tooling benchmark:validation",
+    "benchmark:quick": "bun --filter @kern/tooling benchmark:quick",
+    "docs:snippets": "bun --filter @kern/docs snippets",
+    "docs:a11y": "bun run build:docs && bun --filter @kern/docs a11y",
+    "docs:check": "bun --filter @kern/docs check",
+    "package:check": "bun --filter @kern/core package:check",
+    "pack:dry": "bun --filter @kern/core pack:dry",
     "audit": "bun audit",
-    "check": "bun run lint && bun run typecheck && bun run typecheck:minimum && bun run test:coverage && bun run build && bun run size:check && bun run example && bun run test:timezones && bun run test:compat && bun run test:browser && bun run package:check && bun run audit",
-    "pack:dry": "bun pm pack --dry-run",
-    "prepublishOnly": "bun run check"
+    "check": "bun tooling/scripts/check.ts"
   },
   "engines": {
     "node": ">=22",
     "bun": ">=1.3"
   },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
-  },
-  "keywords": [
-    "typescript",
-    "utilities",
-    "validation",
-    "tree-shaking",
-    "esm",
-    "zero-dependency"
-  ],
-  "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.5",
-    "@biomejs/biome": "^2.2.4",
-    "@types/bun": "^1.2.22",
-    "playwright": "^1.62.1",
-    "publint": "^0.3.23",
-    "typescript-5": "npm:typescript@5.0.4",
-    "typescript": "^7.0.2"
-  }
+  "trustedDependencies": [
+    "@playwright/browser-chromium"
+  ]
 }

@@ -1,0 +1,46 @@
+---
+title: Object
+description: Descriptor-preserving selection, safe own paths, and deep freezing for plain data.
+sidebar:
+  order: 7
+---
+
+```ts
+import { deepFreeze, hasOwn, hasOwnPath, omit, pick } from "@kern/core/object"
+
+const account = {
+  id: "acct-42",
+  email: "ada@example.com",
+  passwordHash: "never-return-this",
+  profile: { preferences: { theme: "dark" } },
+}
+
+const publicAccount = pick(account, ["id", "email"])
+const withoutSecret = omit(account, ["passwordHash"])
+const configuration = deepFreeze({ api: { timeout: 5_000 }, features: ["search"] })
+
+console.log(publicAccount, withoutSecret)
+console.log(hasOwn(account, "email"))
+console.log(hasOwnPath(account, "profile.preferences.theme"))
+console.log(Object.isFrozen(configuration.api))
+```
+
+## Own-property operations
+
+`hasOwn(value, key)` safely accepts `unknown`, returning `false` for primitives and `null` instead
+of throwing. `pick` and `omit` accept only plain or null-prototype objects, preserve own property
+descriptors and symbol keys, and return a new object with the source prototype. Arrays and class
+instances are rejected with `TypeError`.
+
+## Safe paths
+
+`hasOwnPath(value, path)` traverses own properties only. It accepts dotted strings or an explicit
+segment array. Use an array when a real key contains a dot. The segments `__proto__`, `prototype`,
+and `constructor` are always rejected to close prototype-pollution paths.
+
+## Deep freezing
+
+`deepFreeze` validates the complete graph before freezing it, supports cycles, and returns a
+deeply readonly type. It supports primitives, arrays, plain objects, and null-prototype objects.
+Accessors, functions, class instances, `Map`, `Set`, `Date`, typed arrays, promises, and other
+mutable built-ins throw `TypeError`. This is an immutability helper for plain data, not a sandbox.

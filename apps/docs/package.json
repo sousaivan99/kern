@@ -1,0 +1,35 @@
+{
+  "name": "@kern/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "snippets": "bun ../../tooling/scripts/docs/check-snippets.ts",
+    "a11y": "bun ../../tooling/scripts/docs/accessibility.ts",
+    "test:browser": "bun ../../tooling/scripts/docs/browser-smoke.ts",
+    "check": "bun ../../tooling/scripts/docs/check.ts"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.41.7",
+    "@astrojs/starlight-tailwind": "^5.0.0",
+    "@kern/core": "workspace:*",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.2.1",
+    "lucide-astro": "^0.556.0",
+    "starlight-typedoc": "^0.23.1",
+    "tailwindcss": "^4.3.3",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.12.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0",
+    "bun": ">=1.3"
+  }
+}

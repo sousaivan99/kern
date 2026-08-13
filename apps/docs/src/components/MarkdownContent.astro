@@ -1,0 +1,39 @@
+---
+import StarlightMarkdownContent from "@astrojs/starlight/components/MarkdownContent.astro"
+---
+
+<StarlightMarkdownContent><slot /></StarlightMarkdownContent>
+
+<script>
+const codeBlocks = Array.from(document.querySelectorAll<HTMLElement>("main pre"))
+
+const synchronizeScrollableCode = (codeBlock: HTMLElement) => {
+  const isScrollable = codeBlock.scrollWidth > codeBlock.clientWidth + 1
+
+  if (isScrollable) {
+    codeBlock.tabIndex = 0
+    codeBlock.dataset.scrollableCode = "true"
+    if (!codeBlock.hasAttribute("aria-label")) {
+      codeBlock.setAttribute("aria-label", "Scrollable code example")
+    }
+    return
+  }
+
+  if (codeBlock.dataset.scrollableCode === "true") {
+    codeBlock.removeAttribute("tabindex")
+    codeBlock.removeAttribute("aria-label")
+    delete codeBlock.dataset.scrollableCode
+  }
+}
+
+const synchronizeAllCodeBlocks = () => {
+  for (const codeBlock of codeBlocks) synchronizeScrollableCode(codeBlock)
+}
+
+const resizeObserver = new ResizeObserver((entries) => {
+  for (const entry of entries) synchronizeScrollableCode(entry.target as HTMLElement)
+})
+
+for (const codeBlock of codeBlocks) resizeObserver.observe(codeBlock)
+requestAnimationFrame(synchronizeAllCodeBlocks)
+</script>

@@ -1,0 +1,102 @@
+{
+  "name": "@kern/core",
+  "version": "0.1.0",
+  "description": "Zero-dependency, TypeScript-first utility primitives for modern JavaScript runtimes.",
+  "type": "module",
+  "packageManager": "bun@1.3.14",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sousaivan99/kern.git",
+    "directory": "packages/kern"
+  },
+  "homepage": "https://github.com/sousaivan99/kern#readme",
+  "bugs": {
+    "url": "https://github.com/sousaivan99/kern/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "import": "./dist/validation/index.js"
+    },
+    "./money": {
+      "types": "./dist/money/index.d.ts",
+      "import": "./dist/money/index.js"
+    },
+    "./date": {
+      "types": "./dist/date/index.d.ts",
+      "import": "./dist/date/index.js"
+    },
+    "./number": {
+      "types": "./dist/number/index.d.ts",
+      "import": "./dist/number/index.js"
+    },
+    "./string": {
+      "types": "./dist/string/index.d.ts",
+      "import": "./dist/string/index.js"
+    },
+    "./array": {
+      "types": "./dist/array/index.d.ts",
+      "import": "./dist/array/index.js"
+    },
+    "./object": {
+      "types": "./dist/object/index.d.ts",
+      "import": "./dist/object/index.js"
+    },
+    "./async": {
+      "types": "./dist/async/index.d.ts",
+      "import": "./dist/async/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bun ../../tooling/scripts/kern/build.ts",
+    "test": "bun ../../tooling/scripts/kern/test.ts",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun ../../tooling/scripts/kern/test.ts --coverage",
+    "test:timezones": "bun ../../tooling/scripts/kern/test-timezones.ts",
+    "test:compat": "bun ../../tooling/scripts/kern/compat-check.ts",
+    "test:deno": "deno run --allow-read tests/compat/runtime-smoke.mjs",
+    "test:browser": "bun ../../tooling/scripts/kern/browser-check.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:minimum": "node node_modules/typescript-5/bin/tsc --noEmit",
+    "size": "bun ../../tooling/scripts/kern/size.ts",
+    "size:check": "bun ../../tooling/scripts/kern/size.ts --check",
+    "package:check": "bun ../../tooling/scripts/kern/package-check.ts",
+    "audit": "bun audit",
+    "check": "bun ../../tooling/scripts/kern/check.ts",
+    "pack:dry": "bun pm pack --dry-run",
+    "prepublishOnly": "bun run check"
+  },
+  "engines": {
+    "node": ">=22",
+    "bun": ">=1.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "typescript",
+    "utilities",
+    "validation",
+    "tree-shaking",
+    "esm",
+    "zero-dependency"
+  ],
+  "devDependencies": {
+    "@types/bun": "^1.2.22",
+    "typescript": "^7.0.2",
+    "typescript-5": "npm:typescript@5.0.4"
+  }
+}

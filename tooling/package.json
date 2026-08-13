@@ -1,0 +1,28 @@
+{
+  "name": "@kern/tooling",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test tests",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "lint": "biome check ..",
+    "format": "biome format --write ..",
+    "format:check": "biome format ..",
+    "benchmark": "bun benchmarks/index.ts",
+    "benchmark:primitives": "bun benchmarks/index.ts --suite primitives",
+    "benchmark:validation": "bun benchmarks/index.ts --suite validation",
+    "benchmark:quick": "bun benchmarks/index.ts --quick"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@axe-core/playwright": "^4.13.0",
+    "@biomejs/biome": "^2.5.8",
+    "@clack/prompts": "^1.7.0",
+    "@playwright/browser-chromium": "^1.62.1",
+    "@types/bun": "^1.2.22",
+    "playwright": "^1.62.1",
+    "publint": "^0.3.23",
+    "typescript": "^7.0.2",
+    "typescript-5": "npm:typescript@5.0.4"
+  }
+}

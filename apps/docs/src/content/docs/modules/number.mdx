@@ -1,0 +1,32 @@
+---
+title: Number
+description: Small numeric calculations and Intl-based display helpers.
+sidebar:
+  order: 4
+---
+
+```ts
+import { clamp, formatCompact, formatNumber, formatPercentage, isBetween, percentageOfTotal, round } from "@kern/core/number"
+
+const completion = percentageOfTotal(42, 50)
+
+console.log(clamp(130, 0, 100))
+console.log(round(12.3456, 2))
+console.log(isBetween(18, 13, 19, { inclusive: false }))
+console.log(formatNumber(1_234_567.89, { locale: "de-DE" }))
+console.log(formatCompact(1_250_000, { locale: "en-US" }))
+console.log(formatPercentage(completion, { locale: "en-US" }))
+```
+
+## Calculations
+
+- `clamp(value, minimum, maximum)` uses inclusive bounds. `NaN` remains `NaN`; reversed or `NaN` bounds throw `RangeError`.
+- `round(value, precision = 0)` performs decimal-place rounding for positive or negative precision.
+- `isBetween(value, minimum, maximum, { inclusive = true })` supports inclusive or strict boundaries and rejects `NaN` or reversed bounds.
+- `percentageOfTotal(part, total)` returns percentage points, so `42 / 50` returns `84`. It rejects non-finite values and zero totals.
+
+## Formatting
+
+`formatNumber`, `formatCompact`, and `formatPercentage` delegate locale behavior to
+`Intl.NumberFormat`. Their options colocate `locale` with native formatter options. Percentage
+inputs are percentage points: `84` formats as `84%`, not `8,400%`.

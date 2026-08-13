@@ -1,0 +1,47 @@
+---
+const { siteTitleHref } = Astro.locals.starlightRoute
+---
+
+<a href={siteTitleHref} class="kern-site-title" translate="no">
+  <span class="kern-site-name">Kern</span>
+  <span class="kern-site-divider" aria-hidden="true">/</span>
+  <span class="kern-site-section">Documentation</span>
+</a>
+
+<style>
+.kern-site-title {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--kern-color-text-strong);
+  text-decoration: none;
+}
+
+.kern-site-name {
+  overflow: hidden;
+  font-size: 0.98rem;
+  font-weight: 680;
+  letter-spacing: -0.02em;
+}
+
+.kern-site-divider {
+  color: var(--kern-color-text-muted);
+}
+
+.kern-site-section {
+  color: var(--kern-color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.kern-site-title:hover .kern-site-name {
+  color: var(--kern-color-interactive);
+}
+
+@media (max-width: 23rem) {
+  .kern-site-section {
+    display: none;
+  }
+}
+</style>

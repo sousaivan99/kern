@@ -1,0 +1,23 @@
+---
+import StarlightMobileMenuToggle from "@astrojs/starlight/components/MobileMenuToggle.astro"
+---
+
+<StarlightMobileMenuToggle />
+
+<script>
+customElements.whenDefined("starlight-menu-button").then(() => {
+  document.querySelectorAll<HTMLElement>("starlight-menu-button").forEach((menu) => {
+    const button = menu.querySelector("button")
+    if (!button) return
+
+    const synchronizeExpandedState = () => {
+      button.setAttribute("aria-expanded", String(menu.getAttribute("aria-expanded") === "true"))
+    }
+
+    new MutationObserver(synchronizeExpandedState).observe(menu, {
+      attributeFilter: ["aria-expanded"],
+    })
+    synchronizeExpandedState()
+  })
+})
+</script>

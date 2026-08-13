@@ -1,6 +1,8 @@
 node_modules/
-dist/
-coverage/
+**/dist/
+**/coverage/
+**/.astro/
+apps/docs/src/content/docs/reference/
 *.tgz
 .DS_Store
 .env

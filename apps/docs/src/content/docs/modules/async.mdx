@@ -1,0 +1,59 @@
+---
+title: Async
+description: Cancellation-aware timing, retry, memoized execution, debounce, and throttle.
+sidebar:
+  order: 8
+---
+
+## Sleep and retry
+
+```ts
+import { retry, sleep } from "@kern/core/async"
+
+await sleep(10)
+
+const attempts: number[] = []
+const response = await retry(
+  (attempt) => {
+    attempts.push(attempt)
+    if (attempt < 3) throw new Error("Temporary failure")
+    return { ok: true }
+  },
+  { attempts: 4, delay: 5 },
+)
+
+console.log(response, attempts)
+```
+
+`sleep(milliseconds, { signal })` rejects with the signal reason when cancelled and throws
+`RangeError` for negative or non-finite delays. `retry(operation, options)` counts the initial call
+as an attempt, accepts fixed or callback-based delay, optionally filters errors with `shouldRetry`,
+and observes cancellation between attempts.
+
+## Once, debounce, and throttle
+
+```ts
+import { debounce, once, throttle } from "@kern/core/async"
+
+let generated = 0
+const getRequestId = once(() => `request-${++generated}`)
+
+const saved: string[] = []
+const saveSearch = debounce((query: string) => saved.push(query), 100)
+saveSearch("ker")
+saveSearch("kern")
+saveSearch.flush()
+
+const positions: number[] = []
+const trackScroll = throttle((position: number) => positions.push(position), 100)
+trackScroll(10)
+trackScroll(20)
+trackScroll.flush()
+
+console.log(getRequestId(), getRequestId(), saved, positions)
+```
+
+`once` caches the first return value or thrown error and never calls the function again.
+`debounce` invokes after calls settle; `throttle` invokes at most once per interval with leading and
+trailing behavior. Both scheduled wrappers return `void`, expose synchronous `cancel()` and
+`flush()` methods, and can be cancelled permanently by an `AbortSignal`.

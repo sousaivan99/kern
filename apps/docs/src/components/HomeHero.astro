@@ -1,0 +1,357 @@
+---
+import { ArrowRight, Copy, Terminal } from "lucide-astro"
+import packageMetadata from "../../../../packages/kern/package.json"
+---
+
+<section class="kern-docs-hero not-content" aria-labelledby="_top">
+  <div class="kern-docs-intro">
+    <p class="kern-release">@kern/core <span>v{packageMetadata.version}</span></p>
+    <h1 id="_top" data-page-title>TypeScript utilities for application boundaries.</h1>
+    <p class="kern-intro-copy">
+      A small, dependency-free toolkit for validation, money, dates, collections, objects, and
+      asynchronous control flow.
+    </p>
+
+    <nav class="kern-primary-links" aria-label="Introduction links">
+      <a class="kern-primary-link" href="/getting-started/installation/">
+        Get started
+        <ArrowRight aria-hidden="true" size={15} />
+      </a>
+      <a href="/reference/readme/">API reference</a>
+      <a href="/concepts/native-first/">Design principles</a>
+    </nav>
+
+    <fieldset class="kern-install-command" aria-label="Install Kern with Bun">
+      <div class="kern-install-text">
+        <Terminal aria-hidden="true" size={14} />
+        <code>bun add @kern/core</code>
+      </div>
+      <button type="button" data-copy-install aria-label="Copy installation command">
+        <Copy aria-hidden="true" size={14} />
+        <span data-copy-label aria-hidden="true">Copy</span>
+        <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+      </button>
+    </fieldset>
+
+    <p class="kern-support-line">ESM · TypeScript 5+ · Node.js 22+ · Bun 1.3+ · modern browsers</p>
+  </div>
+
+  <section class="kern-example" aria-labelledby="example-title">
+    <header>
+      <div>
+        <span>Example</span>
+        <strong id="example-title">Validate unknown input</strong>
+      </div>
+      <a href="/modules/validation/">
+        Validation guide
+        <ArrowRight aria-hidden="true" size={13} />
+      </a>
+    </header>
+    <pre
+    ><code><span class="line"><i>1</i><span class="kw">import</span> &#123; object, string &#125; <span class="kw">from</span></span>
+<span class="line"><i>2</i>  <span class="str">"@kern/core/validation"</span></span>
+<span class="line"><i>3</i></span>
+<span class="line"><i>4</i><span class="kw">const</span> User = <span class="fn">object</span>(&#123;</span>
+<span class="line"><i>5</i>  name: <span class="fn">string</span>().<span class="fn">trim</span>().<span class="fn">min</span>(<span class="num">2</span>),</span>
+<span class="line"><i>6</i>  email: <span class="fn">string</span>().<span class="fn">email</span>(),</span>
+<span class="line"><i>7</i>&#125;)</span>
+<span class="line"><i>8</i></span>
+<span class="line"><i>9</i><span class="kw">const</span> user = User.<span class="fn">parse</span>(input)</span>
+<span class="line"><i>10</i><span class="fn">console</span>.log(user.name)</span></code></pre>
+  </section>
+</section>
+
+<script>
+document.querySelectorAll<HTMLButtonElement>("[data-copy-install]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const label = button.querySelector<HTMLElement>("[data-copy-label]")
+    const status = button.querySelector<HTMLElement>("[data-copy-status]")
+    if (!label || !status) return
+
+    try {
+      await navigator.clipboard.writeText("bun add @kern/core")
+      label.textContent = "Copied"
+      status.textContent = "Installation command copied."
+      button.dataset.copied = "true"
+    } catch {
+      label.textContent = "Copy failed"
+      status.textContent = "The installation command could not be copied."
+      button.dataset.copyFailed = "true"
+    }
+
+    window.setTimeout(() => {
+      label.textContent = "Copy"
+      status.textContent = ""
+      delete button.dataset.copied
+      delete button.dataset.copyFailed
+    }, 1600)
+  })
+})
+</script>
+
+<style>
+.kern-docs-hero {
+  display: grid;
+  grid-template-columns: minmax(22rem, 0.82fr) minmax(34rem, 1.18fr);
+  gap: clamp(3rem, 7vw, 8rem);
+  align-items: start;
+  padding: clamp(4rem, 8vw, 7rem) 0 clamp(3.5rem, 7vw, 6rem);
+}
+
+.kern-release {
+  margin: 0 0 1.35rem;
+  color: var(--kern-color-interactive);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.kern-release span {
+  margin-left: 0.65rem;
+  color: var(--kern-color-text-muted);
+  font-weight: 500;
+}
+
+h1 {
+  max-width: 15ch;
+  margin: 0;
+  color: var(--kern-color-text-strong);
+  font-size: clamp(2.5rem, 4.25vw, 4rem);
+  font-weight: 680;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.kern-intro-copy {
+  max-width: 38rem;
+  margin: 1.35rem 0 0;
+  color: var(--kern-color-text-body);
+  font-size: clamp(1rem, 1.3vw, 1.12rem);
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.kern-primary-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-top: 1.75rem;
+}
+
+.kern-primary-links a {
+  min-height: 1.5rem;
+  color: var(--kern-color-text-body);
+  font-size: 0.875rem;
+  font-weight: 620;
+  text-decoration: none;
+}
+
+.kern-primary-links .kern-primary-link {
+  display: inline-flex;
+  min-height: 2.45rem;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.35rem;
+  background: var(--sl-color-white);
+  padding: 0.55rem 0.8rem;
+  color: var(--sl-color-black);
+}
+
+.kern-primary-links a:not(.kern-primary-link):hover {
+  color: var(--kern-color-text-strong);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.kern-primary-links .kern-primary-link:hover svg {
+  transform: translateX(2px);
+}
+
+.kern-install-command {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 29rem;
+  min-width: 0;
+  min-height: 3rem;
+  margin-top: 1.5rem;
+  border: 1px solid var(--sl-color-hairline-light);
+  border-radius: 0.3rem;
+  background: var(--sl-color-gray-6);
+  padding: 0.32rem 0.38rem 0.32rem 0.8rem;
+}
+
+.kern-install-text {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--kern-color-text-muted);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.8125rem;
+}
+
+.kern-install-text code {
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+  color: var(--kern-color-text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kern-install-command button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.15rem;
+  border: 0;
+  border-left: 1px solid var(--sl-color-hairline-light);
+  background: transparent;
+  padding: 0 0.55rem 0 0.7rem;
+  color: var(--kern-color-text-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.kern-install-command button:hover,
+.kern-install-command button[data-copied],
+.kern-install-command button[data-copy-failed] {
+  color: var(--kern-color-text-strong);
+}
+
+.kern-support-line {
+  margin: 0.8rem 0 0;
+  color: var(--kern-color-text-muted);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.kern-example {
+  overflow: hidden;
+  border: 1px solid var(--sl-color-hairline-light);
+  background: var(--sl-color-bg);
+}
+
+.kern-example header {
+  display: flex;
+  min-height: 3.4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--sl-color-hairline);
+  background: var(--sl-color-gray-6);
+  padding: 0.65rem 1rem;
+}
+
+.kern-example header > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+}
+
+.kern-example header span {
+  color: var(--kern-color-text-elevated);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.kern-example header strong {
+  color: var(--kern-color-text-strong);
+  font-size: 0.8125rem;
+  font-weight: 620;
+}
+
+.kern-example header a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--kern-color-interactive);
+  font-size: 0.8125rem;
+  font-weight: 620;
+  text-decoration: none;
+}
+
+.kern-example pre {
+  overflow-x: auto;
+  margin: 0;
+  padding: 1.35rem 0 1.5rem;
+  background: transparent;
+  color: var(--kern-color-text-strong);
+  font-family: var(--__sl-font-mono);
+  font-size: clamp(0.8125rem, 0.9vw, 0.875rem);
+  line-height: 1.85;
+}
+
+.kern-example code,
+.kern-example .line {
+  display: block;
+}
+
+.kern-example .line {
+  min-width: max-content;
+  padding-right: 1.5rem;
+}
+
+.kern-example .line i {
+  display: inline-block;
+  width: 3rem;
+  margin-right: 1rem;
+  border-right: 1px solid var(--sl-color-hairline);
+  color: var(--kern-color-text-muted);
+  font-style: normal;
+  text-align: right;
+  padding-right: 0.8rem;
+  user-select: none;
+}
+
+.kw {
+  color: var(--kern-color-syntax-keyword);
+}
+.str {
+  color: var(--kern-color-syntax-string);
+}
+.fn {
+  color: var(--kern-color-syntax-function);
+}
+.num {
+  color: var(--kern-color-syntax-number);
+}
+
+@media (max-width: 62rem) {
+  .kern-docs-hero {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .kern-example {
+    max-width: 48rem;
+  }
+}
+
+@media (max-width: 32rem) {
+  .kern-docs-hero {
+    padding-top: 3rem;
+  }
+
+  .kern-primary-links {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .kern-example header > div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .kern-support-line {
+    max-width: 27rem;
+  }
+}
+</style>

@@ -1,0 +1,141 @@
+---
+import { ArrowRight } from "lucide-astro"
+---
+
+<section class="kern-project-notes not-content" aria-labelledby="project-notes-heading">
+  <div class="kern-project-copy">
+    <p>Project constraints</p>
+    <h2 id="project-notes-heading">Native first, with explicit contracts.</h2>
+    <span>
+      Kern admits a helper only when it removes meaningful boilerplate, improves narrowing, or
+      prevents a common correctness error. Every public export is documented, tested, and measured.
+    </span>
+    <a href="/concepts/native-first/">
+      Read the design principles
+      <ArrowRight aria-hidden="true" size={13} />
+    </a>
+  </div>
+
+  <dl>
+    <div>
+      <dt>0</dt>
+      <dd>runtime dependencies</dd>
+    </div>
+    <div>
+      <dt>8</dt>
+      <dd>public entrypoints</dd>
+    </div>
+    <div>
+      <dt>5+</dt>
+      <dd>TypeScript</dd>
+    </div>
+    <div>
+      <dt>22+</dt>
+      <dd>Node.js</dd>
+    </div>
+  </dl>
+</section>
+
+<style>
+.kern-project-notes {
+  display: grid;
+  grid-template-columns: minmax(20rem, 0.9fr) minmax(30rem, 1.1fr);
+  gap: clamp(3rem, 7vw, 8rem);
+  align-items: end;
+  border-top: 1px solid var(--sl-color-hairline);
+  padding: clamp(3rem, 6vw, 5rem) 0;
+}
+
+.kern-project-copy > p {
+  margin: 0 0 0.55rem;
+  color: var(--kern-color-text-muted);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.kern-project-copy h2 {
+  max-width: 19ch;
+  margin: 0;
+  color: var(--kern-color-text-strong);
+  font-size: clamp(1.6rem, 2.7vw, 2.15rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.kern-project-copy > span {
+  display: block;
+  max-width: 42rem;
+  margin-top: 0.9rem;
+  color: var(--kern-color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.kern-project-copy a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.9rem;
+  color: var(--kern-color-interactive);
+  font-size: 0.8125rem;
+  font-weight: 620;
+  text-decoration: none;
+}
+
+.kern-project-copy a:hover svg {
+  transform: translateX(2px);
+}
+
+.kern-project-notes dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--sl-color-hairline);
+  border-bottom: 1px solid var(--sl-color-hairline);
+}
+
+.kern-project-notes dl > div {
+  min-height: 7rem;
+  border-left: 1px solid var(--sl-color-hairline);
+  padding: 1.2rem;
+}
+
+.kern-project-notes dl > div:last-child {
+  border-right: 1px solid var(--sl-color-hairline);
+}
+
+.kern-project-notes dt {
+  color: var(--kern-color-text-strong);
+  font-family: var(--__sl-font-mono);
+  font-size: 1.25rem;
+  font-weight: 650;
+}
+
+.kern-project-notes dd {
+  margin: 0.35rem 0 0;
+  color: var(--kern-color-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 60rem) {
+  .kern-project-notes {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
+@media (max-width: 34rem) {
+  .kern-project-notes dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kern-project-notes dl > div:nth-child(n + 3) {
+    border-top: 1px solid var(--sl-color-hairline);
+  }
+}
+</style>

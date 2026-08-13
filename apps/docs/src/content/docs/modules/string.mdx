@@ -1,0 +1,47 @@
+---
+title: String
+description: Focused Unicode-aware case conversion, slugs, grapheme truncation, and blank checks.
+sidebar:
+  order: 5
+---
+
+```ts
+import { camelCase, capitalize, isBlank, kebabCase, slugify, snakeCase, truncate, uncapitalize } from "@kern/core/string"
+
+console.log(capitalize("hello, world"))
+console.log(uncapitalize("Hello, world"))
+console.log(camelCase("customer account-ID"))
+console.log(kebabCase("customerAccount ID"))
+console.log(snakeCase("customerAccount ID"))
+console.log(slugify("Crème brûlée & Café!"))
+console.log(truncate("👨‍👩‍👧‍👦 family account", 10))
+console.log(isBlank("  \n"))
+```
+
+## Deterministic and locale-aware case
+
+Case helpers use deterministic `toUpperCase()`/`toLowerCase()` behavior by default, so output does
+not depend on the machine's host locale. Pass a locale only when linguistic casing is intended:
+
+```ts
+import { capitalize, slugify } from "@kern/core/string"
+
+capitalize("istanbul") // "Istanbul"
+capitalize("istanbul", { locale: "tr" }) // "İstanbul"
+slugify("IĞDIR", { locale: "tr" }) // "ıgdır"
+```
+
+`capitalize`, `uncapitalize`, `camelCase`, `kebabCase`, `snakeCase`, and `slugify` accept the same
+`StringCaseOptions`. Word splitting is Unicode-aware but is not a natural-language segmenter.
+
+## Grapheme-safe truncation and slugs
+
+`truncate(value, maximumLength, omission = "…")` counts `Intl.Segmenter` grapheme clusters. It
+never splits a combining sequence, flag, or joined emoji. The positional omission remains inside
+the limit, zero length returns an empty string, and an invalid limit throws `RangeError`.
+
+`slugify` normalizes and removes combining marks, lowercases words, and joins them with hyphens.
+`isBlank` is equivalent to checking `value.trim().length === 0` with native whitespace rules.
+
+Validation string schemas intentionally use UTF-16 code units for `.min()`, `.max()`, and
+`.length()`; grapheme counting is specific to display-oriented `truncate()`.
