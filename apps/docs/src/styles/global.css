@@ -110,6 +110,87 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Explicit console.log examples reserve their output row before JavaScript adds the console. */
+main .expressive-code:has(figure.frame button[data-code*="console.log"]) {
+  display: grid;
+  grid-template-rows: auto 11.5rem;
+  gap: 0.75rem;
+}
+
+.kern-example-console {
+  display: grid;
+  overflow: hidden;
+  box-sizing: border-box;
+  block-size: 11.5rem;
+  grid-template-rows: minmax(3.1rem, auto) minmax(0, 1fr);
+  border: 1px solid var(--sl-color-hairline-light);
+  border-radius: 0.35rem;
+  background: var(--sl-color-bg);
+  color: var(--kern-color-text-body);
+}
+
+.kern-example-console__header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--sl-color-hairline);
+  background: var(--sl-color-gray-6);
+  padding: 0.5rem 0.65rem 0.5rem 0.9rem;
+}
+
+.kern-example-console__label {
+  color: var(--kern-color-text-muted);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kern-example-console__run {
+  min-width: 7.25rem;
+  min-height: 2.1rem;
+  border: 1px solid var(--kern-color-functional-border);
+  border-radius: 0.3rem;
+  background: transparent;
+  padding: 0.35rem 0.65rem;
+  color: var(--kern-color-text-strong);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.kern-example-console__run:hover:not(:disabled) {
+  border-color: var(--kern-color-interactive);
+  color: var(--kern-color-interactive);
+}
+
+.kern-example-console__run:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.kern-example-console[data-state="unavailable"] .kern-example-console__run:disabled {
+  cursor: not-allowed;
+}
+
+.kern-example-console__output {
+  display: block;
+  overflow: auto;
+  min-width: 0;
+  padding: 0.9rem;
+  color: var(--kern-color-text-strong);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  scrollbar-gutter: stable;
+  white-space: pre-wrap;
+}
+
 html:not([data-has-sidebar]) {
   --sl-content-width: 90rem;
   --sl-content-pad-x: clamp(1.25rem, 4vw, 4.5rem);
@@ -371,15 +452,20 @@ starlight-toc a[aria-current="true"] {
     scroll-behavior: auto;
   }
 
+  /* biome-ignore lint/style/noDescendingSpecificity: The reduced-motion reset must follow every motion declaration it overrides. */
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override framework and component animations. */
     animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override framework and component animations. */
     animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override framework and component transitions. */
     transition: none !important;
   }
 
   :is(a, button):hover svg {
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override scoped component transforms. */
     transform: none !important;
   }
 }

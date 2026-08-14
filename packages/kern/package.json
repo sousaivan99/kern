@@ -1,6 +1,6 @@
 {
   "name": "@kern/core",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Zero-dependency, TypeScript-first utility primitives for modern JavaScript runtimes.",
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -18,6 +18,9 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
+    "SEMVER.md",
+    "SUPPORT.md",
     "LICENSE"
   ],
   "exports": {
@@ -64,6 +67,7 @@
     "test": "bun ../../tooling/scripts/kern/test.ts",
     "test:watch": "bun test --watch",
     "test:coverage": "bun ../../tooling/scripts/kern/test.ts --coverage",
+    "test:fuzz": "KERN_FUZZ_CASES=${KERN_FUZZ_CASES:-10000} bun ../../tooling/scripts/kern/test.ts property.test.ts",
     "test:timezones": "bun ../../tooling/scripts/kern/test-timezones.ts",
     "test:compat": "bun ../../tooling/scripts/kern/compat-check.ts",
     "test:deno": "deno run --allow-read tests/compat/runtime-smoke.mjs",
@@ -95,6 +99,7 @@
     "zero-dependency"
   ],
   "devDependencies": {
+    "@standard-schema/spec": "1.1.0",
     "@types/bun": "^1.2.22",
     "typescript": "^7.0.2",
     "typescript-5": "npm:typescript@5.0.4"

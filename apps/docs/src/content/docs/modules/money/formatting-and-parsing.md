@@ -13,9 +13,12 @@ function converts currencies.
 ```ts
 import { currencyMinorUnitDigits } from "@kern/core/money"
 
-currencyMinorUnitDigits("EUR", "en-US") // commonly 2
-currencyMinorUnitDigits("JPY", "ja-JP") // commonly 0
-currencyMinorUnitDigits("KWD", "en-US") // commonly 3
+console.log("EUR:", currencyMinorUnitDigits("EUR", "en-US")) // commonly 2
+console.log("JPY:", currencyMinorUnitDigits("JPY", "ja-JP")) // commonly 0
+console.log("KWD:", currencyMinorUnitDigits("KWD", "en-US")) // commonly 3
+
+currencyMinorUnitDigits("NOPE", "en-US")
+// RangeError: currency is not a well-formed currency code
 ```
 
 `currencyMinorUnitDigits(currency, locale?)` asks `Intl.NumberFormat` for its maximum fraction
@@ -30,13 +33,16 @@ different storage scale; provider rules take precedence at that integration boun
 ```ts
 import { formatMoney } from "@kern/core/money"
 
-formatMoney(1_099, "EUR", { locale: "en-US" })
-formatMoney(1_099, "JPY", { locale: "ja-JP" })
-formatMoney(10_999, "KWD", { locale: "en-US" })
-formatMoney(-1_099, "USD", {
+console.log(formatMoney(1_099, "EUR", { locale: "en-US" }))
+console.log(formatMoney(1_099, "JPY", { locale: "ja-JP" }))
+console.log(formatMoney(10_999, "KWD", { locale: "en-US" }))
+console.log(formatMoney(-1_099, "USD", {
   locale: "en-US",
   currencySign: "accounting",
-})
+}))
+
+formatMoney(10.99, "EUR", { locale: "en-US" })
+// RangeError: Money values must be safe integers in minor units
 ```
 
 `formatMoney(minorUnits, currency, options?)` formats through `Intl.NumberFormat` without first
@@ -68,16 +74,19 @@ used.
 ```ts
 import { parseMoney } from "@kern/core/money"
 
-parseMoney("1.234,56 €", "EUR", { locale: "de-DE" }) // 123456
-parseMoney("$1,234.56", "USD", { locale: "en-US" }) // 123456
-parseMoney("$1.025", "USD", {
+console.log(parseMoney("1.234,56 €", "EUR", { locale: "de-DE" })) // 123456
+console.log(parseMoney("$1,234.56", "USD", { locale: "en-US" })) // 123456
+console.log(parseMoney("$1.025", "USD", {
   locale: "en-US",
   roundingMode: "halfEven",
-}) // 102
-parseMoney("$1.03", "USD", {
+})) // 102
+console.log(parseMoney("$1.03", "USD", {
   locale: "en-US",
   roundingIncrement: 5,
-}) // 105
+})) // 105
+
+parseMoney("$12,34.56", "USD", { locale: "en-US" })
+// RangeError: Invalid monetary value
 ```
 
 `parseMoney(input, currency, options?)` requires the text to follow the selected locale and
@@ -95,7 +104,7 @@ Grouping can be omitted. If present, it must be valid: an `en-US` parser rejects
 The parser is intentionally not a free-form number extractor and will reject plain `"1234.56"`
 when the selected currency format requires `$` or another marker.
 
-## Parsing options
+## Advanced: parsing options
 
 `MoneyParseOptions` contains:
 
@@ -106,8 +115,12 @@ when the selected currency format requires `$` or another marker.
 | `roundingIncrement` | positive safe integer | `1` | Round the parsed minor-unit result to this increment. |
 
 All fractional digits participate in exact rounding. Nothing is truncated before the rounding rule
-runs. See [Money arithmetic](../arithmetic/#all-rounding-modes) for every mode.
+runs. See [Money arithmetic](../arithmetic/#advanced-all-rounding-modes) for every mode.
 
 Malformed input, invalid currency metadata/options, and unsafe results throw `RangeError` (or the
 corresponding native `Intl` error). Parsing returns an integer; it does not return a success/failure
 object. Validate/catch at the input boundary when user mistakes are expected.
+
+The examples intentionally end with one invalid input. Select **Run** to keep the successful output
+visible beside the exact error message. This makes the difference between localized display text,
+integer minor units, and rejected text concrete before you connect a real form.

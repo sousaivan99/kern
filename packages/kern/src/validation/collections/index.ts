@@ -4,12 +4,18 @@ import {
   hasIssueCapacity,
   type InferInput,
   type InferOutput,
+  type InternalSchema,
   type Schema,
   type SchemaPresence,
   success,
   type ValidationContext,
   valueKind,
 } from "../types.js"
+
+const internalSchema = <S extends AnySchema>(
+  schema: S,
+): InternalSchema<InferOutput<S>, InferInput<S>, SchemaPresence> =>
+  schema as unknown as InternalSchema<InferOutput<S>, InferInput<S>, SchemaPresence>
 
 /** Validates every array element and reports indexed paths. */
 export const array = <S extends AnySchema>(element: S): Schema<InferOutput<S>[], InferInput<S>[]> =>
@@ -24,7 +30,7 @@ export const array = <S extends AnySchema>(element: S): Schema<InferOutput<S>[],
     const output: InferOutput<S>[] = []
     let valid = true
     for (let index = 0; index < input.length && hasIssueCapacity(context); index += 1) {
-      const result = element._run(input[index], [...path, index], context)
+      const result = internalSchema(element)._run(input[index], [...path, index], context)
       if (result.success) output.push(result.data as InferOutput<S>)
       else valid = false
     }
@@ -134,9 +140,10 @@ const createObjectSchema = <const S extends Shape, P extends UnknownKeyPolicy>(
       }
       const propertySchema = shape[key]
       if (!propertySchema) continue
+      const propertyInternal = internalSchema(propertySchema)
       const propertyPath = [...path, key]
       const hasProperty = Object.hasOwn(input, key)
-      if (!hasProperty && propertySchema._presence === "required") {
+      if (!hasProperty && propertyInternal._presence === "required") {
         failure(context, propertyPath, "required", "Required property", {
           expected: "defined property",
           received: "undefined",
@@ -155,10 +162,10 @@ const createObjectSchema = <const S extends Shape, P extends UnknownKeyPolicy>(
         propertyValue = read.value
       }
 
-      const result = propertySchema._run(propertyValue, propertyPath, context)
+      const result = propertyInternal._run(propertyValue, propertyPath, context)
       if (!result.success) {
         valid = false
-      } else if (propertySchema._presence !== "optional" || result.data !== undefined) {
+      } else if (propertyInternal._presence !== "optional" || result.data !== undefined) {
         setOwn(output, key, result.data)
       }
     }
@@ -269,7 +276,10 @@ export const tuple = <const S extends readonly AnySchema[]>(
     const output: unknown[] = []
     let valid = true
     for (let index = 0; index < schemas.length && hasIssueCapacity(context); index += 1) {
-      const result = schemas[index]?._run(input[index], [...path, index], context)
+      const schema = schemas[index]
+      const result = schema
+        ? internalSchema(schema)._run(input[index], [...path, index], context)
+        : undefined
       if (!result) continue
       if (result.success) output[index] = result.data
       else valid = false
@@ -301,7 +311,7 @@ export const record = <S extends AnySchema>(
         valid = false
         continue
       }
-      const result = valueSchema._run(read.value, itemPath, context)
+      const result = internalSchema(valueSchema)._run(read.value, itemPath, context)
       if (result.success) setOwn(output, key, result.data)
       else valid = false
     }
@@ -319,7 +329,7 @@ export const union = <const S extends readonly [AnySchema, AnySchema, ...AnySche
         limit: context.limit - context.issues.length,
       }
       try {
-        const result = schema._run(input, path, candidate)
+        const result = internalSchema(schema)._run(input, path, candidate)
         if (result.success && candidate.issues.length === 0) {
           return success(result.data as InferOutput<S[number]>)
         }

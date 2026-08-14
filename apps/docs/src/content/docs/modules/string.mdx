@@ -7,6 +7,33 @@ sidebar:
 
 Kern's string module focuses on operations whose Unicode behavior is easy to get wrong.
 
+## Start here: strings are text values
+
+A JavaScript string is text inside quotes, such as `"Ada"`. Strings are immutable: a function
+returns new text instead of changing the original string.
+
+```ts
+import { capitalize, slugify } from "@kern/core/string"
+
+const title = "crème brûlée"
+const heading = capitalize(title)
+const slug = slugify(title)
+
+console.log(heading) // "Crème brûlée"
+console.log(slug) // "creme-brulee"
+console.log(title) // "crème brûlée": unchanged
+
+capitalize(title, { locale: "not_a_locale" })
+// throws RangeError because the locale tag is invalid
+```
+
+Text is more complex than “one visible character equals one position.” Emoji, accents, and many
+writing systems use multiple Unicode pieces. Kern calls out when a helper works with code points,
+words, or user-perceived grapheme clusters.
+
+The runnable console preserves the successful strings before showing the host runtime's exact
+invalid-locale error.
+
 ## At a glance
 
 | Helper | Example result |
@@ -20,34 +47,74 @@ Kern's string module focuses on operations whose Unicode behavior is easy to get
 | `truncate("Hello world", 8)` | `"Hello w…"` |
 | `isBlank("  \n")` | `true` |
 
-## Capitalize and uncapitalize
+## `capitalize(value, options?)`
 
 ```ts
-import { capitalize, uncapitalize } from "@kern/core/string"
+import { capitalize } from "@kern/core/string"
 
-capitalize("hello, world") // "Hello, world"
-uncapitalize("Hello, world") // "hello, world"
-capitalize("") // ""
+console.log(capitalize("hello, world")) // "Hello, world"
+console.log(capitalize("")) // ""
+console.log(capitalize(" hello")) // " hello"
 ```
 
-Only the first Unicode code point is cased; the remainder is left unchanged. These functions do
-not trim whitespace, so `capitalize(" hello")` still starts with a space.
+`capitalize()` uppercases only the first Unicode code point. The remainder is returned unchanged.
+It does not trim whitespace, so a leading space remains the first character.
 
-## Convert identifier and URL cases
+## `uncapitalize(value, options?)`
 
 ```ts
-import { camelCase, kebabCase, snakeCase } from "@kern/core/string"
+import { uncapitalize } from "@kern/core/string"
 
-camelCase("customer account-ID") // "customerAccountId"
-kebabCase("customerAccount ID") // "customer-account-id"
-snakeCase("customerAccount ID") // "customer_account_id"
+console.log(uncapitalize("Hello, world")) // "hello, world"
+console.log(uncapitalize("APIClient")) // "aPIClient"
+console.log(uncapitalize("")) // ""
 ```
 
-Case conversion first normalizes with Unicode NFKC, splits letter/number words, lowercases them,
-and joins them in the requested form. It understands common camel-case and acronym boundaries, but
-it is not a natural-language tokenizer. Punctuation acts as a separator and is not preserved.
+`uncapitalize()` lowercases only the first Unicode code point. It is not the same as lowercasing
+the whole string; use native `value.toLowerCase()` when that is what you mean.
 
-## Deterministic and locale-aware casing
+## `camelCase(value, options?)`
+
+```ts
+import { camelCase } from "@kern/core/string"
+
+console.log(camelCase("customer account-ID")) // "customerAccountId"
+console.log(camelCase("HTTP response code")) // "httpResponseCode"
+```
+
+`camelCase()` joins words without a separator. The first word is lowercase and each later word is
+capitalized. This form is common for JavaScript variables and object properties.
+
+## `kebabCase(value, options?)`
+
+```ts
+import { kebabCase } from "@kern/core/string"
+
+console.log(kebabCase("customerAccount ID")) // "customer-account-id"
+console.log(kebabCase("Release 2026")) // "release-2026"
+```
+
+`kebabCase()` lowercases the words and joins them with hyphens. It is useful for CSS class names,
+URLs, and readable identifiers. Unlike `slugify()`, it does not remove combining marks/diacritics.
+
+## `snakeCase(value, options?)`
+
+```ts
+import { snakeCase } from "@kern/core/string"
+
+console.log(snakeCase("customerAccount ID")) // "customer_account_id"
+console.log(snakeCase("Release 2026")) // "release_2026"
+```
+
+`snakeCase()` lowercases the words and joins them with underscores. It is often useful for database
+column names and external formats, but your integration's naming rules still take precedence.
+
+All three case converters first normalize with Unicode NFKC, split letter/number words, lowercase
+them, and join them in the requested form. They understand common camel-case and acronym
+boundaries, but they are not natural-language tokenizers. Punctuation acts as a separator and is
+not preserved.
+
+## `StringCaseOptions`
 
 `capitalize`, `uncapitalize`, `camelCase`, `kebabCase`, `snakeCase`, and `slugify` accept the same
 `StringCaseOptions`:
@@ -62,21 +129,24 @@ not depend on the machine's host locale.
 ```ts
 import { capitalize, slugify } from "@kern/core/string"
 
-capitalize("istanbul") // "Istanbul"
-capitalize("istanbul", { locale: "tr" }) // "İstanbul"
-slugify("IĞDIR", { locale: "tr" }) // "ıgdır"
+console.log(capitalize("istanbul")) // "Istanbul"
+console.log(capitalize("istanbul", { locale: "tr" })) // "İstanbul"
+console.log(slugify("IĞDIR", { locale: "tr" })) // "ıgdır"
+
+capitalize("istanbul", { locale: "not_a_locale" })
+// throws RangeError because the locale tag is invalid
 ```
 
 Pass a locale only when linguistic casing is intended. A locale changes casing rules; it does not
 translate text.
 
-## Create slugs
+## `slugify(value, options?)`
 
 ```ts
 import { slugify } from "@kern/core/string"
 
-slugify("Crème brûlée & Café!") // "creme-brulee-cafe"
-slugify("  Product  2026  ") // "product-2026"
+console.log(slugify("Crème brûlée & Café!")) // "creme-brulee-cafe"
+console.log(slugify("  Product  2026  ")) // "product-2026"
 ```
 
 `slugify` performs Unicode NFKD normalization, removes combining marks, applies lowercase word
@@ -86,15 +156,18 @@ guarantee uniqueness. Add an ID when two records may have the same title.
 Some writing systems cannot be represented by simple diacritic removal or Latin transliteration;
 Kern deliberately does not provide a language transliteration engine.
 
-## Truncate visible characters safely
+## `truncate(value, maximumLength, omission?)`
 
 ```ts
 import { truncate } from "@kern/core/string"
 
-truncate("Hello world", 8) // "Hello w…"
-truncate("Hello world", 8, "...") // "Hello..."
-truncate("👨‍👩‍👧‍👦 family", 2) // "👨‍👩‍👧‍👦…"
-truncate("anything", 0) // ""
+console.log(truncate("Hello world", 8)) // "Hello w…"
+console.log(truncate("Hello world", 8, "...")) // "Hello..."
+console.log(truncate("👨‍👩‍👧‍👦 family", 2)) // "👨‍👩‍👧‍👦…"
+console.log(truncate("anything", 0)) // ""
+
+truncate("Hello world", -1)
+// RangeError: Maximum length must be a non-negative safe integer
 ```
 
 `truncate(value, maximumLength, omission = "…")` counts grapheme clusters with `Intl.Segmenter`.
@@ -110,15 +183,53 @@ original string is returned unchanged.
 Validation string schemas use JavaScript UTF-16 code units for `.min()`, `.max()`, and `.length()`.
 Grapheme counting is specific to display-oriented `truncate()`.
 
-## Check blank text
+## `isBlank(value)`
 
 ```ts
 import { isBlank } from "@kern/core/string"
 
-isBlank("") // true
-isBlank("  \n") // true
-isBlank("  hello  ") // false
+console.log(isBlank("")) // true
+console.log(isBlank("  \n")) // true
+console.log(isBlank("  hello  ")) // false
 ```
 
 `isBlank(value)` is equivalent to `value.trim().length === 0` and follows native JavaScript
 whitespace rules. It accepts strings only; it does not coerce `null`, numbers, or other values.
+
+## Common beginner mistakes
+
+- `capitalize()` changes only the first code point. It does not lowercase the rest, so
+  `capitalize("hELLO")` returns `"HELLO"`.
+- Case converters remove punctuation because punctuation is treated as a word separator.
+- `slugify()` creates readable text, not a unique database ID and not a full transliteration
+  engine. Add a stable ID when collisions matter.
+- `truncate()` includes the omission (`"…"` by default) inside the maximum length.
+- `isBlank()` accepts only strings. Validate an unknown value before calling it.
+- Locale-sensitive casing can change output. Pass a locale intentionally rather than relying on a
+  machine's default.
+
+## Advanced usage
+
+### Choose deterministic or linguistic casing
+
+With no `locale`, casing uses deterministic `toUpperCase()`/`toLowerCase()` behavior. Supplying a
+locale requests linguistic rules from the runtime:
+
+```ts
+import { camelCase, capitalize } from "@kern/core/string"
+
+capitalize("istanbul") // "Istanbul"
+capitalize("istanbul", { locale: "tr" }) // "İstanbul"
+camelCase("İSTANBUL RAPORU", { locale: "tr" }) // "istanbulRaporu"
+```
+
+This is appropriate when text belongs to a known language. Identifiers exchanged between systems
+usually need deterministic, locale-free rules.
+
+### Know the normalization boundary
+
+Case converters use Unicode NFKC normalization before finding letter/number words. `slugify()` uses
+NFKD and removes combining marks first. These compatibility normalizations may intentionally fold
+visually or semantically related forms. They are suitable for identifiers and search-like labels,
+not for preserving original user text, cryptographic comparison, or security-sensitive canonical
+identity.

@@ -1,0 +1,80 @@
+name: Feature request
+description: Propose a small helper, option, or improvement that solves a recurring problem.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Kern deliberately keeps its API small and prefers native JavaScript and Web APIs. The most useful proposal explains the repeated problem first; the exact API can be designed afterward.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and documentation for a similar request.
+          required: true
+        - label: This request describes a recurring problem, not only a single application’s business rule.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Suggested area
+      options:
+        - Validation
+        - Money
+        - Date
+        - Number
+        - String
+        - Array
+        - Object
+        - Async
+        - Package or tooling
+        - Documentation
+        - New module
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should Kern solve?
+      description: Describe what users repeatedly need to do, who encounters it, and why it is error-prone or cumbersome today.
+      placeholder: When building…, developers repeatedly have to…
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_solution
+    attributes:
+      label: How is this solved today?
+      description: Show the native JavaScript, existing Kern code, or third-party package currently required. Explain what is missing.
+      render: typescript
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_api
+    attributes:
+      label: Possible Kern API
+      description: Optional. Show the simplest call site you would like to write; this does not need to be the final design.
+      render: typescript
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: Real-world examples
+      description: Give two or more situations where this would be useful. Links to public implementations are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Behavior and tradeoffs
+      description: Mention important units, mutation rules, errors, locale/timezone behavior, performance, bundle size, or edge cases. Use “not sure” if you need help deciding.
+

@@ -275,12 +275,22 @@ describe("validation execution controls and interoperability", () => {
   })
 
   test("implements synchronous Standard Schema V1", () => {
-    const schema = object({ name: string(), age: number().optional() })
+    const schema = object({
+      profile: object({ name: string() }),
+      age: number().optional(),
+    }).transform((value) => value.profile.name)
     expect(schema["~standard"].version).toBe(1)
     expect(schema["~standard"].vendor).toBe("kern")
-    expect(schema["~standard"].validate({ name: "Ada" })).toEqual({ value: { name: "Ada" } })
-    const invalid = schema["~standard"].validate({ name: 1 })
-    expect(invalid).toMatchObject({ issues: [{ path: ["name"], code: "invalid_type" }] })
+    expect(
+      schema["~standard"].validate(
+        { profile: { name: "Ada" } },
+        { libraryOptions: { consumer: "runtime-contract" } },
+      ),
+    ).toEqual({ value: "Ada" })
+    const invalid = schema["~standard"].validate({ profile: { name: 1 } })
+    expect(invalid).toMatchObject({
+      issues: [{ path: ["profile", "name"], code: "invalid_type" }],
+    })
     expect(invalid).not.toBeInstanceOf(Promise)
   })
 

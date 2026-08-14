@@ -79,8 +79,9 @@ Guide pages should explain:
 | `bun run audit` | Dependency vulnerability audit. |
 | `bun run pack:dry` | Show files that would be published without publishing. |
 
-CI owns the complete Node 22/24 and current Deno matrix. Local checks cover Bun, current Node,
-browser behavior, minimum/current TypeScript, and the packed artifact.
+CI owns the Node 22/24/26, minimum Bun 1.3/latest stable Bun, and current Deno matrix. Local checks
+cover the pinned Bun and Node versions, browser behavior, minimum/current TypeScript, and the packed
+artifact.
 
 ## The full gate
 
@@ -112,6 +113,6 @@ For an accepted public change:
 7. add a benchmark only when work scales with input or is performance-sensitive;
 8. run the applicable focused checks and `bun run check`.
 
-Kern is still in unreleased MVP development. APIs may be replaced directly until the completed MVP
-becomes 1.0; do not add compatibility aliases, deprecation layers, or migration pages unless the
-project explicitly decides otherwise.
+Kern 1.x is stable. Review runtime and TypeScript changes against the package's semantic-versioning
+policy, update the changelog for consumer-visible behavior, and use a major version for breaking
+changes. Deprecate a public API in a prior minor release when practical.

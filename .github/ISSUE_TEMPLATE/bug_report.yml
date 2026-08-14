@@ -1,0 +1,116 @@
+name: Bug report
+description: Tell us about behavior that is incorrect, surprising, or different from the documentation.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Kern. You do not need to know why the bug happens. A small example showing what you expected and what happened is enough to start.
+
+        **Security warning:** do not report vulnerabilities here. Use GitHub's [private vulnerability reporting form](https://github.com/sousaivan99/kern/security/advisories/new).
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and did not find the same problem.
+          required: true
+        - label: This report does not contain a security vulnerability or private information.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      description: Choose the closest match. Select “Not sure” if you do not know.
+      options:
+        - Validation
+        - Money
+        - Date
+        - Number
+        - String
+        - Array
+        - Object
+        - Async
+        - Package or TypeScript declarations
+        - Documentation or examples
+        - Framework compatibility
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Kern version
+      description: Run `bun pm ls @kern/core`, `npm ls @kern/core`, or check package.json. Use “workspace” if testing the repository directly.
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Paste the smallest TypeScript or JavaScript example that still shows the problem. Remove application secrets and unrelated code.
+      placeholder: |
+        import { addMoney } from "@kern/core/money"
+
+        console.log(addMoney(100, 50))
+      render: typescript
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+      description: Show the actual result or error message. Explain it in your own words if the message is unclear.
+      placeholder: The function returned… / The error said…
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: Describe the result you expected and, if possible, explain why.
+      placeholder: I expected…
+    validations:
+      required: true
+
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime
+      description: Choose where the problem occurs.
+      multiple: true
+      options:
+        - Node.js 22
+        - Node.js 24
+        - Node.js 26 or newer
+        - Bun 1.3
+        - Newer Bun
+        - Deno
+        - Browser
+        - Other or not sure
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment details
+      description: Include relevant TypeScript, operating-system, browser, locale, and timezone versions or values. Use “not sure” where needed.
+      placeholder: "TypeScript 5.9, Node 24, Ubuntu 24.04, Europe/Luxembourg"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add logs, screenshots, links, frequency, possible regressions, or anything else that may help. You can leave this blank.

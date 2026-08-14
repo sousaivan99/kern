@@ -13,12 +13,13 @@ sidebar:
 import { array, number, object, string } from "@kern/core/validation"
 
 const Users = array(object({ email: string().email(), age: number().min(18) }))
-const result = Users.safeParse([{ email: "invalid", age: 12 }])
+const success = Users.safeParse([{ email: "ada@example.com", age: 36 }])
+const failure = Users.safeParse([{ email: "invalid", age: 12 }])
 
-if (result.success) {
-  console.log(result.data)
-} else {
-  for (const issue of result.issues) {
+console.log("Success:", success)
+
+if (!failure.success) {
+  for (const issue of failure.issues) {
     console.log(issue.path, issue.code, issue.message)
   }
 }
@@ -76,7 +77,7 @@ decide whether issue paths/messages are appropriate to log or show publicly.
 Codes are intended for control flow and translation keys. Messages are intended for people and may
 be customized.
 
-## Control how many issues are collected
+## Advanced: control how many issues are collected
 
 Validation aggregates all reachable issues by default. Nested arrays, objects, tuples, and records
 share the same limit.
@@ -119,6 +120,8 @@ import { object, string, ValidationError } from "@kern/core/validation"
 
 const User = object({ email: string().email() })
 
+console.log("Success:", User.parse({ email: "ada@example.com" }))
+
 try {
   User.parse({ email: "invalid" })
 } catch (error) {
@@ -133,7 +136,7 @@ try {
 `ValidationError.issues` is readonly. The error message is the first issue's message, or
 `"Validation failed"` if no issue is available.
 
-## Input and output inference
+## Advanced: input and output inference
 
 The general schema type is `Schema<Output, Input = Output, Presence = "required">`.
 
@@ -181,7 +184,7 @@ console.log(sameOutput)
 Here `role` is optional in `AccountInput` but required in output, and `port` changes from string
 input to number output. `Infer<S>` is exactly the convenient output alias.
 
-## Standard Schema V1
+## Advanced: Standard Schema V1
 
 Every Kern schema implements synchronous Standard Schema V1 through the `~standard` property:
 
@@ -190,17 +193,34 @@ import { object, string } from "@kern/core/validation"
 
 const User = object({ email: string().email() })
 const standard = User["~standard"]
-const result = standard.validate({ email: "ada@example.com" })
+const success = standard.validate(
+  { email: "ada@example.com" },
+  { libraryOptions: { source: "form" } },
+)
+const failure = standard.validate(
+  { email: "not-an-email" },
+  { libraryOptions: { source: "form" } },
+)
 
 console.log(standard.version) // 1
 console.log(standard.vendor) // "kern"
-console.log(result)
+console.log("Success:", success)
+console.log("Failure:", failure)
 ```
 
 The validator returns `{ value }` on success or `{ issues }` on failure. It is synchronous, uses
 Kern's parsed/transformed output, and passes Kern issue paths through unchanged. Standard
 Schema-aware form, RPC, and validation tools can consume it without an adapter or external runtime
 dependency.
+
+Standard Schema permits a library-specific options bag and permits validators to return a promise.
+Kern accepts the current V1 options argument for compatibility, ignores `libraryOptions`, and always
+returns its result synchronously. Consumer code written for any Standard Schema implementation must
+still allow either a direct result or a promise.
+
+The exported `StandardSchemaV1<Input, Output>` interface includes the official nested result,
+issue, path, options, types, and inference members. Most applications should pass the schema itself
+to a Standard Schema-aware tool instead of calling these lower-level types directly.
 
 Direct `~standard.validate()` uses Kern's default issue aggregation and does not expose Kern-specific
 `abortEarly`/`maxIssues` controls. Call `safeParse()` directly when you need those controls.
@@ -214,6 +234,8 @@ Most applications need only `Infer`, `InferInput`, `InferOutput`, `ValidationIss
 | --- | --- |
 | `Schema<Output, Input, Presence>` | Public contract implemented by every schema. |
 | `AnySchema` | Any Kern schema regardless of its input/output. |
+| `StringSchema` | A string schema with `.trim()`, length, format, regex, prefix, and suffix methods. |
+| `NumberSchema` | A number schema with range, sign, integer, and finite-number methods. |
 | `Infer<S>` | Convenient alias for a schema's output. |
 | `InferInput<S>` | Input accepted before parsing/transformation. |
 | `InferOutput<S>` | Output returned after parsing/transformation. |

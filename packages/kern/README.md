@@ -5,11 +5,12 @@ primitives for modern JavaScript runtimes. It focuses on work where a native one
 enough: structured validation, exact minor-unit money operations, calendar behavior, safe object
 handling, and cancellation-aware async control flow.
 
-The temporary package name is `@kern/core`. Kern is ESM-only, side-effect free, framework
-agnostic, and split into independently importable module entrypoints.
+The package name is `@kern/core`. Kern is ESM-only, side-effect free, framework agnostic, and split
+into independently importable module entrypoints.
 
-Kern is still in unreleased MVP development. The completed MVP will become 1.0; until then the
-repository may replace APIs directly instead of carrying compatibility aliases or migration layers.
+Kern 1.x is the stable public API line. Changes follow the [semantic versioning policy](./SEMVER.md),
+and supported releases and runtimes follow the [support policy](./SUPPORT.md). See the
+[changelog](./CHANGELOG.md) for release-by-release details.
 
 ## Requirements
 
@@ -216,8 +217,11 @@ milliseconds. `toUTCISODate()` explicitly uses UTC.
 `formatRelativeTime()` compares instants; its month/year unit selection uses average Gregorian
 durations and is approximate. Kern does not attempt general timezone arithmetic.
 
-The module stays on native `Date`; Temporal is the future native path, without a Kern abstraction
-or bundled polyfill.
+[Temporal is Stage 4](https://github.com/tc39/proposal-temporal) and has shipped in Firefox,
+Chrome, and Node 26. Kern still supports Node 22/24 and runtimes where Temporal is absent, so its
+public API remains native `Date`. Calendar arithmetic and day boundaries use a complete global
+Temporal implementation when one is available and otherwise use the equivalent `Date` path. Kern
+does not bundle a polyfill or expose a competing Temporal abstraction.
 
 ## Object safety
 
@@ -276,9 +280,9 @@ development-only tool and is not included when consumers install Kern.
 
 `bun run check` is the local release gate: it includes both the minimum and current TypeScript
 compilers, dependency auditing, browser and current-runtime smoke tests, packed-package checks, and
-the timezone suite. CI additionally runs the package on Node 22/24 and current Deno. Runtime source
-changes must stay within the existing gzip budgets: validation below 5 KB, finance-capable money
-below 2.5 KB, and date/string below 2 KB.
+the timezone suite. CI additionally runs the built package on Node 22/24/26, the minimum Bun 1.3
+release, latest stable Bun, and current Deno. Runtime source changes must stay within the existing
+gzip budgets: validation below 5 KB, finance-capable money below 2.5 KB, and date/string below 2 KB.
 
 Build, test, timezone, and release-check commands use live progress indicators and collapse
 successful subprocess output so the console remains active without becoming noisy. A failure always
@@ -303,28 +307,29 @@ Quick mode verifies benchmark fixtures as part of `bun run check`; use the full 
 performance conclusions. See the [benchmark methodology](https://github.com/sousaivan99/kern/blob/main/tooling/benchmarks/README.md) for methodology and
 comparison guidance.
 
-## Build and publish
+## Build and releases
 
 `bun run build` creates browser-targeted ESM bundles, source maps, and TypeScript declarations for
 the root and every public subpath. `bun run pack:dry` reports the exact npm artifact without
 publishing it.
 
-Before publishing:
+Before opening a release pull request:
 
 ```bash
 bun run check
 bun run pack:dry
-npm publish --access public
 ```
 
-Publishing is intentionally manual. Replace the temporary `@kern/core` name in package metadata,
-documentation, and consumer fixtures before publishing under another name.
+Pull requests into `main` or `prod` run the full CI matrix. Merging a release pull request into the
+protected `prod` branch runs CI again on the merge commit; only a successful `prod` CI run can
+trigger the provenance-enabled npm release workflow. Maintainers should follow
+[RELEASING.md](./RELEASING.md), including the one-time npm scope/trusted-publisher setup.
 
 ## Security
 
-See the repository [security policy](https://github.com/sousaivan99/kern/blob/main/SECURITY.md) for private vulnerability reporting. Validation is not
-sanitization, syntactically valid URLs are not necessarily safe destinations, and freezing plain
-data does not isolate untrusted code.
+See the repository [security policy](https://github.com/sousaivan99/kern/blob/main/SECURITY.md) for
+the private reporting channel. Validation is not sanitization, syntactically valid URLs are not
+necessarily safe destinations, and freezing plain data does not isolate untrusted code.
 
 ## License
 

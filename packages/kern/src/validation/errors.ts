@@ -1,4 +1,4 @@
-import type { ValidationIssue } from "./types"
+import type { ValidationIssue } from "./types.js"
 
 export class ValidationError extends Error {
   readonly issues: readonly ValidationIssue[]

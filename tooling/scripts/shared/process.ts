@@ -11,6 +11,43 @@ export interface CapturedProcessOptions {
   readonly onLine?: (line: string) => void
 }
 
+const capturedOutput = (result: CapturedProcess): string =>
+  [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n")
+
+const warningPattern =
+  /(?:\[(?:WARN|warn)\]|\bWARN\b|\b(?:[A-Z][A-Za-z]*)?Warning\b|\b[1-9]\d*\s+warnings?\b|\bwarn(?:ing)?:)/u
+
+const isWarningLine = (line: string): boolean => warningPattern.test(line)
+
+const processOutputPrefixPattern = /^@\S+\s+\S+:\s*/u
+const warningContinuationPattern = /^(?:\(!\)|[-*]\s|at\s)/u
+
+const isWarningContinuation = (line: string): boolean => {
+  let content = line
+  while (processOutputPrefixPattern.test(content)) {
+    content = content.replace(processOutputPrefixPattern, "")
+  }
+  return warningContinuationPattern.test(content.trimStart())
+}
+
+const capturedWarnings = (result: CapturedProcess): string => {
+  const warnings: string[] = []
+  let followsWarning = false
+
+  for (const line of capturedOutput(result).split(/\r?\n/u)) {
+    if (isWarningLine(line)) {
+      warnings.push(line)
+      followsWarning = true
+    } else if (followsWarning && isWarningContinuation(line)) {
+      warnings.push(line)
+    } else {
+      followsWarning = false
+    }
+  }
+
+  return warnings.join("\n")
+}
+
 const consumeStream = async (
   stream: ReadableStream<Uint8Array>,
   onLine?: (line: string) => void,
@@ -62,6 +99,20 @@ export const runCaptured = async (
 export const printCapturedFailure = (result: CapturedProcess): void => {
   const command = result.command.join(" ")
   console.error(`\nCommand failed: ${command}\n`)
-  const output = [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n")
+  const output = capturedOutput(result)
   if (output) console.error(output)
+}
+
+export const hasCapturedWarnings = (result: CapturedProcess): boolean =>
+  capturedWarnings(result).length > 0
+
+export const printCapturedWarnings = (
+  result: CapturedProcess,
+  stepName: string,
+  includeContext = false,
+): void => {
+  const warnings = capturedWarnings(result)
+  if (!warnings) return
+  console.warn(`\nWarnings from ${stepName}:\n`)
+  console.warn(includeContext ? capturedOutput(result) : warnings)
 }
