@@ -5,7 +5,7 @@ sidebar:
   order: 6
 ---
 
-Import array helpers from `@kern/core/array`. Every helper returns a new value and leaves the input
+Import array helpers from `@sousaivan/kern/array`. Every helper returns a new value and leaves the input
 array unchanged.
 
 ## Start here: an array is an ordered list
@@ -15,7 +15,7 @@ Kern's array helpers help you read, split, group, or copy that list. They do not
 array.
 
 ```ts
-import { first, unique } from "@kern/core/array"
+import { first, unique } from "@sousaivan/kern/array"
 
 const names = ["Ada", "Grace", "Ada"]
 
@@ -44,7 +44,7 @@ these and other terms.
 ## `first(values)`
 
 ```ts
-import { first } from "@kern/core/array"
+import { first } from "@sousaivan/kern/array"
 
 const queue = ["build", "test", "deploy"]
 
@@ -58,7 +58,7 @@ is the semantic form of `values[0]`: use it when the name “first” makes the 
 For a known non-empty tuple, TypeScript knows the exact first-element type:
 
 ```ts
-import { first } from "@kern/core/array"
+import { first } from "@sousaivan/kern/array"
 
 const status = first(["draft", 1] as const)
 // status has the exact type "draft"
@@ -67,7 +67,7 @@ const status = first(["draft", 1] as const)
 ## `last(values)`
 
 ```ts
-import { last } from "@kern/core/array"
+import { last } from "@sousaivan/kern/array"
 
 const queue = ["build", "test", "deploy"]
 
@@ -84,7 +84,7 @@ Use `unique(values)` when equality should follow JavaScript `Set` rules. The fir
 and order is preserved.
 
 ```ts
-import { unique } from "@kern/core/array"
+import { unique } from "@sousaivan/kern/array"
 
 console.log(unique(["vue", "react", "vue"])) // ["vue", "react"]
 console.log(unique([1, 1, 2, Number.NaN, Number.NaN])) // [1, 2, NaN]
@@ -99,7 +99,7 @@ Use `uniqueBy()` when objects should be considered duplicates because one calcul
 as an ID, is the same.
 
 ```ts
-import { uniqueBy } from "@kern/core/array"
+import { uniqueBy } from "@sousaivan/kern/array"
 
 const users = [
   { id: 1, name: "Ada" },
@@ -123,7 +123,7 @@ passes through to the caller.
 ## `groupBy(values, selector)`
 
 ```ts
-import { groupBy } from "@kern/core/array"
+import { groupBy } from "@sousaivan/kern/array"
 
 const events = [
   { id: "evt-1", category: "billing" },
@@ -150,7 +150,7 @@ the same safe result shape across its supported runtimes.
 ## `partition(values, predicate)`
 
 ```ts
-import { partition } from "@kern/core/array"
+import { partition } from "@sousaivan/kern/array"
 
 const [adults, minors] = partition(
   [12, 21, 17, 40],
@@ -176,7 +176,7 @@ that did not match. An empty input returns `[[], []]`.
 ## Create batches with `chunk`
 
 ```ts
-import { chunk } from "@kern/core/array"
+import { chunk } from "@sousaivan/kern/array"
 
 console.log("Success:", chunk([1, 2, 3, 4, 5], 2)) // [[1, 2], [3, 4], [5]]
 console.log("Empty array:", chunk([], 3)) // []
@@ -193,7 +193,7 @@ The returned chunks are new arrays. Their contained values are not cloned.
 ## Remove falsy values
 
 ```ts
-import { withoutFalsy } from "@kern/core/array"
+import { withoutFalsy } from "@sousaivan/kern/array"
 
 console.log(withoutFalsy([0, 1, false, "ready", "", null, undefined]))
 // [1, "ready"]
@@ -208,7 +208,7 @@ union. TypeScript cannot represent `NaN` as its own literal type, so runtime rem
 more precise than static narrowing for that value.
 
 ```ts
-import { type NonFalsy, withoutFalsy } from "@kern/core/array"
+import { type NonFalsy, withoutFalsy } from "@sousaivan/kern/array"
 
 type Input = string | null | undefined
 type Present = NonFalsy<Input> // string
@@ -243,7 +243,7 @@ const names: Present[] = withoutFalsy(["Ada", null, "Grace", undefined])
 A TypeScript type guard lets `partition()` give each returned array a more precise type:
 
 ```ts
-import { partition } from "@kern/core/array"
+import { partition } from "@sousaivan/kern/array"
 
 const values: Array<string | number> = ["Ada", 42, "Grace", 7]
 const [names, numbers] = partition(
@@ -261,7 +261,7 @@ numbers.map((number) => number.toFixed(2))
 does not inherit methods such as `.hasOwnProperty()`:
 
 ```ts
-import { groupBy } from "@kern/core/array"
+import { groupBy } from "@sousaivan/kern/array"
 
 const grouped = groupBy(["constructor", "safe"], (value) => value)
 

@@ -30,7 +30,7 @@ For a currency with two decimal places, move the decimal point two places and st
 Then calculate with money helpers and format only for display:
 
 ```ts
-import { addMoney, formatMoney } from "@kern/core/money"
+import { addMoney, formatMoney } from "@sousaivan/kern/money"
 
 const coffee = 350
 const cake = 499
@@ -71,7 +71,7 @@ import {
   formatMoney,
   multiplyMoney,
   sumMoney,
-} from "@kern/core/money"
+} from "@sousaivan/kern/money"
 
 const lineTotal = multiplyMoney(1_499, 3)
 const subtotal = sumMoney([lineTotal, 499])
@@ -133,7 +133,7 @@ Your domain layer owns those rules. Kern gives it small exact operations to buil
 Kern deliberately keeps arithmetic functions tiny, so a domain model should keep the unit metadata:
 
 ```ts
-import { addMoney } from "@kern/core/money"
+import { addMoney } from "@sousaivan/kern/money"
 
 interface Money {
   readonly currency: "EUR" | "USD"

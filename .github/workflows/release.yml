@@ -21,7 +21,7 @@ env:
 
 jobs:
   publish:
-    name: Publish @kern/core
+    name: Publish @sousaivan/kern
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: production
-      url: https://www.npmjs.com/package/@kern/core
+      url: https://www.npmjs.com/package/@sousaivan/kern
     steps:
       - name: Check out the tested commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -82,5 +82,5 @@ jobs:
         run: >-
           gh release create "$RELEASE_TAG"
           --target "$RELEASE_SHA"
-          --title "@kern/core $RELEASE_VERSION"
+          --title "@sousaivan/kern $RELEASE_VERSION"
           --generate-notes

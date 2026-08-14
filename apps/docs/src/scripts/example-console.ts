@@ -1,15 +1,15 @@
 type ConsoleWriter = (...values: readonly unknown[]) => void
 
 const supportedModules = [
-  "@kern/core",
-  "@kern/core/array",
-  "@kern/core/async",
-  "@kern/core/date",
-  "@kern/core/money",
-  "@kern/core/number",
-  "@kern/core/object",
-  "@kern/core/string",
-  "@kern/core/validation",
+  "@sousaivan/kern",
+  "@sousaivan/kern/array",
+  "@sousaivan/kern/async",
+  "@sousaivan/kern/date",
+  "@sousaivan/kern/money",
+  "@sousaivan/kern/number",
+  "@sousaivan/kern/object",
+  "@sousaivan/kern/string",
+  "@sousaivan/kern/validation",
 ] as const
 
 type SupportedModule = (typeof supportedModules)[number]
@@ -64,24 +64,24 @@ const formatThrownError = (error: unknown): string => {
 
 const loadKernModule = async (specifier: string): Promise<Record<string, unknown>> => {
   switch (specifier as SupportedModule) {
-    case "@kern/core":
-      return import("@kern/core")
-    case "@kern/core/array":
-      return import("@kern/core/array")
-    case "@kern/core/async":
-      return import("@kern/core/async")
-    case "@kern/core/date":
-      return import("@kern/core/date")
-    case "@kern/core/money":
-      return import("@kern/core/money")
-    case "@kern/core/number":
-      return import("@kern/core/number")
-    case "@kern/core/object":
-      return import("@kern/core/object")
-    case "@kern/core/string":
-      return import("@kern/core/string")
-    case "@kern/core/validation":
-      return import("@kern/core/validation")
+    case "@sousaivan/kern":
+      return import("@sousaivan/kern")
+    case "@sousaivan/kern/array":
+      return import("@sousaivan/kern/array")
+    case "@sousaivan/kern/async":
+      return import("@sousaivan/kern/async")
+    case "@sousaivan/kern/date":
+      return import("@sousaivan/kern/date")
+    case "@sousaivan/kern/money":
+      return import("@sousaivan/kern/money")
+    case "@sousaivan/kern/number":
+      return import("@sousaivan/kern/number")
+    case "@sousaivan/kern/object":
+      return import("@sousaivan/kern/object")
+    case "@sousaivan/kern/string":
+      return import("@sousaivan/kern/string")
+    case "@sousaivan/kern/validation":
+      return import("@sousaivan/kern/validation")
     default:
       throw new TypeError(`The interactive console cannot load ${JSON.stringify(specifier)}.`)
   }

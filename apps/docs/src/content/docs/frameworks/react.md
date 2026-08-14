@@ -6,7 +6,7 @@ description: Validate controlled React form state with inferred Kern schemas.
 Install Kern in an existing React application:
 
 ```bash
-npm install @kern/core
+npm install @sousaivan/kern
 ```
 
 Kern does not need a provider, hook, or React adapter. Schemas are immutable ordinary values and
@@ -17,8 +17,8 @@ can be declared once outside the component.
 <!-- framework-test: react/src/App.tsx -->
 ```tsx
 import { useState } from "react"
-import { formatMoney } from "@kern/core/money"
-import { object, string } from "@kern/core/validation"
+import { formatMoney } from "@sousaivan/kern/money"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Contact = object({
   email: string().trim().email(),

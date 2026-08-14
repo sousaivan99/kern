@@ -11,8 +11,8 @@ library.
 ## 1. Import from the module you need
 
 ```ts
-import { unique } from "@kern/core/array"
-import { formatMoney } from "@kern/core/money"
+import { unique } from "@sousaivan/kern/array"
+import { formatMoney } from "@sousaivan/kern/money"
 ```
 
 Kern groups helpers by responsibility. A money helper will not secretly validate an application
@@ -23,7 +23,7 @@ model, and a date helper will not silently perform timezone conversion.
 `unknown` means “TypeScript does not know what this is yet.” Validate it before using it:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Message = object({ text: string().min(1) })
 const input: unknown = JSON.parse('{"text":"hello"}')
@@ -39,8 +39,8 @@ This is safer than `as Message`, which only silences TypeScript and performs no 
 Unless an API explicitly says otherwise, Kern returns a new value:
 
 ```ts
-import { addDays } from "@kern/core/date"
-import { unique } from "@kern/core/array"
+import { addDays } from "@sousaivan/kern/date"
+import { unique } from "@sousaivan/kern/array"
 
 const originalDate = new Date(2026, 0, 1)
 const laterDate = addDays(originalDate, 3)
@@ -70,7 +70,7 @@ These defaults make simple code safe, while named options expose advanced behavi
 A validation failure is normal data:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Message = object({ text: string().min(1) })
 const result = Message.safeParse({ text: "" })
@@ -87,7 +87,7 @@ page lists these cases.
 The common path should stay short:
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const Name = string().trim().min(2)
 ```
@@ -95,7 +95,7 @@ const Name = string().trim().min(2)
 Add customization only when the application needs it:
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const Name = string()
   .trim()

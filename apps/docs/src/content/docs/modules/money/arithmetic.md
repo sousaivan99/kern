@@ -10,7 +10,7 @@ Every amount on this page is a safe-integer count of minor units.
 ## `addMoney(leftMinorUnits, rightMinorUnits)`
 
 ```ts
-import { addMoney } from "@kern/core/money"
+import { addMoney } from "@sousaivan/kern/money"
 
 console.log("Success:", addMoney(1_099, 250)) // 1349
 
@@ -25,7 +25,7 @@ the same currency and scale.
 ## `subtractMoney(leftMinorUnits, rightMinorUnits)`
 
 ```ts
-import { subtractMoney } from "@kern/core/money"
+import { subtractMoney } from "@sousaivan/kern/money"
 
 console.log("Success:", subtractMoney(1_099, 100)) // 999
 console.log("Negative result:", subtractMoney(500, 750)) // -250
@@ -40,7 +40,7 @@ validates both operands and the result.
 ## `sumMoney(values)`
 
 ```ts
-import { sumMoney } from "@kern/core/money"
+import { sumMoney } from "@sousaivan/kern/money"
 
 console.log("Success:", sumMoney([1_099, 250, -100])) // 1249
 console.log("Empty list:", sumMoney([])) // 0
@@ -55,7 +55,7 @@ unsafe intermediate total throws even if later values would bring the final tota
 ## Multiply an amount
 
 ```ts
-import { multiplyMoney } from "@kern/core/money"
+import { multiplyMoney } from "@sousaivan/kern/money"
 
 console.log("Whole multiplier:", multiplyMoney(1_499, 3)) // 4497
 console.log("Decimal multiplier:", multiplyMoney(100, 1.5)) // 150
@@ -72,7 +72,7 @@ increment. Negative and zero multipliers are allowed. `NaN` and infinities throw
 ## `percentageOf(minorUnits, percentage, options?)`
 
 ```ts
-import { percentageOf } from "@kern/core/money"
+import { percentageOf } from "@sousaivan/kern/money"
 
 console.log("Success:", percentageOf(10_000, 17.5)) // 1750
 console.log("Negative percentage:", percentageOf(10_000, -10)) // -1000
@@ -87,7 +87,7 @@ percentageOf(10_000, Number.POSITIVE_INFINITY)
 ## `applyDiscount(minorUnits, percentage, options?)`
 
 ```ts
-import { applyDiscount } from "@kern/core/money"
+import { applyDiscount } from "@sousaivan/kern/money"
 
 console.log("15% off:", applyDiscount(1_099, 15)) // 934
 console.log("100% off:", applyDiscount(1_099, 100)) // 0
@@ -140,7 +140,7 @@ For half modes, values below half move to the nearer lower-magnitude result and 
 move to the nearer higher-magnitude result. Only exact ties use the named tie rule.
 
 ```ts
-import { multiplyMoney } from "@kern/core/money"
+import { multiplyMoney } from "@sousaivan/kern/money"
 
 console.log(multiplyMoney(1, 1.4, { roundingMode: "halfEven" })) // 1
 console.log(multiplyMoney(1, 1.5, { roundingMode: "halfEven" })) // 2
@@ -154,7 +154,7 @@ Kern does not select a jurisdictional policy for you.
 ## Round to a cash increment
 
 ```ts
-import { roundMoney } from "@kern/core/money"
+import { roundMoney } from "@sousaivan/kern/money"
 
 console.log(roundMoney(102, { roundingIncrement: 5 })) // 100
 console.log(roundMoney(103, { roundingIncrement: 5 })) // 105
@@ -175,7 +175,7 @@ positive safe integer is accepted.
 ## Allocate an amount exactly
 
 ```ts
-import { allocateMoney } from "@kern/core/money"
+import { allocateMoney } from "@sousaivan/kern/money"
 
 console.log("Equal shares:", allocateMoney(100, [1, 1, 1])) // [34, 33, 33]
 console.log("Weighted:", allocateMoney(10, [1, 2, 3])) // [2, 3, 5]

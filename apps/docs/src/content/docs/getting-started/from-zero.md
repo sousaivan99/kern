@@ -17,7 +17,7 @@ If Kern is not installed yet, follow [Installation](./installation/) first and t
 Create a file named `example.ts`:
 
 ```ts
-import { unique } from "@kern/core/array"
+import { unique } from "@sousaivan/kern/array"
 
 const names = ["Ada", "Grace", "Ada"]
 const distinctNames = unique(names)
@@ -73,7 +73,7 @@ It means:
 You call it with real values:
 
 ```ts
-import { chunk } from "@kern/core/array"
+import { chunk } from "@sousaivan/kern/array"
 
 const pages = chunk(["a", "b", "c", "d", "e"], 2)
 console.log(pages) // [["a", "b"], ["c", "d"], ["e"]]
@@ -104,7 +104,7 @@ accepts `42` but rejects the string `"42"`.
 An object groups named values. Many Kern functions accept an optional final **options object**:
 
 ```ts
-import { formatNumber } from "@kern/core/number"
+import { formatNumber } from "@sousaivan/kern/number"
 
 const options = {
   locale: "en-US",
@@ -118,7 +118,7 @@ console.log(text) // commonly "1,234.57"
 You may write the object directly inside the call:
 
 ```ts
-import { formatNumber } from "@kern/core/number"
+import { formatNumber } from "@sousaivan/kern/number"
 
 formatNumber(1234.567, { locale: "en-US", maximumFractionDigits: 2 })
 ```
@@ -133,7 +133,7 @@ A **callback** is a function you give to another function. Kern calls it later o
 An arrow function such as `(number) => number > 0` is a short way to write a callback:
 
 ```ts
-import { partition } from "@kern/core/array"
+import { partition } from "@sousaivan/kern/array"
 
 const [positive, remaining] = partition(
   [-2, 0, 3, 7],
@@ -148,7 +148,7 @@ The callback in this example is a **predicate** because it answers `true` or `fa
 **selector** returns a key used to identify or group a value:
 
 ```ts
-import { groupBy } from "@kern/core/array"
+import { groupBy } from "@sousaivan/kern/array"
 
 const words = ["cat", "apple", "car"]
 const byFirstLetter = groupBy(words, (word) => word[0] ?? "")
@@ -161,7 +161,7 @@ console.log(byFirstLetter.c) // ["cat", "car"]
 Most Kern functions return their answer immediately. They are **synchronous**:
 
 ```ts
-import { addMoney } from "@kern/core/money"
+import { addMoney } from "@sousaivan/kern/money"
 
 const total = addMoney(100, 50) // total is available immediately
 ```
@@ -170,7 +170,7 @@ Time, network, and other delayed work is **asynchronous**. An asynchronous funct
 `Promise`, which represents a value that may arrive later. Use `await` to wait for it:
 
 ```ts
-import { sleep } from "@kern/core/async"
+import { sleep } from "@sousaivan/kern/async"
 
 async function showMessage(): Promise<void> {
   console.log("Waiting...")
@@ -189,7 +189,7 @@ Some failures are normal user input. Validation offers `safeParse()` so you can 
 an exception:
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const Email = string().email()
 const result = Email.safeParse("not an email")
@@ -205,7 +205,7 @@ Invalid programmer configuration throws an error. Use `try`/`catch` only when yo
 meaningfully recover:
 
 ```ts
-import { chunk } from "@kern/core/array"
+import { chunk } from "@sousaivan/kern/array"
 
 try {
   chunk([1, 2, 3], 0)
@@ -222,7 +222,7 @@ TypeScript checks your code while you develop. Its types do not remain in the ru
 That means data from JSON, a request, storage, or a form must still be checked at runtime.
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const User = object({ name: string().min(1) })
 const input: unknown = JSON.parse('{"name":"Ada"}')
@@ -240,7 +240,7 @@ To **mutate** a value means to change the existing value. Kern normally returns 
 or `Date` instead:
 
 ```ts
-import { addDays } from "@kern/core/date"
+import { addDays } from "@sousaivan/kern/date"
 
 const original = new Date(2026, 0, 1)
 const tomorrow = addDays(original, 1)

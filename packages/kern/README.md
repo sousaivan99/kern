@@ -5,7 +5,7 @@ primitives for modern JavaScript runtimes. It focuses on work where a native one
 enough: structured validation, exact minor-unit money operations, calendar behavior, safe object
 handling, and cancellation-aware async control flow.
 
-The package name is `@kern/core`. Kern is ESM-only, side-effect free, framework agnostic, and split
+The package name is `@sousaivan/kern`. Kern is ESM-only, side-effect free, framework agnostic, and split
 into independently importable module entrypoints.
 
 Kern 1.x is the stable public API line. Changes follow the [semantic versioning policy](./SEMVER.md),
@@ -31,15 +31,15 @@ versions, so supported environments are exercised by compatibility smoke tests.
 ## Install
 
 ```bash
-bun add @kern/core
+bun add @sousaivan/kern
 ```
 
 Prefer the smallest relevant subpath:
 
 ```ts
-import { object, string } from "@kern/core/validation"
-import { formatMoney } from "@kern/core/money"
-import { addDays } from "@kern/core/date"
+import { object, string } from "@sousaivan/kern/validation"
+import { formatMoney } from "@sousaivan/kern/money"
+import { addDays } from "@sousaivan/kern/date"
 ```
 
 The root entrypoint is available for convenience, but subpaths make module boundaries explicit.
@@ -91,7 +91,7 @@ returns `false` for primitives and `null` rather than throwing.
 ## Validation
 
 ```ts
-import { number, object, string } from "@kern/core/validation"
+import { number, object, string } from "@sousaivan/kern/validation"
 
 const UserSchema = object({
   name: string().trim().min(2),
@@ -144,7 +144,7 @@ expressions are cloned before use.
 Money values are safe integers in currency **minor units**:
 
 ```ts
-import { allocateMoney, applyDiscount, formatMoney, parseMoney, roundMoney, sumMoney } from "@kern/core/money"
+import { allocateMoney, applyDiscount, formatMoney, parseMoney, roundMoney, sumMoney } from "@sousaivan/kern/money"
 
 formatMoney(1099, "EUR", { locale: "en-US" }) // €10.99
 parseMoney("10,99 €", "EUR", { locale: "de-DE" }) // 1099
@@ -177,7 +177,7 @@ own currency identity, provider-specific scale rules, audit trails, and regulato
 Percentage helpers use percentage points consistently and compose directly:
 
 ```ts
-import { formatPercentage, isBetween, percentageOfTotal } from "@kern/core/number"
+import { formatPercentage, isBetween, percentageOfTotal } from "@sousaivan/kern/number"
 
 const completion = percentageOfTotal(42, 50) // 84
 formatPercentage(completion, { locale: "en-US" }) // 84%
@@ -199,7 +199,7 @@ import {
   isValidDate,
   subtractDays,
   toUTCISODate,
-} from "@kern/core/date"
+} from "@sousaivan/kern/date"
 
 const tomorrow = addDays(new Date(), 1)
 const yesterday = subtractDays(new Date(), 1)

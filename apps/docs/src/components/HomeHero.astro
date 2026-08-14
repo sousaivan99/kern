@@ -5,7 +5,7 @@ import packageMetadata from "../../../../packages/kern/package.json"
 
 <section class="kern-docs-hero not-content" aria-labelledby="_top">
   <div class="kern-docs-intro">
-    <p class="kern-release">@kern/core <span>v{packageMetadata.version}</span></p>
+    <p class="kern-release">@sousaivan/kern <span>v{packageMetadata.version}</span></p>
     <h1 id="_top" data-page-title>Small TypeScript tools with clear, safe defaults.</h1>
     <p class="kern-intro-copy">
       Validate unknown data, calculate money exactly, handle dates and collections safely, and learn
@@ -24,7 +24,7 @@ import packageMetadata from "../../../../packages/kern/package.json"
     <fieldset class="kern-install-command" aria-label="Install Kern with Bun">
       <div class="kern-install-text">
         <Terminal aria-hidden="true" size={14} />
-        <code>bun add @kern/core</code>
+        <code>bun add @sousaivan/kern</code>
       </div>
       <button type="button" data-copy-install aria-label="Copy installation command">
         <Copy aria-hidden="true" size={14} />
@@ -49,7 +49,7 @@ import packageMetadata from "../../../../packages/kern/package.json"
     </header>
     <pre
     ><code><span class="line"><i>1</i><span class="kw">import</span> &#123; object, string &#125; <span class="kw">from</span></span>
-<span class="line"><i>2</i>  <span class="str">"@kern/core/validation"</span></span>
+<span class="line"><i>2</i>  <span class="str">"@sousaivan/kern/validation"</span></span>
 <span class="line"><i>3</i></span>
 <span class="line"><i>4</i><span class="kw">const</span> User = <span class="fn">object</span>(&#123;</span>
 <span class="line"><i>5</i>  name: <span class="fn">string</span>().<span class="fn">trim</span>().<span class="fn">min</span>(<span class="num">2</span>),</span>
@@ -69,7 +69,7 @@ document.querySelectorAll<HTMLButtonElement>("[data-copy-install]").forEach((but
     if (!label || !status) return
 
     try {
-      await navigator.clipboard.writeText("bun add @kern/core")
+      await navigator.clipboard.writeText("bun add @sousaivan/kern")
       label.textContent = "Copied"
       status.textContent = "Installation command copied."
       button.dataset.copied = "true"

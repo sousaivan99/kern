@@ -25,12 +25,12 @@ API reference.
 Prefer the smallest module subpath:
 
 ```ts
-import { chunk } from "@kern/core/array"
-import { addDays } from "@kern/core/date"
-import { formatMoney } from "@kern/core/money"
+import { chunk } from "@sousaivan/kern/array"
+import { addDays } from "@sousaivan/kern/date"
+import { formatMoney } from "@sousaivan/kern/money"
 ```
 
-The root package, `@kern/core`, re-exports the same helpers for convenience and adds no unique
+The root package, `@sousaivan/kern`, re-exports the same helpers for convenience and adds no unique
 function of its own. Subpath imports make ownership obvious and help bundlers include only what an
 application uses.
 

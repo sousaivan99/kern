@@ -11,7 +11,7 @@ collector and preserve the exact path to each failure.
 ## Arrays
 
 ```ts
-import { array, string } from "@kern/core/validation"
+import { array, string } from "@sousaivan/kern/validation"
 
 const Tags = array(string().trim().min(1))
 
@@ -26,7 +26,7 @@ Sparse positions are read as `undefined` and validated normally.
 There are no built-in array length constraints. Use `.refine()` when the application needs one:
 
 ```ts
-import { array, string } from "@kern/core/validation"
+import { array, string } from "@sousaivan/kern/validation"
 
 const NonEmptyTags = array(string()).refine((tags) => tags.length > 0, {
   code: "empty_tags",
@@ -40,7 +40,7 @@ console.log("Failure:", NonEmptyTags.safeParse([]))
 ## Tuples
 
 ```ts
-import { number, string, tuple } from "@kern/core/validation"
+import { number, string, tuple } from "@sousaivan/kern/validation"
 
 const Coordinate = tuple([number().finite(), number().finite()] as const)
 const Entry = tuple([string(), number().integer()] as const)
@@ -61,7 +61,7 @@ numeric index path.
 ## Object shapes
 
 ```ts
-import { number, object, string } from "@kern/core/validation"
+import { number, object, string } from "@sousaivan/kern/validation"
 
 const User = object({
   id: number().integer(),
@@ -92,7 +92,7 @@ processed afterward when the selected policy needs them. This makes issue order 
 ## Unknown-key policies
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const User = object({ name: string() })
 const input = { name: "Ada", traceId: "abc" }
@@ -117,7 +117,7 @@ safe own data properties rather than assigned through the legacy prototype sette
 Object composition is immutable. Every method returns a new schema and leaves the source unchanged.
 
 ```ts
-import { boolean, number, object, string } from "@kern/core/validation"
+import { boolean, number, object, string } from "@sousaivan/kern/validation"
 
 const User = object({
   id: number().integer(),
@@ -155,7 +155,7 @@ new definition. Composition preserves `.strip()`, `.strict()`, or `.passthrough(
 `partial()` wraps the complete original field from the outside:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Settings = object({ theme: string().default("system") })
 const SettingsPatch = Settings.partial()
@@ -175,7 +175,7 @@ shape first, then apply a general transform.
 ## Records
 
 ```ts
-import { number, record } from "@kern/core/validation"
+import { number, record } from "@sousaivan/kern/validation"
 
 const Scores = record(number().integer().min(0))
 
@@ -190,7 +190,7 @@ object. Use `object({...})` instead when keys are known and have different schem
 ## Unions
 
 ```ts
-import { literal, object, string, union } from "@kern/core/validation"
+import { literal, object, string, union } from "@sousaivan/kern/validation"
 
 const Contact = union([
   object({ type: literal("email"), value: string().email() }),
@@ -215,7 +215,7 @@ it and produces `validation_exception` at the exact property path. It never stor
 or rejected raw value in the issue.
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const input = Object.defineProperty({}, "name", {
   enumerable: true,

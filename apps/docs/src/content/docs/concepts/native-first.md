@@ -29,7 +29,7 @@ Some helpers are semantic names around short native expressions:
 | `formatNumber(value)` | `new Intl.NumberFormat().format(value)` | Colocates locale with native options. |
 
 ```ts
-import { first, unique } from "@kern/core/array"
+import { first, unique } from "@sousaivan/kern/array"
 
 const runtimes = unique(["Bun", "Node", "Bun"])
 const primary = first(runtimes)

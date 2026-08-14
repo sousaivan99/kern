@@ -11,7 +11,7 @@ person, and creates an estimated delivery date.
 ## 1. Describe valid input
 
 ```ts
-import { array, enumeration, number, object, string } from "@kern/core/validation"
+import { array, enumeration, number, object, string } from "@sousaivan/kern/validation"
 
 const Order = object({
   customer: object({
@@ -48,7 +48,7 @@ Network requests, JSON files, form submissions, and environment variables should
 `unknown` until they have been checked.
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Order = object({
   customer: object({ name: string(), email: string().email() }),
@@ -77,7 +77,7 @@ Use `safeParse()` when invalid input is expected and you want to show or return 
 ## 3. Calculate money in minor units
 
 ```ts
-import { applyDiscount, multiplyMoney, sumMoney } from "@kern/core/money"
+import { applyDiscount, multiplyMoney, sumMoney } from "@sousaivan/kern/money"
 
 const order = {
   items: [{ unitPriceMinor: 12_999, quantity: 1 }],
@@ -100,8 +100,8 @@ fraction use exact rounding; the default is nearest with ties away from zero.
 ## 4. Format output and calculate a date
 
 ```ts
-import { addDays, formatDate } from "@kern/core/date"
-import { formatMoney } from "@kern/core/money"
+import { addDays, formatDate } from "@sousaivan/kern/date"
+import { formatMoney } from "@sousaivan/kern/money"
 
 const order = { customer: { name: "Ada" }, currency: "EUR" }
 const total = 11_699
@@ -121,9 +121,9 @@ helper explicitly says UTC.
 ## Complete example
 
 ```ts
-import { addDays, formatDate } from "@kern/core/date"
-import { applyDiscount, formatMoney, multiplyMoney, sumMoney } from "@kern/core/money"
-import { array, enumeration, number, object, string } from "@kern/core/validation"
+import { addDays, formatDate } from "@sousaivan/kern/date"
+import { applyDiscount, formatMoney, multiplyMoney, sumMoney } from "@sousaivan/kern/money"
+import { array, enumeration, number, object, string } from "@sousaivan/kern/validation"
 
 const Order = object({
   customer: object({

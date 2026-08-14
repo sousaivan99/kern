@@ -21,7 +21,7 @@ schema remains unchanged.
 ## Optional values
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Profile = object({ nickname: string().optional() })
 
@@ -38,7 +38,7 @@ parsed output is `undefined`, the object schema omits the key rather than creati
 Outside an object, the parsed value itself can be `undefined`:
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const OptionalText = string().optional()
 console.log("Missing:", OptionalText.safeParse(undefined))
@@ -49,7 +49,7 @@ console.log("Wrong type:", OptionalText.safeParse(42))
 ## Nullable values
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Profile = object({ middleName: string().nullable() })
 
@@ -64,7 +64,7 @@ console.log("Wrong type:", Profile.safeParse({ middleName: 42 }))
 ## Default values
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Account = object({ role: string().default("member") })
 
@@ -87,7 +87,7 @@ makes partial schemas suitable for update payloads.
 ## Add a custom constraint with `refine`
 
 ```ts
-import { number, string } from "@kern/core/validation"
+import { number, string } from "@sousaivan/kern/validation"
 
 const Even = number().refine((value) => value % 2 === 0, "Expected an even number")
 
@@ -114,7 +114,7 @@ successful parsed value.
 A TypeScript type-guard predicate narrows the output:
 
 ```ts
-import { number } from "@kern/core/validation"
+import { number } from "@sousaivan/kern/validation"
 
 type PositiveInteger = number & { readonly __kind: "PositiveInteger" }
 
@@ -131,7 +131,7 @@ The brand in this example is compile-time-only; validation is still defined by t
 ## Convert successful output with `transform`
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const Port = string()
   .trim()
@@ -158,7 +158,7 @@ Standard Schema as well as direct parsing.
 Modifiers wrap the schema in the order you call them. Compare:
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const DefaultThenOptional = string().default("member").optional()
 const OptionalThenDefault = string().optional().default("member")
@@ -180,7 +180,7 @@ If a refinement or transform callback throws, `safeParse()` catches it and retur
 not retained.
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const Explodes = string().transform(() => {
   throw new Error("private callback details")

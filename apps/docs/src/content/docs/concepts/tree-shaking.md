@@ -9,7 +9,7 @@ designed so modern bundlers can do this reliably.
 ## Prefer module imports
 
 ```ts
-import { formatMoney } from "@kern/core/money"
+import { formatMoney } from "@sousaivan/kern/money"
 
 export const displayPrice = (minorUnits: number): string =>
   formatMoney(minorUnits, "EUR", { locale: "en-GB" })
@@ -21,7 +21,7 @@ date, or async helpers into the source graph.
 The root import is also tree-shakeable in supported tooling:
 
 ```ts
-import { formatMoney } from "@kern/core"
+import { formatMoney } from "@sousaivan/kern"
 ```
 
 Subpaths are still preferred because they communicate ownership to readers and work well with a

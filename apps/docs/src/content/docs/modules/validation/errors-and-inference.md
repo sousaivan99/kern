@@ -10,7 +10,7 @@ sidebar:
 `safeParse()` returns a discriminated union. Check `success` before accessing `data` or `issues`:
 
 ```ts
-import { array, number, object, string } from "@kern/core/validation"
+import { array, number, object, string } from "@sousaivan/kern/validation"
 
 const Users = array(object({ email: string().email(), age: number().min(18) }))
 const success = Users.safeParse([{ email: "ada@example.com", age: 36 }])
@@ -31,7 +31,7 @@ There is no `.errors` property. Failures use `.issues` consistently on safe resu
 ## Every issue field
 
 ```ts
-import type { ValueKind } from "@kern/core/validation"
+import type { ValueKind } from "@sousaivan/kern/validation"
 
 interface ValidationIssue {
   readonly path: readonly (string | number)[]
@@ -83,7 +83,7 @@ Validation aggregates all reachable issues by default. Nested arrays, objects, t
 share the same limit.
 
 ```ts
-import { array, object, string } from "@kern/core/validation"
+import { array, object, string } from "@sousaivan/kern/validation"
 
 const Users = array(object({ name: string().min(2), email: string().email() }))
 const input = [
@@ -116,7 +116,7 @@ unknown input keys follow their enumeration order.
 ## Thrown parsing with `ValidationError`
 
 ```ts
-import { object, string, ValidationError } from "@kern/core/validation"
+import { object, string, ValidationError } from "@sousaivan/kern/validation"
 
 const User = object({ email: string().email() })
 
@@ -147,7 +147,7 @@ The general schema type is `Schema<Output, Input = Output, Presence = "required"
 Most functions should use return-value inference directly:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const User = object({ name: string().trim() })
 const user = User.parse({ name: " Ada " })
@@ -162,7 +162,7 @@ console.log(greet(user))
 When a reusable named type is genuinely useful, use the inference aliases:
 
 ```ts
-import { type Infer, type InferInput, type InferOutput, object, string } from "@kern/core/validation"
+import { type Infer, type InferInput, type InferOutput, object, string } from "@sousaivan/kern/validation"
 
 const Account = object({
   name: string().trim(),
@@ -189,7 +189,7 @@ input to number output. `Infer<S>` is exactly the convenient output alias.
 Every Kern schema implements synchronous Standard Schema V1 through the `~standard` property:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const User = object({ email: string().email() })
 const standard = User["~standard"]

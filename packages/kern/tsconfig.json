@@ -3,8 +3,8 @@
   "compilerOptions": {
     "types": ["bun"],
     "paths": {
-      "@kern/core": ["./src/index.ts"],
-      "@kern/core/*": ["./src/*/index.ts"]
+      "@sousaivan/kern": ["./src/index.ts"],
+      "@sousaivan/kern/*": ["./src/*/index.ts"]
     }
   },
   "include": ["src", "tests"]

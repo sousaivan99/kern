@@ -10,7 +10,7 @@ start with [Installation](../../getting-started/installation/).
 
 ```text
 apps/docs/       Documentation site and visual/accessibility checks
-packages/kern/   Published @kern/core source, tests, and package metadata
+packages/kern/   Published @sousaivan/kern source, tests, and package metadata
 tooling/         Build, benchmark, compatibility, and repository scripts
 ```
 
@@ -26,7 +26,7 @@ bun install
 ```
 
 The install includes development-only tools such as TypeScript, Biome, Astro, and the browser used
-by compatibility/accessibility tests. None are runtime dependencies of `@kern/core`.
+by compatibility/accessibility tests. None are runtime dependencies of `@sousaivan/kern`.
 
 ## Day-to-day commands
 

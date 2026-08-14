@@ -231,7 +231,7 @@ Kern code it imports plus native platform APIs.
 
 ### ESM and import
 
-ESM is modern JavaScript's module system. `import { unique } from "@kern/core/array"` loads a named
+ESM is modern JavaScript's module system. `import { unique } from "@sousaivan/kern/array"` loads a named
 export. Kern does not support CommonJS `require()`.
 
 ### Tree-shaking
