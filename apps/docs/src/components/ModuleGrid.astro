@@ -70,6 +70,8 @@ const modules = [
     helpers: ["retry", "sleep", "debounce"],
   },
 ]
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "")
 ---
 
 <section aria-labelledby="modules-heading" class="kern-modules not-content">
@@ -79,7 +81,7 @@ const modules = [
       <h2 id="modules-heading">Public entrypoints</h2>
       <span>Import only the module required by your application.</span>
     </div>
-    <a href="/modules/">
+    <a href={`${base}/modules/`}>
       Every helper explained
       <ArrowRight aria-hidden="true" size={14} />
     </a>
@@ -87,7 +89,7 @@ const modules = [
 
   <div class="kern-module-list">
     {modules.map(({ icon: Icon, ...module }) => (
-      <a href={`/modules/${module.slug}/`}>
+      <a href={`${base}/modules/${module.slug}/`}>
         <span class="kern-module-icon"><Icon aria-hidden="true" size={17} /></span>
         <div class="kern-module-copy">
           <h3>{module.name}</h3>

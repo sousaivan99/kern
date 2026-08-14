@@ -1,6 +1,8 @@
 ---
 import { ArrowRight, Copy, Terminal } from "lucide-astro"
 import packageMetadata from "../../../../packages/kern/package.json"
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "")
 ---
 
 <section class="kern-docs-hero not-content" aria-labelledby="_top">
@@ -13,12 +15,12 @@ import packageMetadata from "../../../../packages/kern/package.json"
     </p>
 
     <nav class="kern-primary-links" aria-label="Introduction links">
-      <a class="kern-primary-link" href="/getting-started/installation/">
+      <a class="kern-primary-link" href={`${base}/getting-started/installation/`}>
         Get started
         <ArrowRight aria-hidden="true" size={15} />
       </a>
-      <a href="/reference/readme/">API reference</a>
-      <a href="/getting-started/from-zero/">Beginner guide</a>
+      <a href={`${base}/reference/readme/`}>API reference</a>
+      <a href={`${base}/getting-started/from-zero/`}>Beginner guide</a>
     </nav>
 
     <fieldset class="kern-install-command" aria-label="Install Kern with Bun">
@@ -42,7 +44,7 @@ import packageMetadata from "../../../../packages/kern/package.json"
         <span>Example</span>
         <strong id="example-title">Validate unknown input</strong>
       </div>
-      <a href="/modules/validation/">
+      <a href={`${base}/modules/validation/`}>
         Validation guide
         <ArrowRight aria-hidden="true" size={13} />
       </a>

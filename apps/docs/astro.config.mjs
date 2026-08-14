@@ -4,8 +4,11 @@ import { defineConfig } from "astro/config"
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc"
 
 const modules = ["validation", "money", "date", "number", "string", "array", "object", "async"]
+const docsBase = process.env.DOCS_BASE_PATH ?? "/"
 
 export default defineConfig({
+  site: "https://sousaivan99.github.io",
+  base: docsBase,
   integrations: [
     starlight({
       title: "Kern",

@@ -20,12 +20,60 @@ env:
   NPM_VERSION: 11.6.2
 
 jobs:
-  publish:
-    name: Publish @sousaivan/kern
+  changes:
+    name: Detect package changes
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'prod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      release_required: ${{ steps.release.outputs.required }}
+    steps:
+      - name: Check out the tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - name: Compare package inputs with the latest release
+        id: release
+        shell: bash
+        run: |
+          LAST_RELEASE_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n 1)
+          if [ -z "$LAST_RELEASE_TAG" ]; then
+            echo "required=true" >> "$GITHUB_OUTPUT"
+            echo "No stable release tag exists; package publication is required."
+            exit 0
+          fi
+
+          if git diff --quiet "$LAST_RELEASE_TAG" HEAD -- \
+            packages/kern/src \
+            packages/kern/package.json \
+            packages/kern/README.md \
+            packages/kern/CHANGELOG.md \
+            packages/kern/SEMVER.md \
+            packages/kern/SUPPORT.md \
+            packages/kern/LICENSE \
+            packages/kern/tsconfig.json \
+            packages/kern/tsconfig.build.json \
+            package.json \
+            bun.lock \
+            tsconfig.base.json \
+            tooling/package.json \
+            tooling/scripts/kern \
+            tooling/scripts/shared; then
+            echo "required=false" >> "$GITHUB_OUTPUT"
+            echo "No package-producing inputs changed since $LAST_RELEASE_TAG; skipping publication."
+          else
+            echo "required=true" >> "$GITHUB_OUTPUT"
+            echo "Package-producing inputs changed since $LAST_RELEASE_TAG; publication is required."
+          fi
+
+  publish:
+    name: Publish @sousaivan/kern
+    needs: changes
+    if: needs.changes.outputs.release_required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
