@@ -1,30 +1,59 @@
 ---
 import { ArrowRight, Copy, Terminal } from "lucide-astro"
-import packageMetadata from "../../../../packages/kern/package.json"
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "")
+const links = [
+  { href: `${base}/getting-started/installation/`, label: "Install" },
+  { href: `${base}/measurements/package-size/`, label: "Package sizes" },
+  { href: `${base}/modules/validation/#playground`, label: "Try validation" },
+  { href: `${base}/modules/`, label: "All modules" },
+] as const
+
+const examples = [
+  {
+    label: "Validation",
+    href: `${base}/modules/validation/`,
+    source: `const User = object({
+  email: string().email(),
+})`,
+  },
+  {
+    label: "Money",
+    href: `${base}/modules/money/arithmetic/`,
+    source: `allocateMoney(1000, [1, 1, 1])
+// [334, 333, 333]`,
+  },
+  {
+    label: "Async",
+    href: `${base}/modules/async/`,
+    source: `await retry(fetchData, {
+  attempts: 3,
+  signal,
+})`,
+  },
+] as const
 ---
 
-<section class="kern-docs-hero not-content" aria-labelledby="_top">
-  <div class="kern-docs-intro">
-    <p class="kern-release">@sousaivan/kern <span>v{packageMetadata.version}</span></p>
-    <h1 id="_top" data-page-title>Small TypeScript tools with clear, safe defaults.</h1>
-    <p class="kern-intro-copy">
-      Validate unknown data, calculate money exactly, handle dates and collections safely, and learn
-      every option through complete examples.
+<section class="kern-home not-content" aria-labelledby="_top">
+  <div class="kern-home-intro">
+    <h1 id="_top" data-page-title>Kern</h1>
+    <p class="kern-home-tagline">
+      Small, dependency-free TypeScript primitives for everyday application code.
     </p>
+    <p class="kern-home-modules">Validation · Money · Dates · Async · Data</p>
+    <p class="kern-support-line">Zero runtime dependencies · Tree-shakeable · Standard Schema</p>
 
-    <nav class="kern-primary-links" aria-label="Introduction links">
-      <a class="kern-primary-link" href={`${base}/getting-started/installation/`}>
-        Get started
-        <ArrowRight aria-hidden="true" size={15} />
-      </a>
-      <a href={`${base}/reference/readme/`}>API reference</a>
-      <a href={`${base}/getting-started/from-zero/`}>Beginner guide</a>
+    <nav class="kern-primary-links" aria-label="Kern documentation">
+      {links.map((link, index) => (
+        <a class:list={{ "kern-primary-link": index === 0 }} href={link.href}>
+          {link.label}
+          {index === 0 && <ArrowRight aria-hidden="true" size={15} />}
+        </a>
+      ))}
     </nav>
 
     <fieldset class="kern-install-command" aria-label="Install Kern with Bun">
-      <div class="kern-install-text">
+      <div>
         <Terminal aria-hidden="true" size={14} />
         <code>bun add @sousaivan/kern</code>
       </div>
@@ -34,32 +63,20 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "")
         <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
       </button>
     </fieldset>
-
-    <p class="kern-support-line">ESM · TypeScript 5+ · Node.js 22+ · Bun 1.3+ · modern browsers</p>
   </div>
 
-  <section class="kern-example" aria-labelledby="example-title">
-    <header>
-      <div>
-        <span>Example</span>
-        <strong id="example-title">Validate unknown input</strong>
-      </div>
-      <a href={`${base}/modules/validation/`}>
-        Validation guide
-        <ArrowRight aria-hidden="true" size={13} />
-      </a>
-    </header>
-    <pre
-    ><code><span class="line"><i>1</i><span class="kw">import</span> &#123; object, string &#125; <span class="kw">from</span></span>
-<span class="line"><i>2</i>  <span class="str">"@sousaivan/kern/validation"</span></span>
-<span class="line"><i>3</i></span>
-<span class="line"><i>4</i><span class="kw">const</span> User = <span class="fn">object</span>(&#123;</span>
-<span class="line"><i>5</i>  name: <span class="fn">string</span>().<span class="fn">trim</span>().<span class="fn">min</span>(<span class="num">2</span>),</span>
-<span class="line"><i>6</i>  email: <span class="fn">string</span>().<span class="fn">email</span>(),</span>
-<span class="line"><i>7</i>&#125;)</span>
-<span class="line"><i>8</i></span>
-<span class="line"><i>9</i><span class="kw">const</span> user = User.<span class="fn">parse</span>(input)</span>
-<span class="line"><i>10</i><span class="fn">console</span>.log(user.name)</span></code></pre>
+  <section class="kern-home-examples" aria-label="Three Kern examples">
+    {examples.map((example) => (
+      <article class="kern-home-example">
+        <header>
+          <h2>{example.label}</h2>
+          <a href={example.href} aria-label={`Read the ${example.label} guide`}>
+            Guide <ArrowRight aria-hidden="true" size={13} />
+          </a>
+        </header>
+        <pre><code>{example.source}</code></pre>
+      </article>
+    ))}
   </section>
 </section>
 
@@ -74,64 +91,62 @@ document.querySelectorAll<HTMLButtonElement>("[data-copy-install]").forEach((but
       await navigator.clipboard.writeText("bun add @sousaivan/kern")
       label.textContent = "Copied"
       status.textContent = "Installation command copied."
-      button.dataset.copied = "true"
     } catch {
       label.textContent = "Copy failed"
       status.textContent = "The installation command could not be copied."
-      button.dataset.copyFailed = "true"
     }
 
     window.setTimeout(() => {
       label.textContent = "Copy"
       status.textContent = ""
-      delete button.dataset.copied
-      delete button.dataset.copyFailed
-    }, 1600)
+    }, 1_600)
   })
 })
 </script>
 
 <style>
-.kern-docs-hero {
-  display: grid;
-  grid-template-columns: minmax(22rem, 0.82fr) minmax(34rem, 1.18fr);
-  gap: clamp(3rem, 7vw, 8rem);
-  align-items: start;
-  padding: clamp(4rem, 8vw, 7rem) 0 clamp(3.5rem, 7vw, 6rem);
+.kern-home {
+  padding: clamp(4rem, 8vw, 7.5rem) 0 clamp(3rem, 7vw, 6rem);
 }
 
-.kern-release {
-  margin: 0 0 1.35rem;
-  color: var(--kern-color-interactive);
-  font-family: var(--__sl-font-mono);
-  font-size: 0.75rem;
-  font-weight: 650;
-}
-
-.kern-release span {
-  margin-left: 0.65rem;
-  color: var(--kern-color-text-muted);
-  font-weight: 500;
+.kern-home-intro {
+  max-width: 57rem;
 }
 
 h1 {
-  max-width: 15ch;
   margin: 0;
   color: var(--kern-color-text-strong);
-  font-size: clamp(2.5rem, 4.25vw, 4rem);
-  font-weight: 680;
-  letter-spacing: -0.045em;
-  line-height: 1.04;
+  font-size: clamp(3.5rem, 8vw, 7rem);
+  font-weight: 690;
+  letter-spacing: -0.065em;
+  line-height: 0.95;
+}
+
+.kern-home-tagline {
+  max-width: 42rem;
+  margin: 1.5rem 0 0;
+  color: var(--kern-color-text-body);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.55;
   text-wrap: balance;
 }
 
-.kern-intro-copy {
-  max-width: 38rem;
-  margin: 1.35rem 0 0;
-  color: var(--kern-color-text-body);
-  font-size: clamp(1rem, 1.3vw, 1.12rem);
+.kern-home-modules,
+.kern-support-line {
+  margin: 0;
+  font-family: var(--__sl-font-mono);
+  font-size: 0.78rem;
   line-height: 1.7;
-  text-wrap: pretty;
+}
+
+.kern-home-modules {
+  margin-top: 1.45rem;
+  color: var(--kern-color-text-strong);
+}
+
+.kern-support-line {
+  margin-top: 0.3rem;
+  color: var(--kern-color-text-muted);
 }
 
 .kern-primary-links {
@@ -139,15 +154,20 @@ h1 {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem 1rem;
-  margin-top: 1.75rem;
+  margin-top: 1.65rem;
 }
 
 .kern-primary-links a {
-  min-height: 1.5rem;
   color: var(--kern-color-text-body);
   font-size: 0.875rem;
   font-weight: 620;
   text-decoration: none;
+}
+
+.kern-primary-links a:not(.kern-primary-link):hover {
+  color: var(--kern-color-text-strong);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .kern-primary-links .kern-primary-link {
@@ -161,16 +181,6 @@ h1 {
   color: var(--sl-color-black);
 }
 
-.kern-primary-links a:not(.kern-primary-link):hover {
-  color: var(--kern-color-text-strong);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.kern-primary-links .kern-primary-link:hover svg {
-  transform: translateX(2px);
-}
-
 .kern-install-command {
   display: flex;
   align-items: center;
@@ -178,14 +188,14 @@ h1 {
   max-width: 29rem;
   min-width: 0;
   min-height: 3rem;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
   border: 1px solid var(--sl-color-hairline-light);
   border-radius: 0.3rem;
   background: var(--sl-color-gray-6);
   padding: 0.32rem 0.38rem 0.32rem 0.8rem;
 }
 
-.kern-install-text {
+.kern-install-command > div {
   display: flex;
   min-width: 0;
   align-items: center;
@@ -195,7 +205,7 @@ h1 {
   font-size: 0.8125rem;
 }
 
-.kern-install-text code {
+.kern-install-command code {
   overflow: hidden;
   padding: 0;
   background: transparent;
@@ -219,141 +229,88 @@ h1 {
   cursor: pointer;
 }
 
-.kern-install-command button:hover,
-.kern-install-command button[data-copied],
-.kern-install-command button[data-copy-failed] {
+.kern-install-command button:hover {
   color: var(--kern-color-text-strong);
 }
 
-.kern-support-line {
-  margin: 0.8rem 0 0;
-  color: var(--kern-color-text-muted);
-  font-family: var(--__sl-font-mono);
-  font-size: 0.75rem;
-  line-height: 1.6;
+.kern-home-examples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: clamp(3.5rem, 7vw, 6rem);
 }
 
-.kern-example {
-  overflow: hidden;
+.kern-home-example {
+  min-width: 0;
   border: 1px solid var(--sl-color-hairline-light);
   background: var(--sl-color-bg);
 }
 
-.kern-example header {
+.kern-home-example header {
   display: flex;
-  min-height: 3.4rem;
+  min-height: 3rem;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   border-bottom: 1px solid var(--sl-color-hairline);
   background: var(--sl-color-gray-6);
-  padding: 0.65rem 1rem;
+  padding: 0.65rem 0.85rem;
 }
 
-.kern-example header > div {
-  display: flex;
-  align-items: baseline;
-  gap: 0.7rem;
-}
-
-.kern-example header span {
-  color: var(--kern-color-text-elevated);
-  font-family: var(--__sl-font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-}
-
-.kern-example header strong {
+.kern-home-example h2 {
+  margin: 0;
   color: var(--kern-color-text-strong);
-  font-size: 0.8125rem;
-  font-weight: 620;
+  font-size: 0.82rem;
+  font-weight: 650;
 }
 
-.kern-example header a {
+.kern-home-example a {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   color: var(--kern-color-interactive);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 620;
   text-decoration: none;
 }
 
-.kern-example pre {
-  overflow-x: auto;
+.kern-home-example pre {
+  overflow: auto;
+  min-height: 9.5rem;
   margin: 0;
-  padding: 1.35rem 0 1.5rem;
+  border: 0;
+  border-radius: 0;
   background: transparent;
+  padding: 1.15rem;
   color: var(--kern-color-text-strong);
-  font-family: var(--__sl-font-mono);
-  font-size: clamp(0.8125rem, 0.9vw, 0.875rem);
-  line-height: 1.85;
+  font-size: clamp(0.75rem, 0.9vw, 0.84rem);
+  line-height: 1.7;
 }
 
-.kern-example code,
-.kern-example .line {
-  display: block;
-}
-
-.kern-example .line {
-  min-width: max-content;
-  padding-right: 1.5rem;
-}
-
-.kern-example .line i {
-  display: inline-block;
-  width: 3rem;
-  margin-right: 1rem;
-  border-right: 1px solid var(--sl-color-hairline);
-  color: var(--kern-color-text-muted);
-  font-style: normal;
-  text-align: right;
-  padding-right: 0.8rem;
-  user-select: none;
-}
-
-.kw {
-  color: var(--kern-color-syntax-keyword);
-}
-.str {
-  color: var(--kern-color-syntax-string);
-}
-.fn {
-  color: var(--kern-color-syntax-function);
-}
-.num {
-  color: var(--kern-color-syntax-number);
+.kern-home-example code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
 }
 
 @media (max-width: 62rem) {
-  .kern-docs-hero {
+  .kern-home-examples {
     grid-template-columns: 1fr;
-    gap: 3rem;
   }
 
-  .kern-example {
-    max-width: 48rem;
+  .kern-home-example pre {
+    min-height: 0;
   }
 }
 
 @media (max-width: 32rem) {
-  .kern-docs-hero {
+  .kern-home {
     padding-top: 3rem;
   }
 
   .kern-primary-links {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .kern-example header > div {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  .kern-support-line {
-    max-width: 27rem;
   }
 }
 </style>

@@ -41,6 +41,7 @@ by compatibility/accessibility tests. None are runtime dependencies of `@sousaiv
 | `bun run format` | Format supported files. |
 | `bun run build` | Build ESM bundles, source maps, and declarations. |
 | `bun run size` | Bundle/minify/gzip every entrypoint and enforce budgets. |
+| `bun run size:report` | Regenerate the versioned package-size report used by the docs. |
 | `bun run benchmark:quick` | Verify benchmark fixtures and smoke the harness. |
 | `bun run benchmark` | Run the complete benchmark suite. |
 

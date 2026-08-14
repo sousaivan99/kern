@@ -52,6 +52,9 @@ Kern's build checks bundle, minify, gzip, and measure every public entrypoint.
 These budgets prevent accidental growth; they do not override correctness. A size increase is
 investigated and justified rather than “fixed” by removing validation or safety behavior.
 
+See [Package size](../../measurements/package-size/) for current byte counts, realistic validation
+fixtures, exact package versions, and reproduction commands.
+
 ## Practical guidance
 
 1. Import from the narrow module.

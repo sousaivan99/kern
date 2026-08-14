@@ -6,6 +6,8 @@ sidebar:
   label: Validation overview
 ---
 
+import ValidationPlayground from "../../../../components/ValidationPlayground.astro";
+
 TypeScript checks code while you develop, but its types disappear at runtime. Data from HTTP,
 forms, JSON, storage, and environment variables can still have the wrong shape. A Kern schema checks
 that data at runtime and tells TypeScript the output type after success.
@@ -44,6 +46,8 @@ Read the schema from the outside inward:
 
 The schema is built once and can validate many inputs. Building it does not validate anything by
 itself.
+
+<ValidationPlayground />
 
 ## Your first schema
 

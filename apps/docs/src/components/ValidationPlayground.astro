@@ -1,0 +1,274 @@
+---
+const initialSource = `import { object, string } from "@sousaivan/kern/validation"
+
+const User = object({
+  name: string().min(2),
+  email: string().email(),
+})
+
+console.log(User.safeParse({
+  name: "Ada",
+  email: "ada@example.com",
+}))`
+---
+
+<section class="kern-playground not-content" data-validation-playground data-state="idle">
+  <header>
+    <div>
+      <h2 id="playground">Try it</h2>
+      <p>Edit the schema or input. It runs locally in your browser.</p>
+    </div>
+    <button type="button" data-playground-reset>Reset</button>
+  </header>
+  <div class="kern-playground-grid">
+    <div class="kern-playground-editor">
+      <label for="validation-playground-source">TypeScript</label>
+      <textarea
+        id="validation-playground-source"
+        aria-describedby="validation-playground-help"
+        data-playground-source
+        spellcheck="false"
+      >{initialSource}</textarea>
+      <p id="validation-playground-help">
+        Runs after you stop typing. Press Control or Command + Enter to run immediately.
+      </p>
+    </div>
+    <div class="kern-playground-result">
+      <div>
+        <span>Output</span>
+        <span data-playground-status role="status" aria-live="polite">Waiting</span>
+      </div>
+      <output data-playground-output aria-live="polite" aria-atomic="true"
+        >Preparing the playground…</output
+      >
+    </div>
+  </div>
+</section>
+
+<script>
+import ValidationPlaygroundWorker from "../workers/validation-playground?worker"
+
+interface RunResponse {
+  readonly id: number
+  readonly output: string
+  readonly state: "error" | "success"
+}
+
+for (const playground of document.querySelectorAll<HTMLElement>("[data-validation-playground]")) {
+  const source = playground.querySelector<HTMLTextAreaElement>("[data-playground-source]")
+  const output = playground.querySelector<HTMLOutputElement>("[data-playground-output]")
+  const status = playground.querySelector<HTMLElement>("[data-playground-status]")
+  const reset = playground.querySelector<HTMLButtonElement>("[data-playground-reset]")
+  if (!source || !output || !status || !reset) continue
+
+  const initialSource = source.value
+  let worker = new ValidationPlaygroundWorker()
+  let debounce: number | undefined
+  let timeout: number | undefined
+  let runId = 0
+
+  const replaceWorker = () => {
+    worker.terminate()
+    worker = new ValidationPlaygroundWorker()
+    worker.addEventListener("message", receive)
+  }
+
+  const receive = (event: MessageEvent<RunResponse>) => {
+    if (event.data.id !== runId) return
+    if (timeout !== undefined) window.clearTimeout(timeout)
+    playground.dataset.state = event.data.state
+    status.textContent = event.data.state === "success" ? "Ready" : "Error"
+    output.textContent = event.data.output
+  }
+
+  const run = () => {
+    if (debounce !== undefined) window.clearTimeout(debounce)
+    if (timeout !== undefined) window.clearTimeout(timeout)
+    runId += 1
+    playground.dataset.state = "running"
+    status.textContent = "Running"
+    output.textContent = "Running…"
+    worker.postMessage({ id: runId, source: source.value, type: "run" })
+    timeout = window.setTimeout(() => {
+      playground.dataset.state = "error"
+      status.textContent = "Stopped"
+      output.textContent = "Execution stopped after 1 second."
+      replaceWorker()
+    }, 1_000)
+  }
+
+  worker.addEventListener("message", receive)
+  source.addEventListener("input", () => {
+    if (debounce !== undefined) window.clearTimeout(debounce)
+    debounce = window.setTimeout(run, 250)
+  })
+  source.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || (!event.ctrlKey && !event.metaKey)) return
+    event.preventDefault()
+    run()
+  })
+  reset.addEventListener("click", () => {
+    source.value = initialSource
+    run()
+    source.focus()
+  })
+  run()
+}
+</script>
+
+<style>
+.kern-playground {
+  margin: 2rem 0 3rem;
+  border: 1px solid var(--sl-color-hairline-light);
+  border-radius: 0.35rem;
+  background: var(--sl-color-bg);
+}
+
+.kern-playground > header,
+.kern-playground-result > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--sl-color-hairline);
+  background: var(--sl-color-gray-6);
+}
+
+.kern-playground > header {
+  padding: 0.8rem 1rem;
+}
+
+.kern-playground h2,
+.kern-playground p {
+  margin: 0;
+}
+
+.kern-playground h2 {
+  color: var(--kern-color-text-strong);
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.kern-playground header p,
+.kern-playground-editor p {
+  color: var(--kern-color-text-muted);
+  font-size: 0.75rem;
+}
+
+.kern-playground header p {
+  margin-top: 0.2rem;
+}
+
+.kern-playground button {
+  min-height: 2.15rem;
+  border: 1px solid var(--kern-color-functional-border);
+  border-radius: 0.3rem;
+  background: transparent;
+  padding: 0.35rem 0.7rem;
+  color: var(--kern-color-text-strong);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.kern-playground button:hover {
+  border-color: var(--kern-color-interactive);
+  color: var(--kern-color-interactive);
+}
+
+.kern-playground-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  min-height: 24rem;
+}
+
+.kern-playground-editor,
+.kern-playground-result {
+  display: grid;
+  min-width: 0;
+}
+
+.kern-playground-editor {
+  grid-template-rows: auto minmax(20rem, 1fr) auto;
+  border-right: 1px solid var(--sl-color-hairline);
+}
+
+.kern-playground-editor label,
+.kern-playground-result > div {
+  color: var(--kern-color-text-muted);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kern-playground-editor label,
+.kern-playground-editor p,
+.kern-playground-result > div {
+  padding: 0.65rem 0.8rem;
+}
+
+.kern-playground-editor label {
+  border-bottom: 1px solid var(--sl-color-hairline);
+  background: var(--sl-color-gray-6);
+}
+
+.kern-playground textarea,
+.kern-playground output {
+  overflow: auto;
+  min-width: 0;
+  border: 0;
+  background: var(--sl-color-bg);
+  color: var(--kern-color-text-strong);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  tab-size: 2;
+  white-space: pre-wrap;
+}
+
+.kern-playground textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 1rem;
+}
+
+.kern-playground output {
+  padding: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.kern-playground-editor p {
+  border-top: 1px solid var(--sl-color-hairline);
+}
+
+.kern-playground-result {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.kern-playground-result [data-playground-status] {
+  color: var(--kern-color-text-body);
+  text-transform: none;
+}
+
+.kern-playground[data-state="error"] [data-playground-status] {
+  color: #dc6b6b;
+}
+
+@media (max-width: 44rem) {
+  .kern-playground-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kern-playground-editor {
+    border-right: 0;
+    border-bottom: 1px solid var(--sl-color-hairline);
+  }
+
+  .kern-playground-result {
+    min-height: 14rem;
+  }
+}
+</style>

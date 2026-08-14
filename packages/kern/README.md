@@ -290,15 +290,17 @@ prints the original captured command output. Use `bun test` directly when debugg
 per-test reporter; `bun run test:watch` remains fully interactive. The progress UI comes from the
 development-only `@clack/prompts` package and is not included in Kern's published runtime package.
 
-The package is ESM-only. Tests use `bun:test`, compile-time assertions live under `tests/types`, and
-the benchmark suite is deliberately dependency-free. It covers scalable array, object, string, and
-money primitives at 1K, 10K, and 100K items along with validation success, failure, wide-input,
-wide-schema, record, and error-aggregation paths. Reports include median and p95 latency,
-throughput, normalized time per processed item, runtime and CPU metadata, and optional JSON output.
+The package is ESM-only. Tests use `bun:test`, and compile-time assertions live under `tests/types`.
+The benchmark tooling uses pinned development-only Zod and Valibot packages for an equivalent
+validation comparison; they are not dependencies of the published package. Kern-specific cases
+cover scalable array, object, string, money, wide-input, wide-schema, record, and error-aggregation
+paths. Reports include library versions, median and p95 latency, throughput, normalized time per
+processed item, runtime and CPU metadata, and optional JSON output.
 
 ```bash
 bun run benchmark:primitives
 bun run benchmark:validation
+bun run benchmark:validation:kern
 bun run benchmark:quick
 bun run benchmark -- --json > benchmark-results.json
 ```
