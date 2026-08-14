@@ -628,11 +628,15 @@ try {
   }
 
   await page.emulateMedia({ contrast: "no-preference", reducedMotion: "reduce" })
-  const reducedMotion = await page.evaluate(() => ({
-    scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
-    transitionDuration: getComputedStyle(document.querySelector(".kern-primary-links a")!)
-      .transitionDuration,
-  }))
+  const reducedMotion = await page.evaluate(() => {
+    const primaryLink = document.querySelector(".kern-primary-links a")
+    if (!primaryLink) throw new Error("Primary documentation link is missing")
+
+    return {
+      scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
+      transitionDuration: getComputedStyle(primaryLink).transitionDuration,
+    }
+  })
   if (reducedMotion.scrollBehavior !== "auto" || reducedMotion.transitionDuration !== "0s") {
     throw new Error("Reduced-motion preference does not disable decorative motion")
   }

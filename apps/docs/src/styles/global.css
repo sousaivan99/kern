@@ -452,15 +452,20 @@ starlight-toc a[aria-current="true"] {
     scroll-behavior: auto;
   }
 
+  /* biome-ignore lint/style/noDescendingSpecificity: The reduced-motion reset must follow every motion declaration it overrides. */
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override framework and component animations. */
     animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override framework and component animations. */
     animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override framework and component transitions. */
     transition: none !important;
   }
 
   :is(a, button):hover svg {
+    /* biome-ignore lint/complexity/noImportantStyles: Reduced-motion preferences must override scoped component transforms. */
     transform: none !important;
   }
 }
