@@ -24,6 +24,123 @@ import {
 } from "../src/date/index.js"
 
 describe("date", () => {
+  test("uses a complete global Temporal implementation and falls back from hostile globals", () => {
+    interface Duration {
+      readonly days?: number
+      readonly milliseconds?: number
+      readonly months?: number
+      readonly years?: number
+    }
+
+    const addMonthsReference = (date: Date, amount: number): Date => {
+      const output = new Date(date.getTime())
+      const day = output.getDate()
+      output.setDate(1)
+      output.setMonth(output.getMonth() + amount)
+      const monthEnd = new Date(output.getTime())
+      monthEnd.setMonth(monthEnd.getMonth() + 1, 0)
+      output.setDate(Math.min(day, monthEnd.getDate()))
+      return output
+    }
+
+    class TestZonedDateTime {
+      readonly #date: Date
+
+      constructor(epochMilliseconds: number) {
+        this.#date = new Date(epochMilliseconds)
+      }
+
+      get epochMilliseconds(): number {
+        return this.#date.getTime()
+      }
+
+      add(duration: Duration): TestZonedDateTime {
+        let output = new Date(this.#date.getTime())
+        if (duration.years) output = addMonthsReference(output, duration.years * 12)
+        if (duration.months) output = addMonthsReference(output, duration.months)
+        if (duration.days) output.setDate(output.getDate() + duration.days)
+        if (duration.milliseconds) {
+          output.setTime(output.getTime() + duration.milliseconds)
+        }
+        return new TestZonedDateTime(output.getTime())
+      }
+
+      subtract(duration: Duration): TestZonedDateTime {
+        return this.add({
+          ...(duration.days === undefined ? {} : { days: -duration.days }),
+          ...(duration.milliseconds === undefined ? {} : { milliseconds: -duration.milliseconds }),
+          ...(duration.months === undefined ? {} : { months: -duration.months }),
+          ...(duration.years === undefined ? {} : { years: -duration.years }),
+        })
+      }
+
+      startOfDay(): TestZonedDateTime {
+        const output = new Date(this.#date.getTime())
+        output.setHours(0, 0, 0, 0)
+        return new TestZonedDateTime(output.getTime())
+      }
+    }
+
+    const temporalGlobal = globalThis as { Temporal?: unknown }
+    const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Temporal")
+    let calls = 0
+    Object.defineProperty(temporalGlobal, "Temporal", {
+      configurable: true,
+      value: {
+        Instant: {
+          fromEpochMilliseconds(epochMilliseconds: number) {
+            calls += 1
+            return {
+              toZonedDateTimeISO() {
+                return new TestZonedDateTime(epochMilliseconds)
+              },
+            }
+          },
+        },
+        Now: {
+          timeZoneId() {
+            calls += 1
+            return "Test/Local"
+          },
+        },
+      },
+      writable: true,
+    })
+
+    const input = new Date(2024, 0, 31, 12, 30)
+    try {
+      expect(addDays(input, 1).getTime()).toBe(new Date(2024, 1, 1, 12, 30).getTime())
+      expect(addMonths(input, 1).getTime()).toBe(new Date(2024, 1, 29, 12, 30).getTime())
+      expect(addYears(input, 1).getTime()).toBe(new Date(2025, 0, 31, 12, 30).getTime())
+      expect(startOfDay(input).getHours()).toBe(0)
+      expect(endOfDay(input).getTime() - startOfDay(input).getTime()).toBe(86_399_999)
+      expect(calls).toBeGreaterThan(0)
+    } finally {
+      if (originalDescriptor) Object.defineProperty(globalThis, "Temporal", originalDescriptor)
+      else Reflect.deleteProperty(globalThis, "Temporal")
+    }
+
+    const hostile = new Proxy(
+      {},
+      {
+        get() {
+          throw new Error("hostile Temporal global")
+        },
+      },
+    )
+    Object.defineProperty(temporalGlobal, "Temporal", {
+      configurable: true,
+      value: hostile,
+      writable: true,
+    })
+    try {
+      expect(addDays(input, 1).getTime()).toBe(new Date(2024, 1, 1, 12, 30).getTime())
+    } finally {
+      if (originalDescriptor) Object.defineProperty(globalThis, "Temporal", originalDescriptor)
+      else Reflect.deleteProperty(globalThis, "Temporal")
+    }
+  })
+
   test("performs non-mutating local calendar arithmetic", () => {
     const original = new Date(2024, 0, 31, 12, 30)
     expect(addDays(original, 1).getDate()).toBe(1)

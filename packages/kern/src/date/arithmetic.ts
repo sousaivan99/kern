@@ -1,4 +1,5 @@
-import { copyDate } from "./shared.js"
+import { assertValidDate, copyDate } from "./shared.js"
+import { addWithTemporal } from "./temporal.js"
 
 const assertInteger = (amount: number): void => {
   if (!Number.isSafeInteger(amount)) throw new RangeError("Date amounts must be safe integers")
@@ -7,6 +8,9 @@ const assertInteger = (amount: number): void => {
 /** Adds local-calendar days without mutating the supplied date. */
 export const addDays = (date: Date, amount: number): Date => {
   assertInteger(amount)
+  assertValidDate(date)
+  const temporal = addWithTemporal(date, { days: amount })
+  if (temporal) return temporal
   const output = copyDate(date)
   output.setDate(output.getDate() + amount)
   return output
@@ -18,6 +22,9 @@ export const subtractDays = (date: Date, amount: number): Date => addDays(date, 
 /** Adds local-calendar months and clamps the day at the destination month end. */
 export const addMonths = (date: Date, amount: number): Date => {
   assertInteger(amount)
+  assertValidDate(date)
+  const temporal = addWithTemporal(date, { months: amount })
+  if (temporal) return temporal
   const output = copyDate(date)
   const day = output.getDate()
   output.setDate(1)
@@ -35,6 +42,10 @@ export const subtractMonths = (date: Date, amount: number): Date => addMonths(da
 /** Adds local-calendar years and clamps leap-day inputs when necessary. */
 export const addYears = (date: Date, amount: number): Date => {
   assertInteger(amount)
+  assertInteger(amount * 12)
+  assertValidDate(date)
+  const temporal = addWithTemporal(date, { years: amount })
+  if (temporal) return temporal
   return addMonths(date, amount * 12)
 }
 

@@ -6,8 +6,8 @@ Kern is a zero-runtime-dependency, TypeScript-first, framework-agnostic, ESM-fir
 
 > Bundle size is a feature of this project, not an afterthought.
 
-The temporary npm package name is `@kern/core`; the repository name is `kern`.
-Kern is in unreleased MVP development. The completed MVP is the first 1.0 release.
+The permanent npm package name is `@kern/core`; the repository name is `kern`.
+Kern 1.x is the stable public API line and follows `packages/kern/SEMVER.md`.
 
 ## Core principles
 
@@ -263,8 +263,8 @@ If not, do not add it.
 
 Once released, do not break an API casually. Before changing public behavior, inspect tests, README examples, and package exports, and consider semver impact. Do not rename or remove public APIs as incidental cleanup.
 
-Before the first 1.0 release, MVP APIs may be replaced directly. Do not add compatibility aliases,
-deprecation periods, or migration documents for unreleased APIs unless explicitly requested.
+Kern 1.x APIs are stable. Follow `packages/kern/SEMVER.md` for every public runtime or type change,
+and document consumer-visible changes in `packages/kern/CHANGELOG.md`.
 
 ## Documentation
 
@@ -309,9 +309,9 @@ bun run benchmark:quick
 ```
 
 Compatibility claims target TypeScript 5+, Node.js 22+, Bun 1.3+, current Deno, and modern
-evergreen browsers. CI owns the complete Node 22/24 and Deno matrix; local `bun run check` owns the
-minimum/current TypeScript, current Node, Bun, browser, audit, package, example, coverage, lint,
-build, and size gates.
+evergreen browsers. CI owns the Node 22/24/26, minimum Bun 1.3/latest stable Bun, and current Deno
+matrix; local `bun run check` owns the minimum/current TypeScript, current Node, Bun, browser, audit,
+package, example, coverage, lint, build, and size gates.
 
 For substantial repository-wide changes run `bun run check`. For any performance-sensitive or
 input-scaling runtime change, run the relevant full benchmark suite before and after the change.

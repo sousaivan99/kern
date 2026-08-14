@@ -10,75 +10,171 @@ sidebar:
 ```ts
 import { isValidDate } from "@kern/core/date"
 
-isValidDate(new Date()) // true
-isValidDate(new Date(Number.NaN)) // false
-isValidDate("2026-08-13") // false
+console.log("Valid date:", isValidDate(new Date())) // true
+console.log("Invalid date:", isValidDate(new Date(Number.NaN))) // false
+console.log("String is not a Date:", isValidDate("2026-08-13")) // false
 ```
 
 `isValidDate(value)` accepts `unknown` and narrows successful values to `Date`. It requires a native
 `Date` instance with a valid timestamp; it does not parse strings.
 
-## Compare exact instants
+## `isBefore(left, right)`
 
 ```ts
-import { isAfter, isBefore, isSameInstant } from "@kern/core/date"
+import { isBefore } from "@kern/core/date"
 
 const left = new Date("2026-08-13T14:30:00Z")
 const right = new Date("2026-08-13T15:30:00Z")
 
-isBefore(left, right) // true
-isAfter(right, left) // true
-isSameInstant(left, new Date(left.getTime())) // true
+console.log("Success:", isBefore(left, right)) // true
+
+isBefore(new Date(Number.NaN), right)
+// RangeError: Expected a valid Date
 ```
 
-These helpers compare epoch milliseconds. Different displayed timezones do not change an instant.
-They validate both dates and throw `RangeError` for an invalid one.
+`isBefore()` returns `true` only when `left` is an earlier instant than `right`. Equal instants
+return `false`.
 
-## Compare local calendar days
+## `isAfter(left, right)`
 
 ```ts
-import {
-  differenceInCalendarDays,
-  isSameDay,
-  isToday,
-  isTomorrow,
-  isYesterday,
-} from "@kern/core/date"
+import { isAfter } from "@kern/core/date"
+
+const release = new Date("2026-08-13T14:30:00Z")
+const deployment = new Date("2026-08-13T15:30:00Z")
+
+console.log("Later:", isAfter(deployment, release)) // true
+console.log("Equal:", isAfter(release, release)) // false
+
+isAfter(new Date(Number.NaN), release)
+// RangeError: Expected a valid Date
+```
+
+`isAfter()` returns `true` only when `left` is a later instant than `right`.
+
+## `isSameInstant(left, right)`
+
+```ts
+import { isSameInstant } from "@kern/core/date"
+
+const left = new Date("2026-08-13T14:30:00Z")
+const right = new Date(left.getTime())
+
+console.log("Success:", isSameInstant(left, right)) // true
+
+isSameInstant(left, new Date(Number.NaN))
+// RangeError: Expected a valid Date
+```
+
+These three instant helpers compare epoch milliseconds. Different displayed timezones do not
+change an instant. They validate both dates and throw `RangeError` for an invalid one.
+
+## `differenceInCalendarDays(left, right)`
+
+```ts
+import { differenceInCalendarDays } from "@kern/core/date"
 
 const now = new Date(2026, 7, 13, 23, 30)
 const next = new Date(2026, 7, 14, 0, 15)
 
-differenceInCalendarDays(next, now) // 1
-isSameDay(next, now) // false
-isTomorrow(next, now) // true
-isYesterday(now, next) // true
-isToday(now, now) // true
+console.log("Success:", differenceInCalendarDays(next, now)) // 1
+
+differenceInCalendarDays(new Date(Number.NaN), now)
+// RangeError: Expected a valid Date
 ```
 
 `differenceInCalendarDays(left, right)` returns `left - right` in host-local calendar days and
-ignores time-of-day and daylight-saving duration. The other helpers build on that behavior.
+ignores time-of-day and daylight-saving duration. Swapping the arguments changes the sign.
+
+## `isSameDay(left, right)`
+
+```ts
+import { isSameDay } from "@kern/core/date"
+
+const morning = new Date(2026, 7, 13, 9)
+const evening = new Date(2026, 7, 13, 21)
+
+console.log("Success:", isSameDay(morning, evening)) // true in the host timezone
+
+isSameDay(morning, new Date(Number.NaN))
+// RangeError: Expected a valid Date
+```
+
+`isSameDay()` compares the host-local year, month, and date. It ignores the time of day.
+
+## `isToday(date, now?)`
+
+```ts
+import { isToday } from "@kern/core/date"
+
+const now = new Date(2026, 7, 13, 12)
+console.log("Success:", isToday(new Date(2026, 7, 13, 8), now)) // true
+
+isToday(new Date(Number.NaN), now)
+// RangeError: Expected a valid Date
+```
+
+## `isTomorrow(date, now?)`
+
+```ts
+import { isTomorrow } from "@kern/core/date"
+
+const now = new Date(2026, 7, 13, 12)
+console.log("Success:", isTomorrow(new Date(2026, 7, 14, 8), now)) // true
+
+isTomorrow(new Date(Number.NaN), now)
+// RangeError: Expected a valid Date
+```
+
+## `isYesterday(date, now?)`
+
+```ts
+import { isYesterday } from "@kern/core/date"
+
+const now = new Date(2026, 7, 13, 12)
+console.log("Success:", isYesterday(new Date(2026, 7, 12, 20), now)) // true
+
+isYesterday(new Date(Number.NaN), now)
+// RangeError: Expected a valid Date
+```
 
 `isToday`, `isTomorrow`, and `isYesterday` default their second `now` argument to `new Date()`.
 Pass it explicitly in tests, server requests, and batch jobs to keep all comparisons anchored to
 the same instant.
 
-## Format a date or date-time
+## `formatDate(date, options?)`
 
 ```ts
-import { formatDate, formatDateTime } from "@kern/core/date"
+import { formatDate } from "@kern/core/date"
 
 const release = new Date("2026-08-13T14:30:00Z")
 
-formatDate(release, { locale: "en-GB", timeZone: "UTC" })
-formatDateTime(release, {
+console.log("Success:", formatDate(release, { locale: "en-GB", timeZone: "UTC" }))
+
+formatDate(new Date(Number.NaN), { locale: "en-GB", timeZone: "UTC" })
+// RangeError: Expected a valid Date
+```
+
+With no formatting fields, `formatDate()` defaults to numeric day, short month, and numeric year.
+
+## `formatDateTime(date, options?)`
+
+```ts
+import { formatDateTime } from "@kern/core/date"
+
+const release = new Date("2026-08-13T14:30:00Z")
+
+console.log("Success:", formatDateTime(release, {
   locale: "de-DE",
   dateStyle: "long",
   timeStyle: "short",
   timeZone: "Europe/Luxembourg",
-})
+}))
+
+formatDateTime(new Date(Number.NaN), { locale: "de-DE" })
+// RangeError: Expected a valid Date
 ```
 
-With no formatting fields, `formatDate` defaults to numeric day, short month, and numeric year.
 `formatDateTime` defaults to `dateStyle: "medium"` and `timeStyle: "short"`. Supplying any native
 formatting field replaces that complete default set.
 
@@ -107,8 +203,11 @@ import { formatRelativeTime } from "@kern/core/date"
 const base = new Date("2026-08-13T12:00:00Z")
 const later = new Date("2026-08-15T12:00:00Z")
 
-formatRelativeTime(later, base, { locale: "en", numeric: "always" }) // "in 2 days"
-formatRelativeTime(base, later, { locale: "en", numeric: "auto" }) // "2 days ago"
+console.log(formatRelativeTime(later, base, { locale: "en", numeric: "always" })) // "in 2 days"
+console.log(formatRelativeTime(base, later, { locale: "en", numeric: "auto" })) // "2 days ago"
+
+formatRelativeTime(new Date(Number.NaN), base, { locale: "en" })
+// RangeError: Expected a valid Date
 ```
 
 The signature is `formatRelativeTime(date, baseDate = new Date(), options = {})`. Kern chooses the
@@ -133,8 +232,15 @@ Gregorian durations and is approximate; do not use the result for billing or exa
 ```ts
 import { toUTCISODate } from "@kern/core/date"
 
-toUTCISODate(new Date("2026-08-13T23:30:00-05:00")) // "2026-08-14"
+console.log(toUTCISODate(new Date("2026-08-13T23:30:00-05:00"))) // "2026-08-14"
+
+toUTCISODate(new Date(Number.NaN))
+// RangeError: Expected a valid Date
 ```
 
 `toUTCISODate(date)` returns the instant's UTC calendar date as `YYYY-MM-DD`. It may differ from the
 date shown in the user's local timezone. Invalid dates throw `RangeError`.
+
+The runnable snippets print a normal result before the invalid-date call. The console then shows
+the exact exception, without removing the successful line, so a beginner can see both paths in one
+place.

@@ -7,10 +7,13 @@ const outputRoot = join(repositoryRoot, "apps", "docs", "dist")
 const routes = [
   "/",
   "/getting-started/installation/",
+  "/getting-started/from-zero/",
   "/frameworks/javascript-typescript/",
   "/frameworks/vue/",
   "/frameworks/nuxt/",
   "/frameworks/react/",
+  "/concepts/glossary/",
+  "/modules/",
   "/modules/validation/",
   "/modules/money/",
   "/modules/date/",
@@ -27,6 +30,94 @@ const representativeRoutes = [
   "/modules/validation/",
   "/modules/array/",
   "/reference/validation/functions/object/",
+] as const
+const runnableExamples = [
+  {
+    route: "/getting-started/from-zero/",
+    marker: "const distinctNames = unique(names)",
+    output: '["Ada", "Grace"]\n["Ada", "Grace", "Ada"]',
+  },
+  {
+    route: "/modules/array/",
+    marker: "console.log(first(names))",
+    output: 'Ada\n["Ada", "Grace"]\n["Ada", "Grace", "Ada"]',
+  },
+  {
+    route: "/modules/async/",
+    marker: "async function greetLater",
+    output:
+      "Waiting\nHello\n\nThrown error:\nRangeError: Delay must be a non-negative finite number",
+    state: "error",
+  },
+  {
+    route: "/modules/date/",
+    marker: "const followUp = addDays(release, 7)",
+    output: "13/08/2026\ntrue\n2026-08-13\n\nThrown error:\nRangeError: Expected a valid Date",
+    state: "error",
+  },
+  {
+    route: "/modules/money/",
+    marker: "const total = addMoney(coffee, cake)",
+    output:
+      "849\n€8.49\n\nThrown error:\nRangeError: Money values must be safe integers in minor units",
+    state: "error",
+  },
+  {
+    route: "/modules/number/",
+    marker: "const safeVolume = clamp(requestedVolume, 0, 100)",
+    output: "100\n100\n\nThrown error:\nRangeError: Minimum cannot be greater than maximum",
+    state: "error",
+  },
+  {
+    route: "/modules/object/",
+    marker: 'passwordHash: "secret"',
+    output: 'true\n{ "id": 1, "name": "Ada" }\n\nThrown error:\nTypeError: Expected a plain object',
+    state: "error",
+  },
+  {
+    route: "/modules/string/",
+    marker: "const slug = slugify(title)",
+    output:
+      "Crème brûlée\ncreme-brulee\ncrème brûlée\n\nThrown error:\nRangeError: Invalid language tag: not_a_locale",
+    state: "error",
+  },
+  {
+    route: "/modules/validation/",
+    marker: "const goodInput: unknown",
+    output:
+      'Success: { "success": true, "data": { "name": "Ada" } }\nFailure: { "success": false, "issues": [{ "path": ["name"], "code": "too_small", "message": "Expected at least 1 characters", "received": "string", "details": { "minimum": 1 } }] }',
+  },
+] as const
+
+const exampleControlRoutes = [
+  "/concepts/native-first/",
+  "/concepts/tree-shaking/",
+  "/contributing/development/",
+  "/frameworks/javascript-typescript/",
+  "/frameworks/nuxt/",
+  "/frameworks/react/",
+  "/frameworks/vue/",
+  "/getting-started/from-zero/",
+  "/getting-started/installation/",
+  "/getting-started/quick-start/",
+  "/getting-started/core-ideas/",
+  "/modules/",
+  "/modules/validation/",
+  "/modules/validation/primitives/",
+  "/modules/validation/collections/",
+  "/modules/validation/modifiers-and-transforms/",
+  "/modules/validation/errors-and-inference/",
+  "/modules/money/",
+  "/modules/money/arithmetic/",
+  "/modules/money/formatting-and-parsing/",
+  "/modules/date/",
+  "/modules/date/arithmetic-and-boundaries/",
+  "/modules/date/formatting-and-comparison/",
+  "/modules/number/",
+  "/modules/string/",
+  "/modules/array/",
+  "/modules/object/",
+  "/modules/async/",
 ] as const
 
 const contentTypes: Readonly<Record<string, string>> = {
@@ -87,6 +178,212 @@ try {
     if (browserErrors.length > 0) {
       throw new Error(`${route} reported browser errors:\n${browserErrors.join("\n")}`)
     }
+  }
+
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto(new URL("/", server.url).href)
+  const heroLinkCenters = await page.evaluate(() =>
+    Array.from(document.querySelectorAll(".kern-primary-links a"), (link) => {
+      const rectangle = link.getBoundingClientRect()
+      return Math.round(rectangle.top + rectangle.height / 2)
+    }),
+  )
+  if (
+    heroLinkCenters.length === 0 ||
+    Math.max(...heroLinkCenters) - Math.min(...heroLinkCenters) > 2
+  ) {
+    throw new Error(
+      `Homepage hero links wrap onto mismatched rows at desktop width: ${JSON.stringify(heroLinkCenters)}`,
+    )
+  }
+
+  for (const example of runnableExamples) {
+    await page.goto(new URL(example.route, server.url).href)
+    const exampleBlock = page.locator(".expressive-code").filter({ hasText: example.marker })
+    if ((await exampleBlock.count()) !== 1) {
+      throw new Error(`${example.route} must have one example containing ${example.marker}`)
+    }
+
+    const consolePanel = exampleBlock.locator(":scope > .kern-example-console")
+    if ((await consolePanel.count()) !== 1) {
+      throw new Error(`${example.route} example must have exactly one inline console`)
+    }
+
+    const runButton = consolePanel.getByRole("button", { name: /^Run example:/ })
+    if ((await runButton.count()) !== 1) {
+      throw new Error(`${example.route} runnable example must have one Run example button`)
+    }
+
+    const layoutBeforeRun = {
+      documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
+      panelHeight: await consolePanel.evaluate((panel) => panel.getBoundingClientRect().height),
+    }
+
+    await runButton.click()
+    const expectedState = "state" in example ? example.state : "success"
+    await page.waitForFunction(
+      ({ marker, state }) =>
+        Array.from(document.querySelectorAll(".expressive-code")).some(
+          (block) =>
+            block.textContent?.includes(marker) &&
+            block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+              state,
+        ),
+      { marker: example.marker, state: expectedState },
+    )
+
+    const output = await consolePanel.locator("output").innerText()
+    if (output !== example.output) {
+      throw new Error(
+        `${example.route} produced unexpected console output: ${JSON.stringify(output)}`,
+      )
+    }
+
+    const layoutAfterRun = {
+      documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
+      panelHeight: await consolePanel.evaluate((panel) => panel.getBoundingClientRect().height),
+    }
+    if (
+      layoutAfterRun.documentHeight !== layoutBeforeRun.documentHeight ||
+      layoutAfterRun.panelHeight !== layoutBeforeRun.panelHeight
+    ) {
+      throw new Error(`${example.route} shifts content when its example runs`)
+    }
+  }
+
+  for (const route of exampleControlRoutes) {
+    await page.goto(new URL(route, server.url).href)
+    const controlCoverage = await page.evaluate(() => {
+      const examples = Array.from(
+        document.querySelectorAll(
+          "main figure.frame:has(pre[data-language='ts'], pre[data-language='typescript'], pre[data-language='js'], pre[data-language='javascript'], pre[data-language='tsx'], pre[data-language='jsx'], pre[data-language='vue'])",
+        ),
+      )
+      const results = examples.map((example) => {
+        const source =
+          example
+            .querySelector<HTMLButtonElement>("button[data-code]")
+            ?.dataset.code?.replaceAll("\u007f", "\n") ?? ""
+        const hasConsoleLog = source.includes("console.log")
+        const consoleCount =
+          example.closest(".expressive-code")?.querySelectorAll(":scope > .kern-example-console")
+            .length ?? 0
+        return { consoleCount, hasConsoleLog }
+      })
+      return {
+        examples: examples.length,
+        consoleExamples: results.filter((result) => result.hasConsoleLog).length,
+        inlineConsoles: results.reduce((count, result) => count + result.consoleCount, 0),
+        invalid: results.filter((result) => result.consoleCount !== (result.hasConsoleLog ? 1 : 0))
+          .length,
+        modalCount: document.querySelectorAll(".kern-code-dialog").length,
+        headerControlCount: document.querySelectorAll(
+          ".kern-code-example-run, .kern-code-example-label",
+        ).length,
+      }
+    })
+    if (
+      controlCoverage.invalid !== 0 ||
+      controlCoverage.consoleExamples !== controlCoverage.inlineConsoles ||
+      controlCoverage.modalCount !== 0 ||
+      controlCoverage.headerControlCount !== 0
+    ) {
+      throw new Error(
+        `${route} does not use exactly one inline console for each console.log example: ${JSON.stringify(controlCoverage)}`,
+      )
+    }
+  }
+
+  await page.goto(new URL("/modules/validation/", server.url).href)
+  const safeParseExample = page
+    .locator(".expressive-code")
+    .filter({ hasText: "const goodResult = Login.safeParse" })
+  const safeParseConsole = safeParseExample.locator(":scope > .kern-example-console")
+  await safeParseConsole
+    .getByRole("button", { name: "Run example: safeParse or parse?", exact: true })
+    .click()
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll(".expressive-code")).some(
+      (block) =>
+        block.textContent?.includes("const goodResult = Login.safeParse") &&
+        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+          "success",
+    ),
+  )
+  const safeParseOutput = await safeParseConsole.locator("output").innerText()
+  if (
+    !safeParseOutput.includes('Success: { "success": true') ||
+    !safeParseOutput.includes('Failure: { "success": false') ||
+    !safeParseOutput.includes('"code": "invalid_email"')
+  ) {
+    throw new Error(`safeParse example does not show success and failure: ${safeParseOutput}`)
+  }
+
+  const parseExample = page
+    .locator(".expressive-code")
+    .filter({ hasText: 'console.log("Error message:", error.message)' })
+  const parseConsole = parseExample.locator(":scope > .kern-example-console")
+  await parseConsole
+    .getByRole("button", { name: "Run example: safeParse or parse?", exact: true })
+    .click()
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll(".expressive-code")).some(
+      (block) =>
+        block.textContent?.includes('console.log("Error message:", error.message)') &&
+        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+          "success",
+    ),
+  )
+  const parseOutput = await parseConsole.locator("output").innerText()
+  if (
+    !parseOutput.includes('Success: { "email": "ada@example.com" }') ||
+    !parseOutput.includes("Error message: Invalid email address") ||
+    !parseOutput.includes('"code": "invalid_email"')
+  ) {
+    throw new Error(`parse example does not show success and error details: ${parseOutput}`)
+  }
+
+  await page.goto(new URL("/modules/money/arithmetic/", server.url).href)
+  const addMoneyExample = page
+    .locator(".expressive-code")
+    .filter({ hasText: 'console.log("Success:", addMoney' })
+  const addMoneyConsole = addMoneyExample.locator(":scope > .kern-example-console")
+  const addMoneyLayoutBefore = {
+    documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
+    panelHeight: await addMoneyConsole.evaluate((panel) => panel.getBoundingClientRect().height),
+  }
+  await addMoneyConsole
+    .getByRole("button", {
+      name: "Run example: addMoney(leftMinorUnits, rightMinorUnits)",
+      exact: true,
+    })
+    .click()
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll(".expressive-code")).some(
+      (block) =>
+        block.textContent?.includes('console.log("Success:", addMoney') &&
+        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+          "error",
+    ),
+  )
+  const addMoneyOutput = await addMoneyConsole.locator("output").innerText()
+  if (
+    addMoneyOutput !==
+    "Success: 1349\n\nThrown error:\nRangeError: Money values must be safe integers in minor units"
+  ) {
+    throw new Error(
+      `addMoney example does not preserve success before its error: ${addMoneyOutput}`,
+    )
+  }
+  const addMoneyLayoutAfter = {
+    documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
+    panelHeight: await addMoneyConsole.evaluate((panel) => panel.getBoundingClientRect().height),
+  }
+  if (
+    addMoneyLayoutAfter.documentHeight !== addMoneyLayoutBefore.documentHeight ||
+    addMoneyLayoutAfter.panelHeight !== addMoneyLayoutBefore.panelHeight
+  ) {
+    throw new Error("Running the inline example console shifts the document layout")
   }
 
   await page.setViewportSize({ width: 2048, height: 1200 })
@@ -167,6 +464,46 @@ try {
   }
 
   await page.keyboard.press("Escape")
+
+  const mobileChunkExample = page
+    .locator(".expressive-code")
+    .filter({ hasText: 'console.log("Success:", chunk' })
+  const mobileConsole = mobileChunkExample.locator(":scope > .kern-example-console")
+  const mobileLayoutBefore = {
+    documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
+    panelHeight: await mobileConsole.evaluate((panel) => panel.getBoundingClientRect().height),
+  }
+  await mobileConsole
+    .getByRole("button", { name: "Run example: Create batches with chunk", exact: true })
+    .click()
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll(".expressive-code")).some(
+      (block) =>
+        block.textContent?.includes('console.log("Success:", chunk') &&
+        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+          "error",
+    ),
+  )
+  const mobileConsoleBounds = await mobileConsole.boundingBox()
+  if (
+    !mobileConsoleBounds ||
+    mobileConsoleBounds.x < 0 ||
+    mobileConsoleBounds.x + mobileConsoleBounds.width > 390
+  ) {
+    throw new Error(
+      `Inline example console does not fit the mobile width: ${JSON.stringify(mobileConsoleBounds)}`,
+    )
+  }
+  const mobileLayoutAfter = {
+    documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
+    panelHeight: await mobileConsole.evaluate((panel) => panel.getBoundingClientRect().height),
+  }
+  if (
+    mobileLayoutAfter.documentHeight !== mobileLayoutBefore.documentHeight ||
+    mobileLayoutAfter.panelHeight !== mobileLayoutBefore.panelHeight
+  ) {
+    throw new Error("Running the inline console shifts mobile document content")
+  }
 
   const scrollableCode = page.locator(
     'main pre[tabindex="0"][aria-label="Scrollable code example"]',

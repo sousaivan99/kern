@@ -2,16 +2,40 @@
 
 ## Supported versions
 
-Kern is pre-1.0. Security fixes are provided for the latest published minor release only.
+Kern 1.x is actively supported. Critical security fixes are provided for the latest release and,
+after a future major release, for the previous major during the six-month support window documented
+in [`packages/kern/SUPPORT.md`](./packages/kern/SUPPORT.md).
 
 ## Reporting a vulnerability
 
-Please do not disclose a suspected vulnerability in a public issue. Use the repository's
-[private vulnerability reporting](https://github.com/sousaivan99/kern/security/advisories/new) to
-send the affected API, reproduction steps, impact, and any suggested mitigation.
+Please do not disclose a suspected vulnerability in a public issue, pull request, discussion, or
+other public channel.
+
+Use GitHub's
+[private vulnerability reporting form](https://github.com/sousaivan99/kern/security/advisories/new).
+GitHub requires you to sign in before opening the form. If you cannot use GitHub's form, email
+[sousa.ivan99@gmail.com](mailto:sousa.ivan99@gmail.com) with the subject
+`[Kern security] Short description` instead.
+
+Include as much of the following as you can:
+
+- the affected Kern version, module, and API;
+- a minimal reproduction or proof of concept;
+- the impact and who could be affected;
+- the runtime, operating system, and other relevant environment details;
+- any known workaround or suggested mitigation;
+- whether you want to be credited in a future advisory.
+
+Do not include secrets, personal data, or data belonging to other people in the report. If the
+reproduction requires sensitive material, describe it first so a safer exchange can be arranged.
 
 You should receive an acknowledgement within five business days. Confirmed reports will be
-coordinated privately until a fix and advisory are ready.
+coordinated privately until a fix and advisory are ready. Please allow a reasonable remediation
+window before publishing details.
+
+GitHub private vulnerability reports and email reports are both handled privately. The GitHub form
+is preferred because it creates a private repository advisory where the report and remediation can
+be coordinated without opening a public issue.
 
 ## Security boundaries
 

@@ -5,6 +5,8 @@ import StarlightMarkdownContent from "@astrojs/starlight/components/MarkdownCont
 <StarlightMarkdownContent><slot /></StarlightMarkdownContent>
 
 <script>
+import "../scripts/example-console"
+
 const codeBlocks = Array.from(document.querySelectorAll<HTMLElement>("main pre"))
 
 const synchronizeScrollableCode = (codeBlock: HTMLElement) => {

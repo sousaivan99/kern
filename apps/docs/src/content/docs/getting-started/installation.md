@@ -8,8 +8,8 @@ sidebar:
 Kern is the ESM-only package `@kern/core`. It has no runtime dependencies and works with any
 framework that can consume modern JavaScript modules.
 
-Kern is currently in unreleased MVP development. The commands below describe the intended package
-setup; the completed MVP will be the first 1.0 release.
+Kern 1.x is the stable public API line. Patch releases fix compatible defects, minor releases add
+backward-compatible capabilities, and major releases may require migrations.
 
 ## Install the package
 

@@ -20,7 +20,8 @@ const Username = string()
   .max(32)
   .regex(/^[a-z][a-z0-9-]+$/u)
 
-Username.parse(" kern-core ") // "kern-core"
+console.log("Success:", Username.safeParse(" kern-core "))
+console.log("Failure:", Username.safeParse("x"))
 ```
 
 All string-specific methods return another `StringSchema`, so they can be chained.
@@ -44,19 +45,20 @@ the same.
 ```ts
 import { string } from "@kern/core/validation"
 
-const Email = string().trim().email("Enter a valid email address")
-const Website = string().url()
-const RequestId = string().uuid()
-const Prefix = string().startsWith("kern_")
-const Suffix = string().endsWith("_prod")
-const Exact = string().length(4)
-
-console.log(Email.safeParse("ada@example.com"))
-console.log(Website.safeParse("https://example.com"))
-console.log(RequestId.safeParse("123e4567-e89b-42d3-a456-426614174000"))
-console.log(Prefix.safeParse("kern_value"), Suffix.safeParse("api_prod"))
-console.log(Exact.safeParse("kern"))
+console.log(string().trim().parse("  Ada  ")) // "Ada"
+console.log(string().min(3).safeParse("ab")) // failure: too_small
+console.log(string().max(3).safeParse("abcd")) // failure: too_big
+console.log(string().length(4).parse("kern")) // "kern"
+console.log(string().email().parse("ada@example.com")) // "ada@example.com"
+console.log(string().url().parse("https://example.com/docs"))
+console.log(string().uuid().parse("123e4567-e89b-42d3-a456-426614174000"))
+console.log(string().regex(/^kern_/u).parse("kern_value")) // "kern_value"
+console.log(string().startsWith("kern_").parse("kern_value")) // "kern_value"
+console.log(string().endsWith("_prod").parse("api_prod")) // "api_prod"
 ```
+
+These examples call `parse()` to keep the output short. In form validation, prefer `safeParse()` so
+a user's mistake becomes an issue result instead of a thrown `ValidationError`.
 
 Important string boundaries:
 
@@ -78,8 +80,10 @@ import { number } from "@kern/core/validation"
 const Port = number().integer().positive().max(65_535).finite()
 const Temperature = number().min(-100).max(100)
 
-Port.parse(3000)
-Temperature.parse(21.5)
+console.log("Port success:", Port.safeParse(3000))
+console.log("Port failure:", Port.safeParse(70_000))
+console.log("Temperature success:", Temperature.safeParse(21.5))
+console.log("Temperature failure:", Temperature.safeParse(-200))
 ```
 
 | Method | What it checks | Default issue code |
@@ -90,6 +94,19 @@ Temperature.parse(21.5)
 | `.negative(message?)` | Input is less than zero. | `not_negative` |
 | `.integer(message?)` | `Number.isInteger(input)`. | `not_integer` |
 | `.finite(message?)` | `Number.isFinite(input)`. | `not_finite` |
+
+Every number-specific method in isolation:
+
+```ts
+import { number } from "@kern/core/validation"
+
+console.log(number().min(10).safeParse(10)) // success: boundary is inclusive
+console.log(number().max(10).safeParse(10)) // success: boundary is inclusive
+console.log(number().positive().safeParse(0)) // failure: not_positive
+console.log(number().negative().safeParse(-1)) // success
+console.log(number().integer().safeParse(1.5)) // failure: not_integer
+console.log(number().finite().safeParse(Infinity)) // failure: not_finite
+```
 
 `number()` rejects `NaN` as an invalid type. It accepts `Infinity` and `-Infinity` until
 `.finite()` is added. Positive and negative exclude zero. `min`/`max` accept infinite boundaries but
@@ -103,8 +120,8 @@ when a domain value must fit the safe-integer range, or use the money helpers, w
 ```ts
 import { boolean } from "@kern/core/validation"
 
-boolean().parse(true)
-boolean().safeParse("true") // failure
+console.log("Success:", boolean().safeParse(true))
+console.log("Failure:", boolean().safeParse("true"))
 ```
 
 `boolean()` accepts only the actual booleans `true` and `false`. It does not coerce strings,
@@ -118,9 +135,9 @@ import { date } from "@kern/core/validation"
 const Timestamp = date()
 const createdAt = new Date("2026-08-13T12:00:00Z")
 
-Timestamp.parse(createdAt) === createdAt // true
-Timestamp.safeParse(new Date(Number.NaN)) // failure
-Timestamp.safeParse("2026-08-13") // failure
+console.log("Success:", Timestamp.safeParse(createdAt))
+console.log("Invalid Date:", Timestamp.safeParse(new Date(Number.NaN)))
+console.log("String failure:", Timestamp.safeParse("2026-08-13"))
 ```
 
 `date()` accepts a valid native `Date` and returns that same instance; it does not clone or parse
@@ -134,8 +151,9 @@ import { literal } from "@kern/core/validation"
 const Ready = literal("ready")
 const Nothing = literal(null)
 
-Ready.parse("ready")
-Nothing.parse(null)
+console.log("Ready success:", Ready.safeParse("ready"))
+console.log("Ready failure:", Ready.safeParse("waiting"))
+console.log("Null success:", Nothing.safeParse(null))
 ```
 
 `literal(value)` accepts one `string`, `number`, `bigint`, `boolean`, `null`, or `undefined` value.
@@ -149,8 +167,8 @@ import { enumeration } from "@kern/core/validation"
 
 const Role = enumeration(["member", "admin"] as const)
 
-Role.parse("admin")
-Role.safeParse("owner") // failure
+console.log("Success:", Role.safeParse("admin"))
+console.log("Failure:", Role.safeParse("owner"))
 ```
 
 `enumeration(values)` accepts one member of a non-empty readonly string tuple. `as const` preserves

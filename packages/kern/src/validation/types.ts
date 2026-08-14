@@ -47,21 +47,66 @@ export interface RefinementOptions {
   readonly message?: string
 }
 
-export type StandardSchemaResult<T> =
-  | { readonly value: T; readonly issues?: undefined }
-  | { readonly issues: readonly ValidationIssue[] }
+/** A synchronous schema compatible with Standard Schema V1. */
+export interface StandardSchemaV1<Input = unknown, Output = Input> {
+  readonly "~standard": StandardSchemaV1.Props<Input, Output>
+}
 
-export interface StandardSchemaV1<Input, Output> {
-  readonly version: 1
-  readonly vendor: "kern"
-  readonly validate: (value: unknown) => StandardSchemaResult<Output>
-  readonly types?: {
+export declare namespace StandardSchemaV1 {
+  interface Props<Input = unknown, Output = Input> {
+    readonly version: 1
+    readonly vendor: string
+    readonly validate: (
+      value: unknown,
+      options?: Options | undefined,
+    ) => Result<Output> | Promise<Result<Output>>
+    readonly types?: Types<Input, Output> | undefined
+  }
+
+  interface Types<Input = unknown, Output = Input> {
     readonly input: Input
     readonly output: Output
   }
+
+  type Result<Output> = SuccessResult<Output> | FailureResult
+
+  interface SuccessResult<Output> {
+    readonly value: Output
+    readonly issues?: undefined
+  }
+
+  interface FailureResult {
+    readonly issues: ReadonlyArray<Issue>
+  }
+
+  interface Issue {
+    readonly message: string
+    readonly path?: ReadonlyArray<PropertyKey | PathSegment> | undefined
+  }
+
+  interface PathSegment {
+    readonly key: PropertyKey
+  }
+
+  interface Options {
+    readonly libraryOptions?: Record<string, unknown> | undefined
+  }
+
+  type InferInput<S extends StandardSchemaV1> = NonNullable<S["~standard"]["types"]>["input"]
+
+  type InferOutput<S extends StandardSchemaV1> = NonNullable<S["~standard"]["types"]>["output"]
 }
 
-export interface Schema<Output, Input = Output, Presence extends SchemaPresence = "required"> {
+interface KernStandardSchemaProps<Input, Output> extends StandardSchemaV1.Props<Input, Output> {
+  readonly vendor: "kern"
+  readonly validate: (
+    value: unknown,
+    options?: StandardSchemaV1.Options | undefined,
+  ) => StandardSchemaV1.Result<Output>
+}
+
+export interface Schema<Output, Input = Output, Presence extends SchemaPresence = "required">
+  extends StandardSchemaV1<Input, Output> {
   parse(input: unknown, options?: ParseOptions): Output
   safeParse(input: unknown, options?: ParseOptions): SafeParseResult<Output>
   optional(): Schema<Output | undefined, Input | undefined, "optional">
@@ -78,10 +123,16 @@ export interface Schema<Output, Input = Output, Presence extends SchemaPresence 
     options?: string | RefinementOptions,
   ): Schema<Output, Input, Presence>
   transform<U>(transformer: (value: Output) => U): Schema<U, Input, Presence>
-  readonly "~standard": StandardSchemaV1<Input, Output>
-  /** @internal */
+  readonly "~standard": KernStandardSchemaProps<Input, Output>
+}
+
+/** @internal Package-private schema state used by Kern's combinators. */
+export interface InternalSchema<
+  Output,
+  Input = Output,
+  Presence extends SchemaPresence = "required",
+> extends Schema<Output, Input, Presence> {
   readonly _run: Validator<Output>
-  /** @internal */
   readonly _presence: Presence
 }
 
