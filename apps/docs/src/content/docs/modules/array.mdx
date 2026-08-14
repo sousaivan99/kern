@@ -8,6 +8,26 @@ sidebar:
 Import array helpers from `@kern/core/array`. Every helper returns a new value and leaves the input
 array unchanged.
 
+## Start here: an array is an ordered list
+
+An array stores values in order and uses zero-based positions: the first item is at position `0`.
+Kern's array helpers help you read, split, group, or copy that list. They do not change the input
+array.
+
+```ts
+import { first, unique } from "@kern/core/array"
+
+const names = ["Ada", "Grace", "Ada"]
+
+console.log(first(names)) // "Ada"
+console.log(unique(names)) // ["Ada", "Grace"]
+console.log(names) // ["Ada", "Grace", "Ada"]: unchanged
+```
+
+The word **callback** below means a function you pass to a helper. A selector callback calculates a
+key; a predicate callback answers `true` or `false`. See the [Glossary](../concepts/glossary/) for
+these and other terms.
+
 ## At a glance
 
 | Helper | Use it when you need to | Empty input |
@@ -21,30 +41,65 @@ array unchanged.
 | `chunk` | Split values into fixed-size pages/batches | `[]` |
 | `withoutFalsy` | Remove JavaScript-falsy values | `[]` |
 
-## First and last
+## `first(values)`
 
 ```ts
-import { first, last } from "@kern/core/array"
+import { first } from "@kern/core/array"
 
 const queue = ["build", "test", "deploy"]
 
-first(queue) // "build"
-last(queue) // "deploy"
-first([]) // undefined
+console.log("First item:", first(queue)) // "build"
+console.log("Empty array:", first([])) // undefined
 ```
 
-These are semantic forms of `values[0]` and `values.at(-1)`. For a known non-empty tuple,
-TypeScript preserves the exact first or last element type.
+`first(values)` returns the item at index `0`. It returns `undefined` when the array is empty. This
+is the semantic form of `values[0]`: use it when the name “first” makes the code easier to read.
 
-## Remove duplicates
+For a known non-empty tuple, TypeScript knows the exact first-element type:
+
+```ts
+import { first } from "@kern/core/array"
+
+const status = first(["draft", 1] as const)
+// status has the exact type "draft"
+```
+
+## `last(values)`
+
+```ts
+import { last } from "@kern/core/array"
+
+const queue = ["build", "test", "deploy"]
+
+console.log("Last item:", last(queue)) // "deploy"
+console.log("Empty array:", last([])) // undefined
+```
+
+`last(values)` returns the final array item, or `undefined` for an empty array. Its native
+equivalent is `values.at(-1)`. A non-empty tuple also preserves its exact final-element type.
+
+## `unique(values)`
 
 Use `unique(values)` when equality should follow JavaScript `Set` rules. The first occurrence wins
 and order is preserved.
 
 ```ts
-import { unique, uniqueBy } from "@kern/core/array"
+import { unique } from "@kern/core/array"
 
-unique(["vue", "react", "vue"]) // ["vue", "react"]
+console.log(unique(["vue", "react", "vue"])) // ["vue", "react"]
+console.log(unique([1, 1, 2, Number.NaN, Number.NaN])) // [1, 2, NaN]
+```
+
+Objects are equal only when they are the same object reference. `unique()` returns a new array but
+does not clone the values inside it. Its native equivalent is `[...new Set(values)]`.
+
+## `uniqueBy(values, selector)`
+
+Use `uniqueBy()` when objects should be considered duplicates because one calculated field, such
+as an ID, is the same.
+
+```ts
+import { uniqueBy } from "@kern/core/array"
 
 const users = [
   { id: 1, name: "Ada" },
@@ -52,15 +107,20 @@ const users = [
   { id: 1, name: "Ada (duplicate)" },
 ]
 
-uniqueBy(users, (user) => user.id)
-// [{ id: 1, name: "Ada" }, { id: 2, name: "Grace" }]
+console.log("Success:", uniqueBy(users, (user) => user.id))
+
+uniqueBy(users, () => {
+  throw new Error("Could not read the user ID")
+})
+// Error: Could not read the user ID
 ```
 
 `uniqueBy(values, selector)` calls `selector(value, index)` once for each input item. The selector
 may return strings, numbers, object identities, or any other value supported by `Map`/`Set`
-equality. It keeps the first item for each selector result.
+equality. It keeps the first item for each selector result. If the selector throws, that exception
+passes through to the caller.
 
-## Group values
+## `groupBy(values, selector)`
 
 ```ts
 import { groupBy } from "@kern/core/array"
@@ -73,6 +133,11 @@ const events = [
 
 const grouped = groupBy(events, (event) => event.category)
 console.log(grouped.billing)
+
+groupBy(events, () => {
+  throw new Error("Could not choose a category")
+})
+// Error: Could not choose a category
 ```
 
 `groupBy(values, selector)` calls the selector with `(value, index)` and accepts any property key:
@@ -82,7 +147,7 @@ strings, numbers, or symbols. It returns a **null-prototype object**, so an inpu
 The closest native API is `Object.groupBy(values, selector)`. Kern provides predictable typing and
 the same safe result shape across its supported runtimes.
 
-## Split by a condition
+## `partition(values, predicate)`
 
 ```ts
 import { partition } from "@kern/core/array"
@@ -94,19 +159,30 @@ const [adults, minors] = partition(
 
 console.log(adults) // [21, 40]
 console.log(minors) // [12, 17]
+
+partition([12, 21], () => {
+  throw new Error("Could not check the age")
+})
+// Error: Could not check the age
 ```
 
 `partition(values, predicate)` always returns `[matching, remaining]`. Both arrays preserve input
 order. The predicate receives `(value, index)` and can be a TypeScript type guard, in which case the
 matching array is narrowed.
 
+The order of the returned pair matters: index `0` contains matches and index `1` contains values
+that did not match. An empty input returns `[[], []]`.
+
 ## Create batches with `chunk`
 
 ```ts
 import { chunk } from "@kern/core/array"
 
-chunk([1, 2, 3, 4, 5], 2) // [[1, 2], [3, 4], [5]]
-chunk([], 3) // []
+console.log("Success:", chunk([1, 2, 3, 4, 5], 2)) // [[1, 2], [3, 4], [5]]
+console.log("Empty array:", chunk([], 3)) // []
+
+chunk([1, 2, 3], 0)
+// RangeError: Chunk size must be a positive safe integer
 ```
 
 `size` is the maximum number of values in each returned array. It must be a positive safe integer.
@@ -119,7 +195,7 @@ The returned chunks are new arrays. Their contained values are not cloned.
 ```ts
 import { withoutFalsy } from "@kern/core/array"
 
-withoutFalsy([0, 1, false, "ready", "", null, undefined])
+console.log(withoutFalsy([0, 1, false, "ready", "", null, undefined]))
 // [1, "ready"]
 ```
 
@@ -131,6 +207,15 @@ empty arrays or empty objects because both are truthy.
 union. TypeScript cannot represent `NaN` as its own literal type, so runtime removal of `NaN` is
 more precise than static narrowing for that value.
 
+```ts
+import { type NonFalsy, withoutFalsy } from "@kern/core/array"
+
+type Input = string | null | undefined
+type Present = NonFalsy<Input> // string
+
+const names: Present[] = withoutFalsy(["Ada", null, "Grace", undefined])
+```
+
 ## Mutation and errors
 
 | Helper | Mutates input? | Can throw because of its options? |
@@ -138,3 +223,51 @@ more precise than static narrowing for that value.
 | `first`, `last`, `unique`, `withoutFalsy` | No | No |
 | `uniqueBy`, `groupBy`, `partition` | No | A selector/predicate exception passes through. |
 | `chunk` | No | `RangeError` for an invalid size. |
+
+## Common beginner mistakes
+
+- `unique()` compares objects by identity, not by matching fields. Use `uniqueBy(users, user =>
+  user.id)` for an ID-based comparison.
+- `withoutFalsy()` removes useful numeric zeroes as well as missing values. Do not use it when `0`
+  is valid data.
+- `chunk(values, 0)` cannot make progress and throws. The size must be a positive safe integer.
+- Selector and predicate callbacks are your application code. If one throws, Kern does not hide
+  that error.
+- Returned arrays are new containers, but objects inside them are shared. Changing a contained
+  object can still be observed through the original array.
+
+## Advanced usage
+
+### Narrow a partition with a type guard
+
+A TypeScript type guard lets `partition()` give each returned array a more precise type:
+
+```ts
+import { partition } from "@kern/core/array"
+
+const values: Array<string | number> = ["Ada", 42, "Grace", 7]
+const [names, numbers] = partition(
+  values,
+  (value): value is string => typeof value === "string",
+)
+
+names.map((name) => name.toUpperCase())
+numbers.map((number) => number.toFixed(2))
+```
+
+### Understand `groupBy()` result safety
+
+`groupBy()` returns a null-prototype object. It safely accepts keys such as `"constructor"`, but it
+does not inherit methods such as `.hasOwnProperty()`:
+
+```ts
+import { groupBy } from "@kern/core/array"
+
+const grouped = groupBy(["constructor", "safe"], (value) => value)
+
+Object.hasOwn(grouped, "constructor") // true
+grouped.constructor // ["constructor"], not the Object constructor
+```
+
+Selectors may return strings, numbers, or symbols. Object-valued selector results use reference
+identity, just like keys in `Map`.

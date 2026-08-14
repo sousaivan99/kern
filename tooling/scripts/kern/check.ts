@@ -4,7 +4,7 @@ import { runWorkflow, type WorkflowStep } from "../shared/workflow.js"
 const repositoryRoot = resolve(import.meta.dir, "../../..")
 const run = (...arguments_: string[]): readonly string[] => [process.execPath, "run", ...arguments_]
 const steps: readonly WorkflowStep[] = [
-  { command: run("lint"), name: "Lint" },
+  { command: run("lint"), name: "Lint", warningOutput: "full" },
   { command: run("typecheck"), name: "TypeScript current" },
   { command: run("typecheck:minimum"), name: "TypeScript minimum" },
   { command: run("test:coverage"), name: "Tests and coverage" },

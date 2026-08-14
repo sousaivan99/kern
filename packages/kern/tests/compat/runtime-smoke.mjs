@@ -11,12 +11,16 @@ import {
 import { once, sleep } from "../../dist/async/index.js"
 import {
   addDays,
+  addMonths,
+  addYears,
   differenceInCalendarDays,
+  endOfDay,
   isAfter,
   isBefore,
   isSameDay,
   isSameInstant,
   isValidDate,
+  startOfDay,
   subtractDays,
 } from "../../dist/date/index.js"
 import {
@@ -40,6 +44,86 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(`Compatibility smoke failure: ${message}`)
 }
 
+const installTemporalProbe = () => {
+  const temporal = Reflect.get(globalThis, "Temporal")
+  if ((typeof temporal !== "object" && typeof temporal !== "function") || temporal === null) {
+    return { available: false, calls: () => 0, restore() {} }
+  }
+  const instant = Reflect.get(temporal, "Instant")
+  const now = Reflect.get(temporal, "Now")
+  if ((typeof instant !== "object" && typeof instant !== "function") || instant === null) {
+    return { available: false, calls: () => 0, restore() {} }
+  }
+  if ((typeof now !== "object" && typeof now !== "function") || now === null) {
+    return { available: false, calls: () => 0, restore() {} }
+  }
+  const fromEpochMilliseconds = Reflect.get(instant, "fromEpochMilliseconds")
+  const timeZoneId = Reflect.get(now, "timeZoneId")
+  if (typeof fromEpochMilliseconds !== "function" || typeof timeZoneId !== "function") {
+    return { available: false, calls: () => 0, restore() {} }
+  }
+
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "Temporal")
+  let calls = 0
+  Object.defineProperty(globalThis, "Temporal", {
+    configurable: true,
+    value: {
+      Instant: {
+        fromEpochMilliseconds(value) {
+          calls += 1
+          return Reflect.apply(fromEpochMilliseconds, instant, [value])
+        },
+      },
+      Now: {
+        timeZoneId() {
+          calls += 1
+          return Reflect.apply(timeZoneId, now, [])
+        },
+      },
+    },
+    writable: true,
+  })
+  return {
+    available: true,
+    calls: () => calls,
+    restore() {
+      if (descriptor) Object.defineProperty(globalThis, "Temporal", descriptor)
+      else Reflect.deleteProperty(globalThis, "Temporal")
+    },
+  }
+}
+
+const temporalProbe = installTemporalProbe()
+
+const legacyAddDays = (date, amount) => {
+  const output = new Date(date.getTime())
+  output.setDate(output.getDate() + amount)
+  return output
+}
+
+const legacyAddMonths = (date, amount) => {
+  const output = new Date(date.getTime())
+  const day = output.getDate()
+  output.setDate(1)
+  output.setMonth(output.getMonth() + amount)
+  const monthEnd = new Date(output.getTime())
+  monthEnd.setMonth(monthEnd.getMonth() + 1, 0)
+  output.setDate(Math.min(day, monthEnd.getDate()))
+  return output
+}
+
+const legacyStartOfDay = (date) => {
+  const output = new Date(date.getTime())
+  output.setHours(0, 0, 0, 0)
+  return output
+}
+
+const legacyEndOfDay = (date) => {
+  const output = new Date(date.getTime())
+  output.setHours(23, 59, 59, 999)
+  return output
+}
+
 const schema = object({ name: string().trim().min(2) })
 assert(schema.parse({ name: " Ada " }).name === "Ada", "validation")
 assert(schema["~standard"].validate({ name: "Ada" }).value.name === "Ada", "standard schema")
@@ -59,6 +143,24 @@ assert(
   "date equality",
 )
 assert(isValidDate(subtractDays(new Date(2024, 0, 2), 1)), "date validity and subtraction")
+for (const input of [
+  new Date(2024, 0, 31, 12, 30),
+  new Date(2024, 2, 10, 1, 30),
+  new Date(2024, 9, 27, 1, 30),
+]) {
+  assert(addDays(input, 1).getTime() === legacyAddDays(input, 1).getTime(), "Temporal addDays")
+  assert(
+    addMonths(input, 1).getTime() === legacyAddMonths(input, 1).getTime(),
+    "Temporal addMonths",
+  )
+  assert(addYears(input, 1).getTime() === legacyAddMonths(input, 12).getTime(), "Temporal addYears")
+  assert(startOfDay(input).getTime() === legacyStartOfDay(input).getTime(), "Temporal startOfDay")
+  assert(endOfDay(input).getTime() === legacyEndOfDay(input).getTime(), "Temporal endOfDay")
+}
+if (temporalProbe.available) {
+  assert(temporalProbe.calls() > 0, "native Temporal path")
+}
+temporalProbe.restore()
 assert(isBetween(2, 1, 3) && percentageOfTotal(1, 4) === 25, "number")
 assert(formatNumber(1234, { locale: "en-US", useGrouping: false }) === "1234", "number format")
 assert(formatPercentage(25, { locale: "en-US" }) === "25%", "percentage format")

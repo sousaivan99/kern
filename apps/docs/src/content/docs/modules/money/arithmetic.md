@@ -7,54 +7,101 @@ sidebar:
 
 Every amount on this page is a safe-integer count of minor units.
 
-## Add, subtract, and sum
+## `addMoney(leftMinorUnits, rightMinorUnits)`
 
 ```ts
-import { addMoney, subtractMoney, sumMoney } from "@kern/core/money"
+import { addMoney } from "@kern/core/money"
 
-addMoney(1_099, 250) // 1349
-subtractMoney(1_099, 100) // 999
-sumMoney([1_099, 250, -100]) // 1249
-sumMoney([]) // 0
+console.log("Success:", addMoney(1_099, 250)) // 1349
+
+addMoney(1_099, 2.5)
+// RangeError: Money values must be safe integers in minor units
 ```
 
-`addMoney` and `subtractMoney` validate both operands and the result. `sumMoney` uses checked
-addition for every value, so an unsafe intermediate total throws even if later values would bring
-the final total back into range.
+`addMoney()` adds two integer minor-unit amounts. Both operands and the result must be safe
+integers. The helper does not know the currency, so your application must ensure both values use
+the same currency and scale.
+
+## `subtractMoney(leftMinorUnits, rightMinorUnits)`
+
+```ts
+import { subtractMoney } from "@kern/core/money"
+
+console.log("Success:", subtractMoney(1_099, 100)) // 999
+console.log("Negative result:", subtractMoney(500, 750)) // -250
+
+subtractMoney(1_099, Number.NaN)
+// RangeError: Money values must be safe integers in minor units
+```
+
+`subtractMoney()` calculates `leftMinorUnits - rightMinorUnits`. Negative results are valid. It
+validates both operands and the result.
+
+## `sumMoney(values)`
+
+```ts
+import { sumMoney } from "@kern/core/money"
+
+console.log("Success:", sumMoney([1_099, 250, -100])) // 1249
+console.log("Empty list:", sumMoney([])) // 0
+
+sumMoney([1_099, 2.5])
+// RangeError: Money values must be safe integers in minor units
+```
+
+`sumMoney()` totals an array of minor-unit values. It uses checked addition for every item, so an
+unsafe intermediate total throws even if later values would bring the final total back into range.
 
 ## Multiply an amount
 
 ```ts
 import { multiplyMoney } from "@kern/core/money"
 
-multiplyMoney(1_499, 3) // 4497
-multiplyMoney(100, 1.5) // 150
-multiplyMoney(1, 0.5) // 1 with the default halfExpand mode
+console.log("Whole multiplier:", multiplyMoney(1_499, 3)) // 4497
+console.log("Decimal multiplier:", multiplyMoney(100, 1.5)) // 150
+console.log("Rounded result:", multiplyMoney(1, 0.5)) // 1
+
+multiplyMoney(100, Number.NaN)
+// RangeError: Money factors must be finite
 ```
 
 `multiplyMoney(minorUnits, multiplier, options?)` converts the finite JavaScript multiplier to an
 exact decimal ratio based on its source representation, then rounds to the requested minor-unit
 increment. Negative and zero multipliers are allowed. `NaN` and infinities throw `RangeError`.
 
-## Calculate percentages and discounts
+## `percentageOf(minorUnits, percentage, options?)`
 
 ```ts
-import { applyDiscount, percentageOf } from "@kern/core/money"
+import { percentageOf } from "@kern/core/money"
 
-percentageOf(10_000, 17.5) // 1750
-percentageOf(10_000, -10) // -1000
-applyDiscount(1_099, 15) // 934
-applyDiscount(1_099, 100) // 0
+console.log("Success:", percentageOf(10_000, 17.5)) // 1750
+console.log("Negative percentage:", percentageOf(10_000, -10)) // -1000
+
+percentageOf(10_000, Number.POSITIVE_INFINITY)
+// RangeError: Money factors must be finite
 ```
 
 `percentageOf(minorUnits, percentage, options?)` is intentionally unrestricted: negative or above
 100 percentages may be useful for deltas, taxes, and ratios. The percentage must still be finite.
 
+## `applyDiscount(minorUnits, percentage, options?)`
+
+```ts
+import { applyDiscount } from "@kern/core/money"
+
+console.log("15% off:", applyDiscount(1_099, 15)) // 934
+console.log("100% off:", applyDiscount(1_099, 100)) // 0
+console.log("No discount:", applyDiscount(1_099, 0)) // 1099
+
+applyDiscount(1_099, 120)
+// RangeError: Discount percentage must be between 0 and 100
+```
+
 `applyDiscount(minorUnits, percentage, options?)` accepts only finite values from `0` through `100`
 inclusive. It calculates the rounded discount with `percentageOf`, then subtracts it from the
 original amount. Invalid percentages throw `RangeError`.
 
-## Rounding options
+## Advanced: rounding options
 
 The following functions accept `MoneyRoundingOptions`:
 
@@ -72,7 +119,7 @@ The following functions accept `MoneyRoundingOptions`:
 Unknown mode strings and zero, negative, fractional, infinite, `NaN`, or unsafe increments throw
 `RangeError`.
 
-## All rounding modes
+## Advanced: all rounding modes
 
 The non-`half` modes always choose one direction when a result is not exact. The `half` modes round
 to the nearest value and differ only at an exact tie.
@@ -95,10 +142,10 @@ move to the nearer higher-magnitude result. Only exact ties use the named tie ru
 ```ts
 import { multiplyMoney } from "@kern/core/money"
 
-multiplyMoney(1, 1.4, { roundingMode: "halfEven" }) // 1
-multiplyMoney(1, 1.5, { roundingMode: "halfEven" }) // 2
-multiplyMoney(1, 2.5, { roundingMode: "halfEven" }) // 2
-multiplyMoney(1, 1.6, { roundingMode: "halfEven" }) // 2
+console.log(multiplyMoney(1, 1.4, { roundingMode: "halfEven" })) // 1
+console.log(multiplyMoney(1, 1.5, { roundingMode: "halfEven" })) // 2
+console.log(multiplyMoney(1, 2.5, { roundingMode: "halfEven" })) // 2
+console.log(multiplyMoney(1, 1.6, { roundingMode: "halfEven" })) // 2
 ```
 
 `halfEven` is often called bankers' rounding. Whether it is appropriate is a business decision;
@@ -109,9 +156,12 @@ Kern does not select a jurisdictional policy for you.
 ```ts
 import { roundMoney } from "@kern/core/money"
 
-roundMoney(102, { roundingIncrement: 5 }) // 100
-roundMoney(103, { roundingIncrement: 5 }) // 105
-roundMoney(-102, { roundingIncrement: 5, roundingMode: "ceil" }) // -100
+console.log(roundMoney(102, { roundingIncrement: 5 })) // 100
+console.log(roundMoney(103, { roundingIncrement: 5 })) // 105
+console.log(roundMoney(-102, { roundingIncrement: 5, roundingMode: "ceil" })) // -100
+
+roundMoney(102, { roundingIncrement: 0 })
+// RangeError: roundingIncrement must be a positive safe integer
 ```
 
 `roundMoney(minorUnits, options?)` rounds an already-integer amount to an increment. An increment of
@@ -127,11 +177,14 @@ positive safe integer is accepted.
 ```ts
 import { allocateMoney } from "@kern/core/money"
 
-allocateMoney(100, [1, 1, 1]) // [34, 33, 33]
-allocateMoney(10, [1, 2, 3]) // [2, 3, 5]
-allocateMoney(-10, [1, 2, 3]) // [-2, -3, -5]
-allocateMoney(10, [0, 1, 0, 1]) // [0, 5, 0, 5]
-allocateMoney(0, [1, 1]) // [0, 0]
+console.log("Equal shares:", allocateMoney(100, [1, 1, 1])) // [34, 33, 33]
+console.log("Weighted:", allocateMoney(10, [1, 2, 3])) // [2, 3, 5]
+console.log("Negative:", allocateMoney(-10, [1, 2, 3])) // [-2, -3, -5]
+console.log("Zero weights:", allocateMoney(10, [0, 1, 0, 1])) // [0, 5, 0, 5]
+console.log("Zero total:", allocateMoney(0, [1, 1])) // [0, 0]
+
+allocateMoney(100, [])
+// RangeError: Money allocation ratios cannot be empty
 ```
 
 `allocateMoney(minorUnits, ratios)` treats ratios as relative weights. `[1, 1]`, `[50, 50]`, and
@@ -156,3 +209,7 @@ rounding to the final settlement amount only when your domain rules require it.
 All money arithmetic throws `RangeError` for invalid numeric configuration, non-safe-integer
 amounts, non-finite factors/percentages, unsafe results, or invalid allocation ratios. Callback
 errors are not involved; these helpers are deterministic synchronous functions.
+
+Each runnable example above prints valid results before deliberately passing one invalid value.
+The console keeps the successful lines visible and then shows the exact thrown error. In real code,
+validate user input before calculation or catch the error at the application boundary.

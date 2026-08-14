@@ -15,8 +15,8 @@ import { array, string } from "@kern/core/validation"
 
 const Tags = array(string().trim().min(1))
 
-Tags.parse([" typescript ", "kern"]) // ["typescript", "kern"]
-Tags.safeParse(["valid", ""]) // issue path: [1]
+console.log("Success:", Tags.safeParse([" typescript ", "kern"]))
+console.log("Failure:", Tags.safeParse(["valid", ""])) // issue path: [1]
 ```
 
 `array(elementSchema)` accepts only arrays and runs the element schema for every index until the
@@ -32,6 +32,9 @@ const NonEmptyTags = array(string()).refine((tags) => tags.length > 0, {
   code: "empty_tags",
   message: "Add at least one tag",
 })
+
+console.log("Success:", NonEmptyTags.safeParse(["kern"]))
+console.log("Failure:", NonEmptyTags.safeParse([]))
 ```
 
 ## Tuples
@@ -42,8 +45,10 @@ import { number, string, tuple } from "@kern/core/validation"
 const Coordinate = tuple([number().finite(), number().finite()] as const)
 const Entry = tuple([string(), number().integer()] as const)
 
-Coordinate.parse([49.61, 6.13])
-Entry.parse(["items", 3])
+console.log("Coordinate success:", Coordinate.safeParse([49.61, 6.13]))
+console.log("Coordinate failure:", Coordinate.safeParse([49.61]))
+console.log("Entry success:", Entry.safeParse(["items", 3]))
+console.log("Entry failure:", Entry.safeParse(["items", 3.5]))
 ```
 
 `tuple(schemas)` requires an array with exactly the same length as the schema tuple. Each position
@@ -65,8 +70,8 @@ const User = object({
   role: string().default("member"),
 })
 
-User.parse({ id: 1, name: " Ada " })
-// { id: 1, name: "Ada", role: "member" }
+console.log("Success:", User.safeParse({ id: 1, name: " Ada " }))
+console.log("Failure:", User.safeParse({ id: 1, name: "A" }))
 ```
 
 `object(shape)` accepts plain objects and null-prototype objects. Arrays, dates, functions, and
@@ -92,9 +97,9 @@ import { object, string } from "@kern/core/validation"
 const User = object({ name: string() })
 const input = { name: "Ada", traceId: "abc" }
 
-User.strip().parse(input) // { name: "Ada" }
-User.strict().safeParse(input) // unrecognized_key at ["traceId"]
-User.passthrough().parse(input) // { name: "Ada", traceId: "abc" }
+console.log("Strip success:", User.strip().safeParse(input))
+console.log("Strict failure:", User.strict().safeParse(input))
+console.log("Passthrough success:", User.passthrough().safeParse(input))
 ```
 
 | Method | Unknown values | Inferred output |
@@ -129,6 +134,7 @@ const ActiveUser = PublicUser.extend({ active: boolean() })
 console.log(UserSummary.parse({ id: 1, name: "Ada" }))
 console.log(UserPatch.parse({ name: "Grace" }))
 console.log(ActiveUser.parse({ id: 1, name: "Ada", role: "admin", active: true }))
+console.log("Failure:", ActiveUser.safeParse({ id: 1, name: "A", active: true }))
 ```
 
 | Method | Behavior |
@@ -173,8 +179,8 @@ import { number, record } from "@kern/core/validation"
 
 const Scores = record(number().integer().min(0))
 
-Scores.parse({ ada: 10, grace: 9 })
-Scores.safeParse({ ada: 10, grace: -1 }) // issue path: ["grace"]
+console.log("Success:", Scores.safeParse({ ada: 10, grace: 9 }))
+console.log("Failure:", Scores.safeParse({ ada: 10, grace: -1 }))
 ```
 
 `record(valueSchema)` validates every enumerable own string-keyed value in a plain or
@@ -191,7 +197,8 @@ const Contact = union([
   object({ type: literal("phone"), value: string().min(7) }),
 ] as const)
 
-Contact.parse({ type: "email", value: "ada@example.com" })
+console.log("Success:", Contact.safeParse({ type: "email", value: "ada@example.com" }))
+console.log("Failure:", Contact.safeParse({ type: "email", value: "not-an-email" }))
 ```
 
 `union(schemas)` requires at least two alternatives. Alternatives are tested independently in
@@ -201,7 +208,7 @@ are discarded; if every alternative fails, Kern emits one `invalid_union` issue 
 This keeps ordinary failures compact. If a UI must explain every branch, model a discriminating
 field with an outer object or validate alternatives separately.
 
-## Hostile property access
+## Advanced: hostile property access
 
 Object and record schemas read own properties during validation. If a getter throws, Kern catches
 it and produces `validation_exception` at the exact property path. It never stores the thrown error
@@ -218,5 +225,6 @@ const input = Object.defineProperty({}, "name", {
 })
 
 const result = object({ name: string() }).safeParse(input)
-console.log(result)
+console.log("Normal success:", object({ name: string() }).safeParse({ name: "Ada" }))
+console.log("Getter failure:", result)
 ```

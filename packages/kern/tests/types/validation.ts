@@ -1,3 +1,4 @@
+import type { StandardSchemaV1 as OfficialStandardSchemaV1 } from "@standard-schema/spec"
 import {
   type Infer,
   type InferInput,
@@ -6,6 +7,7 @@ import {
   number,
   object,
   type Schema,
+  type StandardSchemaV1,
   string,
 } from "../../src/validation/index.js"
 
@@ -116,6 +118,37 @@ const standardOutput: InferOutput<typeof User> | undefined = User["~standard"].t
 void standardInput
 void standardOutput
 
+const kernStandard: StandardSchemaV1<UserInput, UserOutput> = User
+const officialPrimitive: OfficialStandardSchemaV1<string, string> = string()
+const officialObject: OfficialStandardSchemaV1<UserInput, UserOutput> = User
+const officialOptional: OfficialStandardSchemaV1<string | undefined, string | undefined> =
+  string().optional()
+const officialDefault: OfficialStandardSchemaV1<string | undefined, string> =
+  string().default("fallback")
+const officialTransform: OfficialStandardSchemaV1<string, number> = transformed
+void kernStandard
+void officialPrimitive
+void officialObject
+void officialOptional
+void officialDefault
+void officialTransform
+
+type _OfficialTransformInput = Assert<
+  Equal<OfficialStandardSchemaV1.InferInput<typeof transformed>, string>
+>
+type _OfficialTransformOutput = Assert<
+  Equal<OfficialStandardSchemaV1.InferOutput<typeof transformed>, number>
+>
+type _KernTransformInput = Assert<Equal<StandardSchemaV1.InferInput<typeof transformed>, string>>
+type _KernTransformOutput = Assert<Equal<StandardSchemaV1.InferOutput<typeof transformed>, number>>
+
+User["~standard"].validate({ name: "Ada" }, { libraryOptions: { consumer: "type-contract" } })
+
+// @ts-expect-error validation execution is package-private
+User._run
+// @ts-expect-error schema presence is package-private
+User._presence
+
 interface StandardConsumer {
   readonly "~standard": {
     readonly version: 1
@@ -125,7 +158,7 @@ interface StandardConsumer {
       | {
           readonly issues: readonly {
             readonly message: string
-            readonly path?: readonly (PropertyKey | { readonly key: PropertyKey })[]
+            readonly path?: readonly (PropertyKey | { readonly key: PropertyKey })[] | undefined
           }[]
         }
       | Promise<unknown>
