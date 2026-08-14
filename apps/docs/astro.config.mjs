@@ -29,6 +29,7 @@ export default defineConfig({
           items: [
             { label: "Introduction", slug: "" },
             { label: "Installation", slug: "getting-started/installation" },
+            { label: "New to JavaScript?", slug: "getting-started/from-zero" },
             { label: "Quick start", slug: "getting-started/quick-start" },
             { label: "Core ideas", slug: "getting-started/core-ideas" },
           ],
@@ -45,6 +46,7 @@ export default defineConfig({
         {
           label: "Concepts",
           items: [
+            { label: "Glossary", slug: "concepts/glossary" },
             { label: "Native first", slug: "concepts/native-first" },
             { label: "Tree-shaking", slug: "concepts/tree-shaking" },
           ],
@@ -52,6 +54,7 @@ export default defineConfig({
         {
           label: "Module guides",
           items: [
+            { label: "All helpers", slug: "modules" },
             {
               label: "Validation",
               collapsed: true,

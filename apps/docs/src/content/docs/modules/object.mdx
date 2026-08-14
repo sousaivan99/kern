@@ -8,6 +8,32 @@ sidebar:
 The object module is intentionally narrow. It works with own properties and plain data while
 avoiding arbitrary path writes and prototype-pollution hazards.
 
+## Start here: objects store named values
+
+An object such as `{ name: "Ada", active: true }` contains properties. Each property has a key
+(`name`) and a value (`"Ada"`). Kern distinguishes properties directly owned by the object from
+properties inherited through JavaScript's prototype system.
+
+```ts
+import { hasOwn, pick } from "@kern/core/object"
+
+const user = { id: 1, name: "Ada", passwordHash: "secret" }
+
+console.log(hasOwn(user, "name")) // true
+console.log(pick(user, ["id", "name"])) // { id: 1, name: "Ada" }
+
+pick(new Date(), [])
+// TypeError: Expected a plain object
+```
+
+“Plain object” means ordinary data created with `{}` or `Object.create(null)`. Dates, arrays, maps,
+functions, and class instances have different behavior and are rejected by helpers that require
+plain data. The [Glossary](../concepts/glossary/) explains own properties, prototypes, descriptors,
+and null-prototype objects.
+
+The runnable console prints the successful object first, then shows what an unchecked `Date` input
+throws at runtime.
+
 ## At a glance
 
 | Helper | Purpose | Input restriction |
@@ -23,10 +49,10 @@ avoiding arbitrary path writes and prototype-pollution hazards.
 ```ts
 import { hasOwn } from "@kern/core/object"
 
-hasOwn({ name: "Ada" }, "name") // true
-hasOwn(Object.create({ inherited: true }), "inherited") // false
-hasOwn(null, "name") // false
-hasOwn("text", "length") // false
+console.log("Own key:", hasOwn({ name: "Ada" }, "name")) // true
+console.log("Inherited key:", hasOwn(Object.create({ inherited: true }), "inherited")) // false
+console.log("Null:", hasOwn(null, "name")) // false
+console.log("String:", hasOwn("text", "length")) // false
 ```
 
 `hasOwn(value, key)` accepts `unknown` and never coerces primitives. It checks string, number, and
@@ -35,10 +61,10 @@ symbol keys. It is similar to `Object.hasOwn(value, key)`, with the object/null 
 Use it for narrowing untrusted values one property at a time. It checks presence, not the
 property's value type.
 
-## Pick or omit properties
+## `pick(value, keys)`
 
 ```ts
-import { omit, pick } from "@kern/core/object"
+import { pick } from "@kern/core/object"
 
 const account = {
   id: "acct-42",
@@ -47,12 +73,40 @@ const account = {
 }
 
 const summary = pick(account, ["id", "email"])
-const safeAccount = omit(account, ["passwordHash"])
+console.log(summary)
+// { id: "acct-42", email: "ada@example.com" }
 
-console.log(summary, safeAccount)
+pick(new Date(), [])
+// TypeError: Expected a plain object
 ```
 
-Both helpers:
+`pick()` creates a new object containing only the listed own keys. A missing key is ignored at
+runtime, although TypeScript normally prevents known-typed callers from listing one.
+
+## `omit(value, keys)`
+
+```ts
+import { omit } from "@kern/core/object"
+
+const account = {
+  id: "acct-42",
+  email: "ada@example.com",
+  passwordHash: "never-return-this",
+}
+
+const safeAccount = omit(account, ["passwordHash"])
+console.log(safeAccount)
+// { id: "acct-42", email: "ada@example.com" }
+
+omit([], [])
+// TypeError: Expected a plain object
+```
+
+`omit()` creates a new object containing every own property except the listed keys. Use it when the
+excluded list is shorter and clearer than the included list. It is not a security policy by
+itself—explicit `pick()` lists are often safer for public API responses.
+
+Both `pick()` and `omit()`:
 
 - return a new object;
 - preserve the source's normal or null prototype;
@@ -64,7 +118,7 @@ Both helpers:
 Arrays, dates, maps, sets, functions, and class instances throw `TypeError`. Keys that do not exist
 are ignored. TypeScript restricts the key list to known keys when the source type is known.
 
-`pick` and `omit` are data-shaping tools, not authorization by themselves. Decide which fields are
+`pick()` and `omit()` are data-shaping tools, not authorization by themselves. Decide which fields are
 safe to expose in the domain layer and test that policy.
 
 ## Check a nested own path
@@ -79,9 +133,10 @@ const account = {
   },
 }
 
-hasOwnPath(account, "profile.preferences.theme") // true
-hasOwnPath(account, ["profile", "display.name"]) // true
-hasOwnPath(account, "profile.missing") // false
+console.log(hasOwnPath(account, "profile.preferences.theme")) // true
+console.log(hasOwnPath(account, ["profile", "display.name"])) // true
+console.log(hasOwnPath(account, "profile.missing")) // false
+console.log(hasOwnPath(account, "profile.__proto__.polluted")) // false: blocked path
 ```
 
 The path can be:
@@ -97,6 +152,15 @@ Only own properties are followed. A missing segment, primitive intermediate valu
 returns `false`. A getter is read during traversal and can throw; this helper is not a validation
 sandbox for hostile objects.
 
+`ObjectPath` is the exported type for the second argument:
+
+```ts
+import { type ObjectPath, hasOwnPath } from "@kern/core/object"
+
+const path: ObjectPath = ["users", 0, "email"]
+hasOwnPath({ users: [{ email: "ada@example.com" }] }, path) // true
+```
+
 ## Deeply freeze plain data
 
 ```ts
@@ -109,10 +173,17 @@ const configuration = deepFreeze({
 
 console.log(Object.isFrozen(configuration)) // true
 console.log(Object.isFrozen(configuration.api)) // true
+
+// @ts-expect-error Demonstrates the runtime guard for unchecked JavaScript input.
+deepFreeze(new Date())
+// TypeError: Only arrays and plain objects can be deeply frozen
 ```
 
 `deepFreeze(value)` validates the complete graph first, then freezes it recursively. That means an
 unsupported nested value causes a `TypeError` before any part of the graph has been frozen.
+TypeScript normally prevents the deliberately wrong `Date` call. The `@ts-expect-error` comment
+marks that mistake as intentional so the example can demonstrate the runtime protection available
+to plain JavaScript and unchecked input.
 
 Supported values:
 
@@ -129,3 +200,56 @@ These values have internal mutable state that `Object.freeze()` does not reliabl
 The function freezes the caller-owned graph in place and returns the same value with the exported
 `DeepReadonly<T>` type. This mutation is the explicit purpose of the API. It is an immutability
 helper for trusted plain data, not a security sandbox or deep clone.
+
+```ts
+import { type DeepReadonly, deepFreeze } from "@kern/core/object"
+
+type Settings = { theme: string; flags: string[] }
+
+const settings: DeepReadonly<Settings> = deepFreeze({
+  theme: "dark",
+  flags: ["search"],
+})
+
+// settings.theme = "light" // TypeScript error: the property is readonly
+// settings.flags.push("billing") // TypeScript error: the array is readonly
+```
+
+## Common beginner mistakes
+
+- `hasOwn()` checks that a key exists, not that its value has the expected type. Use validation for
+  a complete untrusted object.
+- Dotted string paths split on dots. Use `hasOwnPath(value, ["display.name"])` when the real key
+  itself contains a dot.
+- `pick()` and `omit()` are shallow. Nested objects remain shared with the source.
+- An omit list is easy to forget when a new sensitive field is added. Prefer an explicit pick list
+  for public responses.
+- `deepFreeze()` freezes the supplied graph in place. Clone first if the caller needs a mutable
+  version too.
+- `Object.freeze()` does not make `Date`, `Map`, or other internal mutable state deeply immutable;
+  Kern rejects those values rather than implying otherwise.
+
+## Advanced usage
+
+### Descriptor-preserving copies
+
+`pick()` and `omit()` copy own property descriptors. They preserve symbols, non-enumerable fields,
+read-only flags, and getters/setters without invoking an accessor during the copy. This differs from
+object spread, which reads enumerable values and creates ordinary writable properties.
+
+Only use accessors from trusted objects. Reading a copied getter later can still execute arbitrary
+application code.
+
+### Cycles and all-or-nothing freezing
+
+`deepFreeze()` supports cycles made entirely from arrays and plain objects. It first validates the
+whole reachable graph. If any value is unsupported, it throws before freezing any part, avoiding a
+partly frozen result. After validation it tracks visited objects so a cycle does not recurse
+forever.
+
+### Prototype-pollution boundaries
+
+`hasOwnPath()` rejects `__proto__`, `prototype`, and `constructor` at every path level and never
+traverses inherited properties. It is intentionally read-only: Kern does not expose an arbitrary
+path setter. Object validation safely defines dangerous input names as own data properties where
+the selected unknown-key policy retains them.

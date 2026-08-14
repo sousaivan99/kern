@@ -8,6 +8,31 @@ sidebar:
 Use `@kern/core/number` for ordinary numbers. Use `@kern/core/money` for financial amounts because
 money requires integer units and exact rounding rules.
 
+## Start here: calculate first, format for display last
+
+A JavaScript `number` is used for counts, measurements, percentages, coordinates, and many other
+values. Calculation helpers return numbers. Formatting helpers return strings meant for people:
+
+```ts
+import { clamp, formatNumber } from "@kern/core/number"
+
+const requestedVolume = 125
+const safeVolume = clamp(requestedVolume, 0, 100)
+const label = formatNumber(safeVolume, { locale: "en-US" })
+
+console.log(safeVolume) // 100: still a number
+console.log(label) // "100": display text
+
+clamp(requestedVolume, 100, 0)
+// RangeError: Minimum cannot be greater than maximum
+```
+
+Do not perform arithmetic on formatted text. Keep the number in application state and format it at
+the UI boundary.
+
+The runnable console prints the valid result first, then demonstrates the exact error for reversed
+minimum and maximum bounds.
+
 ## At a glance
 
 | Helper | Result | Important default |
@@ -22,12 +47,17 @@ money requires integer units and exact rounding rules.
 
 ## Clamp a value
 
+Signature: `clamp(value, minimum, maximum): number`.
+
 ```ts
 import { clamp } from "@kern/core/number"
 
-clamp(130, 0, 100) // 100
-clamp(-10, 0, 100) // 0
-clamp(50, 0, 100) // 50
+console.log(clamp(130, 0, 100)) // 100
+console.log(clamp(-10, 0, 100)) // 0
+console.log(clamp(50, 0, 100)) // 50
+
+clamp(50, 100, 0)
+// RangeError: Minimum cannot be greater than maximum
 ```
 
 The bounds are inclusive. `minimum` may equal `maximum`. Reversed bounds or `NaN` bounds throw
@@ -35,12 +65,17 @@ The bounds are inclusive. `minimum` may equal `maximum`. Reversed bounds or `NaN
 
 ## Round decimal places
 
+Signature: `round(value, precision = 0): number`.
+
 ```ts
 import { round } from "@kern/core/number"
 
-round(12.3456, 2) // 12.35
-round(1499, -2) // 1500
-round(12.5) // 13
+console.log(round(12.3456, 2)) // 12.35
+console.log(round(1499, -2)) // 1500
+console.log(round(12.5)) // 13
+
+round(12.3456, 101)
+// RangeError: Precision must be an integer between -100 and 100
 ```
 
 Positive precision rounds digits after the decimal point. Negative precision rounds tens,
@@ -52,11 +87,16 @@ for explicit modes such as `halfEven`.
 
 ## Check a range
 
+Signature: `isBetween(value, minimum, maximum, options?): boolean`.
+
 ```ts
 import { isBetween } from "@kern/core/number"
 
-isBetween(18, 18, 65) // true
-isBetween(18, 18, 65, { inclusive: false }) // false
+console.log("Inclusive:", isBetween(18, 18, 65)) // true
+console.log("Exclusive:", isBetween(18, 18, 65, { inclusive: false })) // false
+
+isBetween(18, 65, 18)
+// RangeError: Minimum cannot be greater than maximum
 ```
 
 `BetweenOptions` has one option:
@@ -69,37 +109,132 @@ Reversed or `NaN` bounds throw `RangeError`. A `NaN` input value simply returns 
 
 ## Calculate a percentage
 
+Signature: `percentageOfTotal(part, total): number`.
+
 ```ts
 import { percentageOfTotal } from "@kern/core/number"
 
-percentageOfTotal(42, 50) // 84
-percentageOfTotal(1, 4) // 25
+console.log(percentageOfTotal(42, 50)) // 84
+console.log(percentageOfTotal(1, 4)) // 25
+
+percentageOfTotal(1, 0)
+// RangeError: Total cannot be zero
 ```
 
 The result is in **percentage points**: `25` means 25%. Both operands must be finite and `total`
 cannot be zero. Invalid operands throw `RangeError`. Negative inputs are allowed when the
 mathematics is meaningful for your domain.
 
-## Format numbers
+## `formatNumber(value, options?)`
 
 ```ts
-import { formatCompact, formatNumber, formatPercentage } from "@kern/core/number"
+import { formatNumber } from "@kern/core/number"
 
-formatNumber(1_234_567.89, { locale: "de-DE" })
-formatCompact(1_250_000, { locale: "en-US" })
-formatPercentage(84, { locale: "en-US" })
+console.log(formatNumber(1_234_567.89, { locale: "de-DE" })) // "1.234.567,89"
+console.log(formatNumber(12.3, {
+  locale: "en-US",
+  minimumFractionDigits: 2,
+})) // "12.30"
+
+formatNumber(12.3, { locale: "not_a_locale" })
+// throws RangeError because the locale tag is invalid
 ```
 
-All formatting delegates to `Intl.NumberFormat`. `NumberFormatOptions` accepts:
+`formatNumber()` is the general display helper. It returns localized text and never changes the
+input number. The exact punctuation and digits come from the runtime's `Intl.NumberFormat` data.
+
+Its native equivalent is:
+
+```ts
+new Intl.NumberFormat("de-DE").format(1_234_567.89)
+```
+
+## `formatCompact(value, options?)`
+
+```ts
+import { formatCompact } from "@kern/core/number"
+
+console.log(formatCompact(1_250, { locale: "en-US" })) // commonly "1.3K"
+console.log(formatCompact(1_250_000, {
+  locale: "en-US",
+  maximumFractionDigits: 1,
+})) // commonly "1.3M"
+
+formatCompact(1_250, { locale: "not_a_locale" })
+// throws RangeError because the locale tag is invalid
+```
+
+`formatCompact()` is for short UI labels such as counters and dashboard cards. It forces native
+`notation: "compact"`; another supplied `notation` value is ignored. Compact wording is locale
+data, so do not parse it back into a number or assert one locale's result for every machine.
+
+## `formatPercentage(percentage, options?)`
+
+```ts
+import { formatPercentage } from "@kern/core/number"
+
+console.log(formatPercentage(84, { locale: "en-US" })) // "84%"
+console.log(formatPercentage(12.5, {
+  locale: "de-DE",
+  maximumFractionDigits: 1,
+})) // "12,5 %"
+
+formatPercentage(84, { locale: "not_a_locale" })
+// throws RangeError because the locale tag is invalid
+```
+
+The input uses **percentage points**. Pass `84` for 84%, not `0.84`. Kern divides the input by 100
+and forces `style: "percent"` before using `Intl.NumberFormat`.
+
+## `NumberFormatOptions`
+
+All three formatting helpers accept `NumberFormatOptions`. It contains:
 
 - `locale`, such as `"en-US"`, `"de-DE"`, or an array of preferred locales;
 - every native `Intl.NumberFormatOptions` property, including `minimumFractionDigits`,
   `maximumFractionDigits`, `useGrouping`, `signDisplay`, `numberingSystem`, and `roundingMode` when
   supported by the runtime.
 
-`formatCompact` forces `notation: "compact"`; another supplied `notation` value is ignored.
-`formatPercentage` forces `style: "percent"` and divides its input by 100, so `84` displays as
-`84%`, not `8,400%`. Other compatible native formatting options remain available.
-
 When `locale` is omitted, the runtime's default locale is used. Pass it explicitly for snapshots,
-stored display text, or user-specific output.
+stored display text, or user-specific output. Invalid locales or incompatible native options can
+throw the same `RangeError` or `TypeError` as `Intl.NumberFormat`.
+
+## Common beginner mistakes
+
+- Use `percentageOfTotal(1, 4)` to calculate `25`, then `formatPercentage(25)` to display `25%`.
+  Passing `0.25` to `formatPercentage()` displays `0.25%` because Kern accepts percentage points.
+- `round()` is ordinary floating-point rounding, not financial settlement. Use the money module
+  for currency amounts and explicit tie-breaking modes.
+- `clamp()` and `isBetween()` require ordered bounds: minimum first, maximum second.
+- A formatted result is a string. It is not intended to be parsed back into a number.
+- `NaN` is a special number value that is never between bounds. `clamp(NaN, ...)` deliberately
+  remains `NaN`.
+
+## Advanced usage
+
+### Native `Intl` options
+
+`NumberFormatOptions` intentionally extends the runtime's complete `Intl.NumberFormatOptions`.
+This allows significant-digit formatting, numbering systems, sign display, grouping policy, and
+runtime-supported rounding controls without Kern copying the platform API:
+
+```ts
+import { formatNumber } from "@kern/core/number"
+
+formatNumber(-1234.567, {
+  locale: "ar-EG-u-nu-arab",
+  maximumSignificantDigits: 4,
+  signDisplay: "always",
+  useGrouping: true,
+})
+```
+
+Supported option values follow the executing runtime. If an application formats a very large
+volume of values in a hot loop with one fixed configuration, creating and reusing a native
+`Intl.NumberFormat` instance directly may be more appropriate.
+
+### Special numeric values
+
+`round()` returns `NaN`, `Infinity`, and `-Infinity` unchanged. `clamp()` clamps infinities but
+preserves `NaN`. Formatting delegates special-number wording to `Intl`. Domain code should usually
+reject non-finite inputs before calculation when they represent invalid measurements.

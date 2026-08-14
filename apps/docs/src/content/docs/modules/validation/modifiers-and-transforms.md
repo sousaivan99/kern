@@ -25,9 +25,10 @@ import { object, string } from "@kern/core/validation"
 
 const Profile = object({ nickname: string().optional() })
 
-Profile.parse({}) // {}
-Profile.parse({ nickname: undefined }) // {}
-Profile.parse({ nickname: "Ada" }) // { nickname: "Ada" }
+console.log(Profile.safeParse({})) // success: {}
+console.log(Profile.safeParse({ nickname: undefined })) // success: {}
+console.log(Profile.safeParse({ nickname: "Ada" })) // success
+console.log(Profile.safeParse({ nickname: 42 })) // failure
 ```
 
 `.optional()` accepts `undefined`. In an object shape, it also makes the key optional. When the
@@ -40,7 +41,9 @@ Outside an object, the parsed value itself can be `undefined`:
 import { string } from "@kern/core/validation"
 
 const OptionalText = string().optional()
-OptionalText.parse(undefined) // undefined
+console.log("Missing:", OptionalText.safeParse(undefined))
+console.log("Text:", OptionalText.safeParse("Ada"))
+console.log("Wrong type:", OptionalText.safeParse(42))
 ```
 
 ## Nullable values
@@ -50,8 +53,9 @@ import { object, string } from "@kern/core/validation"
 
 const Profile = object({ middleName: string().nullable() })
 
-Profile.parse({ middleName: null })
-Profile.safeParse({}) // failure: the key is still required
+console.log("Success:", Profile.safeParse({ middleName: null }))
+console.log("Missing key:", Profile.safeParse({}))
+console.log("Wrong type:", Profile.safeParse({ middleName: 42 }))
 ```
 
 `.nullable()` accepts `null`; it says nothing about a key being missing. Use
@@ -64,9 +68,10 @@ import { object, string } from "@kern/core/validation"
 
 const Account = object({ role: string().default("member") })
 
-Account.parse({}) // { role: "member" }
-Account.parse({ role: undefined }) // { role: "member" }
-Account.parse({ role: "admin" }) // { role: "admin" }
+console.log(Account.safeParse({})) // success: { role: "member" }
+console.log(Account.safeParse({ role: undefined })) // success: default applied
+console.log(Account.safeParse({ role: "admin" })) // success
+console.log(Account.safeParse({ role: 42 })) // failure
 ```
 
 `.default(value)` accepts `undefined` as input and guarantees a non-`undefined` output. In an object,
@@ -91,7 +96,10 @@ const Username = string().refine((value) => !value.includes("admin"), {
   message: "This name is reserved",
 })
 
-console.log(Even.safeParse(4), Username.safeParse("admin-user"))
+console.log("Even success:", Even.safeParse(4))
+console.log("Even failure:", Even.safeParse(3))
+console.log("Username success:", Username.safeParse("ada"))
+console.log("Username failure:", Username.safeParse("admin-user"))
 ```
 
 `refine(predicate, options?)` first runs the schema before it. The predicate receives only a
@@ -134,7 +142,8 @@ const Port = string()
   })
 
 const port = Port.parse(" 3000 ") // number 3000
-console.log(port)
+console.log("Success:", port)
+console.log("Failure:", Port.safeParse("not-a-port"))
 ```
 
 The accepted input remains a string, while the output becomes a number. A transform can return any
@@ -154,8 +163,9 @@ import { string } from "@kern/core/validation"
 const DefaultThenOptional = string().default("member").optional()
 const OptionalThenDefault = string().optional().default("member")
 
-DefaultThenOptional.parse(undefined) // undefined
-OptionalThenDefault.parse(undefined) // "member"
+console.log(DefaultThenOptional.safeParse(undefined)) // success: undefined
+console.log(OptionalThenDefault.safeParse(undefined)) // success: "member"
+console.log(OptionalThenDefault.safeParse(42)) // failure
 ```
 
 Likewise, `string().trim().min(2)` validates the trimmed text, while
@@ -176,7 +186,8 @@ const Explodes = string().transform(() => {
   throw new Error("private callback details")
 })
 
-console.log(Explodes.safeParse("value"))
+console.log("Normal success:", string().safeParse("value"))
+console.log("Callback failure:", Explodes.safeParse("value"))
 ```
 
 `parse()` sees the same validation failure and throws `ValidationError`. Invalid parse controls such

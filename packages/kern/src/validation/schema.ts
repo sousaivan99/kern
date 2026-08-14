@@ -1,11 +1,11 @@
 import { ValidationError } from "./errors.js"
 import {
   addIssue,
+  type InternalSchema,
   type ParseOptions,
   type PathSegment,
   type RefinementOptions,
   type SafeParseResult,
-  type Schema,
   type SchemaPresence,
   type ValidationContext,
   type ValidationIssue,
@@ -48,7 +48,7 @@ function refinementDetails(
 export function createSchema<Output, Input = Output, Presence extends SchemaPresence = "required">(
   validator: Validator<Output>,
   presence: Presence = "required" as Presence,
-): Schema<Output, Input, Presence> {
+): InternalSchema<Output, Input, Presence> {
   const safeParse = (input: unknown, options?: ParseOptions): SafeParseResult<Output> => {
     const context = createContext(options)
 
@@ -140,7 +140,7 @@ export function createSchema<Output, Input = Output, Presence extends SchemaPres
     "~standard": {
       version: 1,
       vendor: "kern",
-      validate(value) {
+      validate(value, _options) {
         const result = safeParse(value)
         return result.success ? { value: result.data } : { issues: result.issues }
       },

@@ -17,6 +17,7 @@
     "test": "bun tooling/scripts/test.ts",
     "test:watch": "bun --filter @kern/core test:watch",
     "test:coverage": "bun --filter @kern/core test:coverage",
+    "test:fuzz": "bun --filter @kern/core test:fuzz",
     "test:timezones": "bun --filter @kern/core test:timezones",
     "test:compat": "bun --filter @kern/core test:compat",
     "test:deno": "bun --filter @kern/core test:deno",

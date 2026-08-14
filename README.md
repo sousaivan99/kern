@@ -1,8 +1,8 @@
 # Kern
 
 Kern is a Bun workspace for `@kern/core`, a zero-runtime-dependency, TypeScript-first collection
-of small semantic primitives for modern JavaScript runtimes. The repository is in unreleased MVP
-development; the finished MVP will be the first 1.0 release.
+of small semantic primitives for modern JavaScript runtimes. Version 1.x is the stable public API
+line and follows the package's semantic-versioning and support policies.
 
 ## Workspace
 
@@ -65,3 +65,7 @@ targets, packed artifact, bundle budgets, benchmarks, and dependency audit.
 - Supported package runtimes: Node.js 22+, Bun 1.3+, current Deno, and modern evergreen browsers
 - License: [MIT](./LICENSE)
 - Security reports: [SECURITY.md](./SECURITY.md)
+- Changelog: [packages/kern/CHANGELOG.md](./packages/kern/CHANGELOG.md)
+- Semantic versioning: [packages/kern/SEMVER.md](./packages/kern/SEMVER.md)
+- Support: [packages/kern/SUPPORT.md](./packages/kern/SUPPORT.md)
+- Releases: [packages/kern/RELEASING.md](./packages/kern/RELEASING.md)
