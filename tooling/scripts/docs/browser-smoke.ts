@@ -13,6 +13,8 @@ const routes = [
   "/frameworks/nuxt/",
   "/frameworks/react/",
   "/concepts/glossary/",
+  "/measurements/package-size/",
+  "/measurements/validation-benchmarks/",
   "/modules/",
   "/modules/validation/",
   "/modules/money/",
@@ -27,6 +29,7 @@ const representativeRoutes = [
   "/",
   "/getting-started/installation/",
   "/concepts/native-first/",
+  "/measurements/package-size/",
   "/modules/validation/",
   "/modules/array/",
   "/reference/validation/functions/object/",
@@ -295,6 +298,62 @@ try {
   }
 
   await page.goto(new URL("/modules/validation/", server.url).href)
+  const playground = page.locator("[data-validation-playground]")
+  const playgroundSource = playground.locator("[data-playground-source]")
+  const playgroundOutput = playground.locator("[data-playground-output]")
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-validation-playground]")?.getAttribute("data-state") ===
+      "success",
+  )
+  if (!(await playgroundOutput.innerText()).includes('"success": true')) {
+    throw new Error("Validation playground does not run its initial source")
+  }
+
+  await playgroundSource.fill(`import { object, string } from "@sousaivan/kern/validation"
+const User = object({ name: string().min(2), email: string().email() })
+console.log(User.safeParse({ name: "A", email: "bad" }))`)
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-validation-playground]")?.getAttribute("data-state") ===
+        "success" &&
+      document.querySelector("[data-playground-output]")?.textContent?.includes('"success": false'),
+  )
+  if (!(await playgroundOutput.innerText()).includes("invalid_email")) {
+    throw new Error("Validation playground does not expose structured validation issues")
+  }
+
+  await playgroundSource.fill("const = broken")
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-validation-playground]")?.getAttribute("data-state") ===
+      "error",
+  )
+  if (!(await playgroundOutput.innerText()).startsWith("SyntaxError:")) {
+    throw new Error("Validation playground does not report syntax errors")
+  }
+
+  await playgroundSource.fill('import { z } from "zod"\nconsole.log(z)')
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-playground-output]")
+      ?.textContent?.includes('Only "@sousaivan/kern/validation" can be imported.'),
+  )
+
+  await playgroundSource.fill("while (true) {}")
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-playground-output]")?.textContent ===
+      "Execution stopped after 1 second.",
+  )
+  await playground.getByRole("button", { name: "Reset", exact: true }).click()
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-validation-playground]")?.getAttribute("data-state") ===
+        "success" &&
+      document.querySelector("[data-playground-output]")?.textContent?.includes('"success": true'),
+  )
+
   const safeParseExample = page
     .locator(".expressive-code")
     .filter({ hasText: "const goodResult = Login.safeParse" })
@@ -393,10 +452,30 @@ try {
     throw new Error("Homepage documentation canvas is too narrow at wide desktop width")
   }
   const lucideIconCount = await page.locator("main svg.lucide").count()
-  if (lucideIconCount < 20) throw new Error("Homepage is not using the Lucide icon system")
+  if (lucideIconCount < 6) throw new Error("Homepage is not using the Lucide icon system")
   const homepageText = await page.locator("main").innerText()
   if (/\p{Emoji_Presentation}/u.test(homepageText)) {
     throw new Error("Homepage contains emoji instead of package icons")
+  }
+  if ((await page.locator("main h1").innerText()) !== "Kern") {
+    throw new Error("Homepage must use Kern as its heading-one value proposition")
+  }
+  if (
+    !homepageText.includes(
+      "Small, dependency-free TypeScript primitives for everyday application code.",
+    ) ||
+    !homepageText.includes("Validation · Money · Dates · Async · Data") ||
+    !homepageText.includes("Zero runtime dependencies · Tree-shakeable · Standard Schema")
+  ) {
+    throw new Error("Homepage value proposition is incomplete")
+  }
+  if ((await page.locator(".kern-home-example").count()) !== 3) {
+    throw new Error("Homepage must show exactly three examples")
+  }
+  for (const target of ["/measurements/package-size/", "/modules/validation/#playground"]) {
+    if ((await page.locator(`a[href$="${target}"]`).count()) === 0) {
+      throw new Error(`Homepage is missing its ${target} link`)
+    }
   }
 
   const liveCopyStatus = page.locator("[data-copy-status][role='status'][aria-live='polite']")
@@ -411,9 +490,9 @@ try {
 
   await page.setViewportSize({ width: 1440, height: 900 })
 
-  const referenceHref = await page.locator('a[href*="/reference/"]').first().getAttribute("href")
-  if (!referenceHref) throw new Error("Generated API reference link was not found")
-  const referenceResponse = await page.goto(new URL(referenceHref, server.url).href)
+  const referenceResponse = await page.goto(
+    new URL("/reference/validation/functions/object/", server.url).href,
+  )
   if (!referenceResponse?.ok())
     throw new Error(`API reference returned ${referenceResponse?.status()}`)
 

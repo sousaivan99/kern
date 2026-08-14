@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "measurement": {
+    "bunVersion": "1.3.14",
+    "compression": "gzip, level 9",
+    "format": "esm",
+    "minified": true,
+    "target": "browser"
+  },
+  "entrypoints": [
+    {
+      "gzipBytes": 3148,
+      "rawBytes": 8802,
+      "budgetBytes": 5120,
+      "id": "validation",
+      "import": "@sousaivan/kern/validation"
+    },
+    {
+      "gzipBytes": 2502,
+      "rawBytes": 6105,
+      "budgetBytes": 2560,
+      "id": "money",
+      "import": "@sousaivan/kern/money"
+    },
+    {
+      "gzipBytes": 1466,
+      "rawBytes": 3614,
+      "budgetBytes": 2048,
+      "id": "date",
+      "import": "@sousaivan/kern/date"
+    },
+    {
+      "gzipBytes": 593,
+      "rawBytes": 1238,
+      "budgetBytes": 1500,
+      "id": "number",
+      "import": "@sousaivan/kern/number"
+    },
+    {
+      "gzipBytes": 458,
+      "rawBytes": 754,
+      "budgetBytes": 1500,
+      "id": "array",
+      "import": "@sousaivan/kern/array"
+    },
+    {
+      "gzipBytes": 666,
+      "rawBytes": 1312,
+      "budgetBytes": 2048,
+      "id": "string",
+      "import": "@sousaivan/kern/string"
+    },
+    {
+      "gzipBytes": 707,
+      "rawBytes": 1670,
+      "budgetBytes": 2048,
+      "id": "object",
+      "import": "@sousaivan/kern/object"
+    },
+    {
+      "gzipBytes": 1018,
+      "rawBytes": 2200,
+      "budgetBytes": 2500,
+      "id": "async",
+      "import": "@sousaivan/kern/async"
+    }
+  ],
+  "rootEntrypoint": {
+    "gzipBytes": 8990,
+    "rawBytes": 25616,
+    "budgetBytes": 16384,
+    "id": "index",
+    "import": "@sousaivan/kern"
+  },
+  "examples": [
+    {
+      "id": "kern",
+      "label": "Kern",
+      "package": "@sousaivan/kern",
+      "version": "1.0.0",
+      "gzipBytes": 2330,
+      "rawBytes": 5825,
+      "fixture": "tooling/size-fixtures/validation/kern.ts",
+      "source": "import { object, string } from \"@sousaivan/kern/validation\"\n\nexport const User = object({\n  name: string().min(2),\n  email: string().email(),\n})\n"
+    },
+    {
+      "id": "zod",
+      "label": "Zod",
+      "package": "zod",
+      "version": "4.4.3",
+      "gzipBytes": 18548,
+      "rawBytes": 66974,
+      "fixture": "tooling/size-fixtures/validation/zod.ts",
+      "source": "import * as z from \"zod\"\n\nexport const User = z.object({\n  name: z.string().min(2),\n  email: z.email(),\n})\n"
+    },
+    {
+      "id": "valibot",
+      "label": "Valibot",
+      "package": "valibot",
+      "version": "1.4.2",
+      "gzipBytes": 1433,
+      "rawBytes": 3529,
+      "fixture": "tooling/size-fixtures/validation/valibot.ts",
+      "source": "import * as v from \"valibot\"\n\nexport const User = v.object({\n  name: v.pipe(v.string(), v.minLength(2)),\n  email: v.pipe(v.string(), v.email()),\n})\n"
+    }
+  ]
+}

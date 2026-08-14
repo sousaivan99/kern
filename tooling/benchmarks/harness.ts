@@ -1,8 +1,11 @@
 import { cpus } from "node:os"
+import packageMetadata from "../../packages/kern/package.json"
 import { type TableColumn, terminal } from "../scripts/shared/console.js"
 
 export interface BenchmarkCase {
   readonly itemsPerOperation?: number
+  readonly library?: string
+  readonly libraryVersion?: string
   readonly name: string
   readonly prepareBatch?: (iterations: number) => () => unknown
   readonly run: () => unknown
@@ -11,6 +14,16 @@ export interface BenchmarkCase {
   readonly unit?: string
   readonly verify?: (result: unknown) => void
 }
+
+export interface UnsupportedBenchmarkCase {
+  readonly library: string
+  readonly libraryVersion: string
+  readonly name: string
+  readonly suite: string
+  readonly unsupported: string
+}
+
+export type BenchmarkDefinition = BenchmarkCase | UnsupportedBenchmarkCase
 
 interface BenchmarkConfiguration {
   readonly json: boolean
@@ -36,12 +49,18 @@ interface BenchmarkStatistics {
 
 interface BenchmarkResult {
   readonly itemsPerOperation?: number
+  readonly library: string
+  readonly libraryVersion: string
   readonly name: string
   readonly size?: number
   readonly statistics: BenchmarkStatistics
   readonly suite: string
   readonly unit?: string
 }
+
+interface UnsupportedBenchmarkResult extends UnsupportedBenchmarkCase {}
+
+type ReportedBenchmarkResult = BenchmarkResult | UnsupportedBenchmarkResult
 
 const fullConfiguration = {
   sampleCount: 21,
@@ -135,6 +154,8 @@ const measure = (
   const medianMilliseconds = percentile(samples, 0.5)
   const nanosecondsPerOperation = (medianMilliseconds * 1_000_000) / iterations
   const itemsPerOperation = benchmark.itemsPerOperation ?? benchmark.size
+  const library = benchmark.library ?? "Kern"
+  const libraryVersion = benchmark.libraryVersion ?? packageMetadata.version
   const statistics: BenchmarkStatistics = {
     iterations,
     maximumMilliseconds: samples.at(-1) ?? 0,
@@ -151,6 +172,8 @@ const measure = (
       ...(benchmark.itemsPerOperation === undefined
         ? {}
         : { itemsPerOperation: benchmark.itemsPerOperation }),
+      library,
+      libraryVersion,
       name: benchmark.name,
       ...(benchmark.size === undefined ? {} : { size: benchmark.size }),
       statistics: {
@@ -165,6 +188,8 @@ const measure = (
     ...(benchmark.itemsPerOperation === undefined
       ? {}
       : { itemsPerOperation: benchmark.itemsPerOperation }),
+    library,
+    libraryVersion,
     name: benchmark.name,
     statistics,
     suite: benchmark.suite,
@@ -181,47 +206,56 @@ const formatDuration = (nanoseconds: number): string => {
   return `${(nanoseconds / 1_000_000).toFixed(2)} ms`
 }
 
-const printTable = (results: readonly BenchmarkResult[]): void => {
-  const columns: readonly TableColumn<BenchmarkResult>[] = [
+const printTable = (results: readonly ReportedBenchmarkResult[]): void => {
+  const columns: readonly TableColumn<ReportedBenchmarkResult>[] = [
     {
       header: "suite",
       style: (result) => (result.suite === "validation" ? "magenta" : "cyan"),
       value: (result) => result.suite,
     },
+    { header: "library", style: "cyan", value: (result) => result.library },
+    { header: "version", style: "dim", value: (result) => result.libraryVersion },
     { header: "benchmark", value: (result) => result.name },
     {
       align: "right",
       header: "size",
       style: "dim",
-      value: (result) => (result.size === undefined ? "—" : formatCount(result.size)),
+      value: (result) =>
+        "unsupported" in result || result.size === undefined ? "—" : formatCount(result.size),
     },
     {
       align: "right",
       header: "median/op",
       style: "yellow",
-      value: (result) => formatDuration(result.statistics.nanosecondsPerOperation),
+      value: (result) =>
+        "unsupported" in result
+          ? `unsupported: ${result.unsupported}`
+          : formatDuration(result.statistics.nanosecondsPerOperation),
     },
     {
       align: "right",
       header: "p95/op",
       style: "magenta",
       value: (result) =>
-        formatDuration(
-          (result.statistics.p95Milliseconds * 1_000_000) / result.statistics.iterations,
-        ),
+        "unsupported" in result
+          ? "—"
+          : formatDuration(
+              (result.statistics.p95Milliseconds * 1_000_000) / result.statistics.iterations,
+            ),
     },
     {
       align: "right",
       header: "ops/s",
       style: "green",
-      value: (result) => formatCount(result.statistics.operationsPerSecond),
+      value: (result) =>
+        "unsupported" in result ? "—" : formatCount(result.statistics.operationsPerSecond),
     },
     {
       align: "right",
       header: "time/item",
       style: "cyan",
       value: (result) =>
-        result.statistics.nanosecondsPerItem === undefined
+        "unsupported" in result || result.statistics.nanosecondsPerItem === undefined
           ? "—"
           : formatDuration(result.statistics.nanosecondsPerItem),
     },
@@ -233,7 +267,7 @@ export function invariant(condition: unknown, message: string): asserts conditio
   if (!condition) throw new Error(`Benchmark verification failed: ${message}`)
 }
 
-export const runBenchmarks = (benchmarks: readonly BenchmarkCase[]): void => {
+export const runBenchmarks = (benchmarks: readonly BenchmarkDefinition[]): void => {
   const configuration = parseArguments()
   const selected = configuration.suite
     ? benchmarks.filter((benchmark) => benchmark.suite === configuration.suite)
@@ -243,10 +277,15 @@ export const runBenchmarks = (benchmarks: readonly BenchmarkCase[]): void => {
     throw new Error(`No benchmarks found for suite ${configuration.suite}. Available: ${suites}`)
   }
 
-  const results = selected.map((benchmark) => measure(benchmark, configuration))
+  const results: ReportedBenchmarkResult[] = selected.map((benchmark) =>
+    "unsupported" in benchmark ? benchmark : measure(benchmark, configuration),
+  )
   const metadata = {
     architecture: process.arch,
     cpu: cpus()[0]?.model ?? "unknown",
+    caseOrder: selected.map(
+      (benchmark) => `${benchmark.suite}:${benchmark.name}:${benchmark.library ?? "Kern"}`,
+    ),
     mode: configuration.quick ? "quick" : "full",
     platform: process.platform,
     runtime: `Bun ${Bun.version}`,
@@ -271,7 +310,9 @@ export const runBenchmarks = (benchmarks: readonly BenchmarkCase[]): void => {
     )
     console.log()
     printTable(results)
-    terminal.success(`${results.length} benchmark cases completed`)
+    terminal.success(
+      `${results.filter((result) => !("unsupported" in result)).length} benchmark cases completed`,
+    )
   }
 
   void sink

@@ -76,6 +76,7 @@
     "typecheck:minimum": "node node_modules/typescript-5/bin/tsc --noEmit",
     "size": "bun ../../tooling/scripts/kern/size.ts",
     "size:check": "bun ../../tooling/scripts/kern/size.ts --check",
+    "size:report": "bun ../../tooling/scripts/kern/size.ts --write-report",
     "package:check": "bun ../../tooling/scripts/kern/package-check.ts",
     "audit": "bun audit",
     "check": "bun ../../tooling/scripts/kern/check.ts",

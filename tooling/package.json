@@ -11,7 +11,8 @@
     "format:check": "biome format ..",
     "benchmark": "bun benchmarks/index.ts",
     "benchmark:primitives": "bun benchmarks/index.ts --suite primitives",
-    "benchmark:validation": "bun benchmarks/index.ts --suite validation",
+    "benchmark:validation": "bun benchmarks/index.ts --suite validation-compare",
+    "benchmark:validation:kern": "bun benchmarks/index.ts --suite validation-kern",
     "benchmark:quick": "bun benchmarks/index.ts --quick"
   },
   "devDependencies": {
@@ -33,8 +34,10 @@
     "react-dom": "^19.2.8",
     "typescript": "^7.0.2",
     "typescript-5": "npm:typescript@5.0.4",
+    "valibot": "1.4.2",
     "vite": "^8.2.1",
     "vue": "^3.5.41",
-    "vue-tsc": "^3.3.9"
+    "vue-tsc": "^3.3.9",
+    "zod": "4.4.3"
   }
 }

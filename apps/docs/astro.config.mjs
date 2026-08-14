@@ -12,7 +12,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Kern",
-      description: "Small, audited TypeScript primitives for modern JavaScript runtimes.",
+      description: "Small, dependency-free TypeScript primitives for everyday application code.",
       favicon: "/favicon.svg",
       customCss: ["./src/styles/global.css"],
       components: {
@@ -44,6 +44,13 @@ export default defineConfig({
             { label: "Vue", slug: "frameworks/vue" },
             { label: "Nuxt", slug: "frameworks/nuxt" },
             { label: "React", slug: "frameworks/react" },
+          ],
+        },
+        {
+          label: "Measurements",
+          items: [
+            { label: "Package size", slug: "measurements/package-size" },
+            { label: "Validation benchmarks", slug: "measurements/validation-benchmarks" },
           ],
         },
         {

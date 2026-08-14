@@ -1,0 +1,33 @@
+---
+title: Package size
+description: Reproducible raw and gzip measurements for Kern entrypoints and realistic validation schemas.
+---
+
+import PackageSizeReport from "../../../components/PackageSizeReport.astro";
+
+These are bundled JavaScript measurements, not npm tarball or installed-directory sizes. Every
+number below comes from the tracked report generated from the current source and pinned comparison
+packages.
+
+<PackageSizeReport />
+
+## Reproduce the report
+
+Use the repository's pinned Bun version and frozen lockfile:
+
+```bash
+bun install --frozen-lockfile
+bun run build:kern
+bun run size
+```
+
+Machine-readable output is available without terminal decoration:
+
+```bash
+bun run size -- --json > size-results.json
+```
+
+Maintainers update the versioned documentation snapshot with `bun run size:report`.
+`bun run size:check` rebuilds every fixture, enforces entrypoint budgets, and fails when the snapshot
+does not match. Exact bytes are measurements rather than a semver guarantee and can change with the
+source, dependency versions, or bundler.
