@@ -76,7 +76,7 @@ describe("development subprocess capture", () => {
             "routine output",
             "@kern/docs build: [WARN] plugin diagnostic",
             "@kern/docs build: (!) Generated chunk is large. Consider:",
-            "@kern/core test:browser: @kern/docs build: - splitting the entrypoint",
+            "@sousaivan/kern test:browser: @kern/docs build: - splitting the entrypoint",
             "more routine output",
           ].join("\n"),
         ),

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `@kern/core` are recorded here. Kern follows
+All notable changes to `@sousaivan/kern` are recorded here. Kern follows
 [Semantic Versioning](./SEMVER.md), and each published version is immutable.
 
 ## [Unreleased]

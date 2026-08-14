@@ -25,7 +25,7 @@ try {
   await writeFile(
     join(temporaryDirectory, "consumer.ts"),
     [
-      'import { object, string, type StandardSchemaV1 } from "@kern/core/validation"',
+      'import { object, string, type StandardSchemaV1 } from "@sousaivan/kern/validation"',
       "const schema = object({ name: string() }).transform((value) => value.name.length)",
       "const standard: StandardSchemaV1<{ name: string }, number> = schema",
       "void standard",
@@ -71,7 +71,7 @@ try {
     throw new Error("Packed consumers must not install @standard-schema/spec")
   }
 
-  const installedPackageRoot = join(temporaryDirectory, "node_modules", "@kern", "core")
+  const installedPackageRoot = join(temporaryDirectory, "node_modules", "@sousaivan", "kern")
   for (const policyFile of ["CHANGELOG.md", "SEMVER.md", "SUPPORT.md"]) {
     if (!(await Bun.file(join(installedPackageRoot, policyFile)).exists())) {
       throw new Error(`Packed package is missing ${policyFile}`)

@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-Kern is the ESM-only package `@kern/core`. It has no runtime dependencies and works with any
+Kern is the ESM-only package `@sousaivan/kern`. It has no runtime dependencies and works with any
 framework that can consume modern JavaScript modules.
 
 Kern 1.x is the stable public API line. Patch releases fix compatible defects, minor releases add
@@ -16,19 +16,19 @@ backward-compatible capabilities, and major releases may require migrations.
 Choose the command for your package manager:
 
 ```bash
-bun add @kern/core
+bun add @sousaivan/kern
 ```
 
 ```bash
-npm install @kern/core
+npm install @sousaivan/kern
 ```
 
 ```bash
-pnpm add @kern/core
+pnpm add @sousaivan/kern
 ```
 
 ```bash
-yarn add @kern/core
+yarn add @sousaivan/kern
 ```
 
 You do not need to install type packages. Kern includes its TypeScript declarations.
@@ -65,9 +65,9 @@ null/undefined handling.
 Prefer the subpath that owns the helper:
 
 ```ts
-import { addDays } from "@kern/core/date"
-import { formatMoney } from "@kern/core/money"
-import { object, string } from "@kern/core/validation"
+import { addDays } from "@sousaivan/kern/date"
+import { formatMoney } from "@sousaivan/kern/money"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Account = object({ name: string().trim().min(2) })
 const account = Account.parse({ name: " Ada " })
@@ -83,7 +83,7 @@ Subpath imports make ownership obvious and help bundlers discard modules you do 
 The root entrypoint also works:
 
 ```ts
-import { addDays, formatMoney, object, string } from "@kern/core"
+import { addDays, formatMoney, object, string } from "@sousaivan/kern"
 ```
 
 Use it when convenience matters more than making module boundaries visible. Both forms are
@@ -94,7 +94,7 @@ side-effect free and tree-shakeable in supported bundlers.
 Create a small TypeScript file and run it with your normal toolchain:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Greeting = object({ message: string().min(1) })
 const result = Greeting.safeParse({ message: "Kern is ready" })

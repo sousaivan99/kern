@@ -13,7 +13,7 @@ A JavaScript string is text inside quotes, such as `"Ada"`. Strings are immutabl
 returns new text instead of changing the original string.
 
 ```ts
-import { capitalize, slugify } from "@kern/core/string"
+import { capitalize, slugify } from "@sousaivan/kern/string"
 
 const title = "crème brûlée"
 const heading = capitalize(title)
@@ -50,7 +50,7 @@ invalid-locale error.
 ## `capitalize(value, options?)`
 
 ```ts
-import { capitalize } from "@kern/core/string"
+import { capitalize } from "@sousaivan/kern/string"
 
 console.log(capitalize("hello, world")) // "Hello, world"
 console.log(capitalize("")) // ""
@@ -63,7 +63,7 @@ It does not trim whitespace, so a leading space remains the first character.
 ## `uncapitalize(value, options?)`
 
 ```ts
-import { uncapitalize } from "@kern/core/string"
+import { uncapitalize } from "@sousaivan/kern/string"
 
 console.log(uncapitalize("Hello, world")) // "hello, world"
 console.log(uncapitalize("APIClient")) // "aPIClient"
@@ -76,7 +76,7 @@ the whole string; use native `value.toLowerCase()` when that is what you mean.
 ## `camelCase(value, options?)`
 
 ```ts
-import { camelCase } from "@kern/core/string"
+import { camelCase } from "@sousaivan/kern/string"
 
 console.log(camelCase("customer account-ID")) // "customerAccountId"
 console.log(camelCase("HTTP response code")) // "httpResponseCode"
@@ -88,7 +88,7 @@ capitalized. This form is common for JavaScript variables and object properties.
 ## `kebabCase(value, options?)`
 
 ```ts
-import { kebabCase } from "@kern/core/string"
+import { kebabCase } from "@sousaivan/kern/string"
 
 console.log(kebabCase("customerAccount ID")) // "customer-account-id"
 console.log(kebabCase("Release 2026")) // "release-2026"
@@ -100,7 +100,7 @@ URLs, and readable identifiers. Unlike `slugify()`, it does not remove combining
 ## `snakeCase(value, options?)`
 
 ```ts
-import { snakeCase } from "@kern/core/string"
+import { snakeCase } from "@sousaivan/kern/string"
 
 console.log(snakeCase("customerAccount ID")) // "customer_account_id"
 console.log(snakeCase("Release 2026")) // "release_2026"
@@ -127,7 +127,7 @@ Without a locale, Kern uses deterministic `toUpperCase()` and `toLowerCase()` be
 not depend on the machine's host locale.
 
 ```ts
-import { capitalize, slugify } from "@kern/core/string"
+import { capitalize, slugify } from "@sousaivan/kern/string"
 
 console.log(capitalize("istanbul")) // "Istanbul"
 console.log(capitalize("istanbul", { locale: "tr" })) // "İstanbul"
@@ -143,7 +143,7 @@ translate text.
 ## `slugify(value, options?)`
 
 ```ts
-import { slugify } from "@kern/core/string"
+import { slugify } from "@sousaivan/kern/string"
 
 console.log(slugify("Crème brûlée & Café!")) // "creme-brulee-cafe"
 console.log(slugify("  Product  2026  ")) // "product-2026"
@@ -159,7 +159,7 @@ Kern deliberately does not provide a language transliteration engine.
 ## `truncate(value, maximumLength, omission?)`
 
 ```ts
-import { truncate } from "@kern/core/string"
+import { truncate } from "@sousaivan/kern/string"
 
 console.log(truncate("Hello world", 8)) // "Hello w…"
 console.log(truncate("Hello world", 8, "...")) // "Hello..."
@@ -186,7 +186,7 @@ Grapheme counting is specific to display-oriented `truncate()`.
 ## `isBlank(value)`
 
 ```ts
-import { isBlank } from "@kern/core/string"
+import { isBlank } from "@sousaivan/kern/string"
 
 console.log(isBlank("")) // true
 console.log(isBlank("  \n")) // true
@@ -216,7 +216,7 @@ With no `locale`, casing uses deterministic `toUpperCase()`/`toLowerCase()` beha
 locale requests linguistic rules from the runtime:
 
 ```ts
-import { camelCase, capitalize } from "@kern/core/string"
+import { camelCase, capitalize } from "@sousaivan/kern/string"
 
 capitalize("istanbul") // "Istanbul"
 capitalize("istanbul", { locale: "tr" }) // "İstanbul"

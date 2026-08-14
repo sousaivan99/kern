@@ -6,7 +6,7 @@ description: Validate a Vue form and format application values with direct Kern 
 Install Kern in an existing Vue 3 project:
 
 ```bash
-npm install @kern/core
+npm install @sousaivan/kern
 ```
 
 No Vue plugin or `app.use()` call is required. Import helpers inside a component, composable, or
@@ -22,8 +22,8 @@ the form.
 ```vue
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { formatMoney } from "@kern/core/money"
-import { object, string } from "@kern/core/validation"
+import { formatMoney } from "@sousaivan/kern/money"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Contact = object({
   email: string().trim().email(),

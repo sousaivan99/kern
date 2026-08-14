@@ -6,7 +6,7 @@ Kern is a zero-runtime-dependency, TypeScript-first, framework-agnostic, ESM-fir
 
 > Bundle size is a feature of this project, not an afterthought.
 
-The permanent npm package name is `@kern/core`; the repository name is `kern`.
+The permanent npm package name is `@sousaivan/kern`; the repository name is `kern`.
 Kern 1.x is the stable public API line and follows `packages/kern/SEMVER.md`.
 
 ## Core principles
@@ -64,7 +64,7 @@ imported by `packages/kern/src/` or included in published runtime entrypoints.
 
 ```text
 apps/docs/       Astro/Starlight/Tailwind documentation application
-packages/kern/   Publishable @kern/core source, tests, and package metadata
+packages/kern/   Publishable @sousaivan/kern source, tests, and package metadata
 tooling/         Repository scripts, benchmarks, and tooling tests
 ```
 
@@ -111,12 +111,12 @@ Owns small Promise, timing, and control-flow helpers. Support `AbortSignal` wher
 Prefer consumer subpath imports:
 
 ```ts
-import { object, string } from "@kern/core/validation"
-import { formatMoney } from "@kern/core/money"
-import { addDays } from "@kern/core/date"
+import { object, string } from "@sousaivan/kern/validation"
+import { formatMoney } from "@sousaivan/kern/money"
+import { addDays } from "@sousaivan/kern/date"
 ```
 
-Do not encourage `import * as Kern from "@kern/core"` without a specific reason. Consider how every export affects tree-shaking.
+Do not encourage `import * as Kern from "@sousaivan/kern"` without a specific reason. Consider how every export affects tree-shaking.
 
 When adding a public helper:
 

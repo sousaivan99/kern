@@ -11,7 +11,7 @@ function converts currencies.
 ## Find the native currency precision
 
 ```ts
-import { currencyMinorUnitDigits } from "@kern/core/money"
+import { currencyMinorUnitDigits } from "@sousaivan/kern/money"
 
 console.log("EUR:", currencyMinorUnitDigits("EUR", "en-US")) // commonly 2
 console.log("JPY:", currencyMinorUnitDigits("JPY", "ja-JP")) // commonly 0
@@ -31,7 +31,7 @@ different storage scale; provider rules take precedence at that integration boun
 ## Format integer minor units
 
 ```ts
-import { formatMoney } from "@kern/core/money"
+import { formatMoney } from "@sousaivan/kern/money"
 
 console.log(formatMoney(1_099, "EUR", { locale: "en-US" }))
 console.log(formatMoney(1_099, "JPY", { locale: "ja-JP" }))
@@ -72,7 +72,7 @@ used.
 ## Parse strict localized currency text
 
 ```ts
-import { parseMoney } from "@kern/core/money"
+import { parseMoney } from "@sousaivan/kern/money"
 
 console.log(parseMoney("1.234,56 €", "EUR", { locale: "de-DE" })) // 123456
 console.log(parseMoney("$1,234.56", "USD", { locale: "en-US" })) // 123456

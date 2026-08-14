@@ -7,7 +7,7 @@ Kern is an ordinary ESM package. It does not require a plugin, code generator, o
 Install it with your project's package manager:
 
 ```bash
-npm install @kern/core
+npm install @sousaivan/kern
 ```
 
 Prefer module subpaths so each import communicates what it owns and remains easy to tree-shake.
@@ -19,8 +19,8 @@ it checks values at runtime.
 
 <!-- framework-test: vanilla/javascript.mjs -->
 ```js
-import { formatMoney } from "@kern/core/money"
-import { object, string } from "@kern/core/validation"
+import { formatMoney } from "@sousaivan/kern/money"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Contact = object({
   name: string().trim().min(2),
@@ -51,7 +51,7 @@ the result without a type assertion.
 
 <!-- framework-test: vanilla/typescript.ts -->
 ```ts
-import { object, string, type Infer } from "@kern/core/validation"
+import { object, string, type Infer } from "@sousaivan/kern/validation"
 
 const Contact = object({
   name: string().trim().min(2),

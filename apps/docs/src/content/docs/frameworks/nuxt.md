@@ -6,7 +6,7 @@ description: Use Kern directly in Nuxt components, server routes, SSR, and clien
 Install Kern in the Nuxt application:
 
 ```bash
-npm install @kern/core
+npm install @sousaivan/kern
 ```
 
 Kern needs no Nuxt module and no entry in `nuxt.config.ts`. Direct imports work in Vue components,
@@ -19,7 +19,7 @@ The same helper can run during server-side rendering and in the browser after hy
 <!-- framework-test: nuxt/app/app.vue -->
 ```vue
 <script setup lang="ts">
-import { formatMoney } from "@kern/core/money"
+import { formatMoney } from "@sousaivan/kern/money"
 
 const total = formatMoney(12999, "EUR", { locale: "en-GB" })
 </script>
@@ -42,7 +42,7 @@ placing the rejected value in the response.
 
 <!-- framework-test: nuxt/server/api/contact.post.ts -->
 ```ts framework-only
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Contact = object({
   name: string().trim().min(2),

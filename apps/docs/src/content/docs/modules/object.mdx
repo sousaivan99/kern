@@ -15,7 +15,7 @@ An object such as `{ name: "Ada", active: true }` contains properties. Each prop
 properties inherited through JavaScript's prototype system.
 
 ```ts
-import { hasOwn, pick } from "@kern/core/object"
+import { hasOwn, pick } from "@sousaivan/kern/object"
 
 const user = { id: 1, name: "Ada", passwordHash: "secret" }
 
@@ -47,7 +47,7 @@ throws at runtime.
 ## Check one own property
 
 ```ts
-import { hasOwn } from "@kern/core/object"
+import { hasOwn } from "@sousaivan/kern/object"
 
 console.log("Own key:", hasOwn({ name: "Ada" }, "name")) // true
 console.log("Inherited key:", hasOwn(Object.create({ inherited: true }), "inherited")) // false
@@ -64,7 +64,7 @@ property's value type.
 ## `pick(value, keys)`
 
 ```ts
-import { pick } from "@kern/core/object"
+import { pick } from "@sousaivan/kern/object"
 
 const account = {
   id: "acct-42",
@@ -86,7 +86,7 @@ runtime, although TypeScript normally prevents known-typed callers from listing 
 ## `omit(value, keys)`
 
 ```ts
-import { omit } from "@kern/core/object"
+import { omit } from "@sousaivan/kern/object"
 
 const account = {
   id: "acct-42",
@@ -124,7 +124,7 @@ safe to expose in the domain layer and test that policy.
 ## Check a nested own path
 
 ```ts
-import { hasOwnPath } from "@kern/core/object"
+import { hasOwnPath } from "@sousaivan/kern/object"
 
 const account = {
   profile: {
@@ -155,7 +155,7 @@ sandbox for hostile objects.
 `ObjectPath` is the exported type for the second argument:
 
 ```ts
-import { type ObjectPath, hasOwnPath } from "@kern/core/object"
+import { type ObjectPath, hasOwnPath } from "@sousaivan/kern/object"
 
 const path: ObjectPath = ["users", 0, "email"]
 hasOwnPath({ users: [{ email: "ada@example.com" }] }, path) // true
@@ -164,7 +164,7 @@ hasOwnPath({ users: [{ email: "ada@example.com" }] }, path) // true
 ## Deeply freeze plain data
 
 ```ts
-import { deepFreeze } from "@kern/core/object"
+import { deepFreeze } from "@sousaivan/kern/object"
 
 const configuration = deepFreeze({
   api: { timeout: 5_000 },
@@ -202,7 +202,7 @@ The function freezes the caller-owned graph in place and returns the same value 
 helper for trusted plain data, not a security sandbox or deep clone.
 
 ```ts
-import { type DeepReadonly, deepFreeze } from "@kern/core/object"
+import { type DeepReadonly, deepFreeze } from "@sousaivan/kern/object"
 
 type Settings = { theme: string; flags: string[] }
 

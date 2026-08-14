@@ -1,4 +1,4 @@
-# Releasing `@kern/core`
+# Releasing `@sousaivan/kern`
 
 ## Branch flow
 
@@ -21,12 +21,14 @@ unprotected push was a merge; branch protection provides that guarantee.
 
 ## npm setup
 
-The npm account or organization must control the `@kern` scope and grant publish access to
-`@kern/core`.
+The npm user `sousaivan` owns the personal `@sousaivan` scope and must grant publish access to
+`@sousaivan/kern`.
 
 Because the package does not exist before its first publication, add a short-lived granular npm
-automation token as the `production` environment secret `NPM_TOKEN` for the initial release. Limit
-the token to this package/scope and remove it immediately after the first successful publish.
+access token as the `production` environment secret `NPM_TOKEN` for the initial release. In npm,
+choose the personal user `sousaivan` (not an organization), set **Packages and scopes** to
+**Read and write** with **All Packages**, enable **Bypass 2FA**, and remove the token immediately
+after the first successful publish.
 
 After the package exists, configure its npm trusted publisher with:
 

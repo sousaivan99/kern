@@ -11,7 +11,7 @@ fixed-duration arithmetic.
 ## `addDays(date, amount)`
 
 ```ts
-import { addDays } from "@kern/core/date"
+import { addDays } from "@sousaivan/kern/date"
 
 const release = new Date(2026, 7, 13, 10, 30)
 const followUp = addDays(release, 7)
@@ -29,7 +29,7 @@ local time on another calendar day.”
 ## `subtractDays(date, amount)`
 
 ```ts
-import { subtractDays } from "@kern/core/date"
+import { subtractDays } from "@sousaivan/kern/date"
 
 const release = new Date(2026, 7, 13, 10, 30)
 const reminder = subtractDays(release, 2)
@@ -46,7 +46,7 @@ DST rules as `addDays()`.
 ## `addMonths(date, amount)`
 
 ```ts
-import { addMonths } from "@kern/core/date"
+import { addMonths } from "@sousaivan/kern/date"
 
 const january31 = new Date(2024, 0, 31, 10)
 
@@ -66,7 +66,7 @@ subtracting a month from February 29 produces January 29.
 ## `subtractMonths(date, amount)`
 
 ```ts
-import { subtractMonths } from "@kern/core/date"
+import { subtractMonths } from "@sousaivan/kern/date"
 
 const january31 = new Date(2024, 0, 31, 10)
 
@@ -82,7 +82,7 @@ clamping as `addMonths()`.
 ## `addYears(date, amount)`
 
 ```ts
-import { addYears } from "@kern/core/date"
+import { addYears } from "@sousaivan/kern/date"
 
 const leapDay = new Date(2024, 1, 29, 12)
 
@@ -98,7 +98,7 @@ year.
 ## `subtractYears(date, amount)`
 
 ```ts
-import { subtractYears } from "@kern/core/date"
+import { subtractYears } from "@sousaivan/kern/date"
 
 const leapDay = new Date(2024, 1, 29, 12)
 
@@ -114,7 +114,7 @@ wall-clock time exists.
 ## `startOfDay(date)`
 
 ```ts
-import { startOfDay } from "@kern/core/date"
+import { startOfDay } from "@sousaivan/kern/date"
 
 const value = new Date(2026, 7, 13, 14, 30, 15)
 
@@ -129,7 +129,7 @@ startOfDay(new Date(Number.NaN))
 ## `endOfDay(date)`
 
 ```ts
-import { endOfDay } from "@kern/core/date"
+import { endOfDay } from "@sousaivan/kern/date"
 
 const value = new Date(2026, 7, 13, 14, 30, 15)
 
@@ -156,7 +156,7 @@ Passing a negative amount reverses direction, so `addDays(date, -2)` is equivale
 None of these functions changes the supplied date:
 
 ```ts
-import { addDays } from "@kern/core/date"
+import { addDays } from "@sousaivan/kern/date"
 
 const original = new Date(2026, 0, 1)
 const changed = addDays(original, 1)

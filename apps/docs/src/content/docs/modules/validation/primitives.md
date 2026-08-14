@@ -12,7 +12,7 @@ Primitive schemas check one runtime value. They never coerce another type into t
 Start with `string()`, then chain transformations and constraints in the order they should run:
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 const Username = string()
   .trim()
@@ -43,7 +43,7 @@ Every optional `message` replaces only the human-readable message; the stable is
 the same.
 
 ```ts
-import { string } from "@kern/core/validation"
+import { string } from "@sousaivan/kern/validation"
 
 console.log(string().trim().parse("  Ada  ")) // "Ada"
 console.log(string().min(3).safeParse("ab")) // failure: too_small
@@ -75,7 +75,7 @@ Important string boundaries:
 ## Number schema
 
 ```ts
-import { number } from "@kern/core/validation"
+import { number } from "@sousaivan/kern/validation"
 
 const Port = number().integer().positive().max(65_535).finite()
 const Temperature = number().min(-100).max(100)
@@ -98,7 +98,7 @@ console.log("Temperature failure:", Temperature.safeParse(-200))
 Every number-specific method in isolation:
 
 ```ts
-import { number } from "@kern/core/validation"
+import { number } from "@sousaivan/kern/validation"
 
 console.log(number().min(10).safeParse(10)) // success: boundary is inclusive
 console.log(number().max(10).safeParse(10)) // success: boundary is inclusive
@@ -118,7 +118,7 @@ when a domain value must fit the safe-integer range, or use the money helpers, w
 ## Boolean schema
 
 ```ts
-import { boolean } from "@kern/core/validation"
+import { boolean } from "@sousaivan/kern/validation"
 
 console.log("Success:", boolean().safeParse(true))
 console.log("Failure:", boolean().safeParse("true"))
@@ -130,7 +130,7 @@ numbers, or truthy/falsy values. A type mismatch uses `invalid_type`.
 ## Date schema
 
 ```ts
-import { date } from "@kern/core/validation"
+import { date } from "@sousaivan/kern/validation"
 
 const Timestamp = date()
 const createdAt = new Date("2026-08-13T12:00:00Z")
@@ -146,7 +146,7 @@ strings. An invalid date or different type uses `invalid_type`.
 ## Literal schema
 
 ```ts
-import { literal } from "@kern/core/validation"
+import { literal } from "@sousaivan/kern/validation"
 
 const Ready = literal("ready")
 const Nothing = literal(null)
@@ -163,7 +163,7 @@ can match `NaN`. A mismatch uses `invalid_literal`.
 ## String enumeration
 
 ```ts
-import { enumeration } from "@kern/core/validation"
+import { enumeration } from "@sousaivan/kern/validation"
 
 const Role = enumeration(["member", "admin"] as const)
 

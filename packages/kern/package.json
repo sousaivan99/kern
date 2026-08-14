@@ -1,5 +1,5 @@
 {
-  "name": "@kern/core",
+  "name": "@sousaivan/kern",
   "version": "1.0.0",
   "description": "Zero-dependency, TypeScript-first utility primitives for modern JavaScript runtimes.",
   "type": "module",

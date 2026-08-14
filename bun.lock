@@ -3,14 +3,14 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@kern/core",
+      "name": "@sousaivan/kern",
     },
     "apps/docs": {
       "name": "@kern/docs",
       "dependencies": {
         "@astrojs/starlight": "^0.41.7",
         "@astrojs/starlight-tailwind": "^5.0.0",
-        "@kern/core": "workspace:*",
+        "@sousaivan/kern": "workspace:*",
         "@tailwindcss/vite": "^4.3.3",
         "astro": "^7.2.1",
         "lucide-astro": "^0.556.0",
@@ -25,7 +25,7 @@
       },
     },
     "packages/kern": {
-      "name": "@kern/core",
+      "name": "@sousaivan/kern",
       "version": "1.0.0",
       "devDependencies": {
         "@standard-schema/spec": "1.1.0",
@@ -385,7 +385,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@kern/core": ["@kern/core@workspace:packages/kern"],
+    "@sousaivan/kern": ["@sousaivan/kern@workspace:packages/kern"],
 
     "@kern/docs": ["@kern/docs@workspace:apps/docs"],
 

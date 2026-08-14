@@ -37,7 +37,7 @@ that JavaScript month numbers start at zero: `0` is January and `7` is August.
 | UTC calendar output | `toUTCISODate` | Return the UTC `YYYY-MM-DD`. |
 
 ```ts
-import { addDays, formatDate, isAfter, toUTCISODate } from "@kern/core/date"
+import { addDays, formatDate, isAfter, toUTCISODate } from "@sousaivan/kern/date"
 
 const release = new Date("2026-08-13T14:30:00Z")
 const followUp = addDays(release, 7)
@@ -89,7 +89,7 @@ Pass the locale and display timezone explicitly, and pass a stable `now` argumen
 comparisons:
 
 ```ts
-import { formatDateTime, isToday } from "@kern/core/date"
+import { formatDateTime, isToday } from "@sousaivan/kern/date"
 
 const now = new Date("2026-08-14T12:00:00Z")
 const value = new Date("2026-08-14T09:30:00Z")

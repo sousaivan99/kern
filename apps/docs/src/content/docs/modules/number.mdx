@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-Use `@kern/core/number` for ordinary numbers. Use `@kern/core/money` for financial amounts because
+Use `@sousaivan/kern/number` for ordinary numbers. Use `@sousaivan/kern/money` for financial amounts because
 money requires integer units and exact rounding rules.
 
 ## Start here: calculate first, format for display last
@@ -14,7 +14,7 @@ A JavaScript `number` is used for counts, measurements, percentages, coordinates
 values. Calculation helpers return numbers. Formatting helpers return strings meant for people:
 
 ```ts
-import { clamp, formatNumber } from "@kern/core/number"
+import { clamp, formatNumber } from "@sousaivan/kern/number"
 
 const requestedVolume = 125
 const safeVolume = clamp(requestedVolume, 0, 100)
@@ -50,7 +50,7 @@ minimum and maximum bounds.
 Signature: `clamp(value, minimum, maximum): number`.
 
 ```ts
-import { clamp } from "@kern/core/number"
+import { clamp } from "@sousaivan/kern/number"
 
 console.log(clamp(130, 0, 100)) // 100
 console.log(clamp(-10, 0, 100)) // 0
@@ -68,7 +68,7 @@ The bounds are inclusive. `minimum` may equal `maximum`. Reversed bounds or `NaN
 Signature: `round(value, precision = 0): number`.
 
 ```ts
-import { round } from "@kern/core/number"
+import { round } from "@sousaivan/kern/number"
 
 console.log(round(12.3456, 2)) // 12.35
 console.log(round(1499, -2)) // 1500
@@ -90,7 +90,7 @@ for explicit modes such as `halfEven`.
 Signature: `isBetween(value, minimum, maximum, options?): boolean`.
 
 ```ts
-import { isBetween } from "@kern/core/number"
+import { isBetween } from "@sousaivan/kern/number"
 
 console.log("Inclusive:", isBetween(18, 18, 65)) // true
 console.log("Exclusive:", isBetween(18, 18, 65, { inclusive: false })) // false
@@ -112,7 +112,7 @@ Reversed or `NaN` bounds throw `RangeError`. A `NaN` input value simply returns 
 Signature: `percentageOfTotal(part, total): number`.
 
 ```ts
-import { percentageOfTotal } from "@kern/core/number"
+import { percentageOfTotal } from "@sousaivan/kern/number"
 
 console.log(percentageOfTotal(42, 50)) // 84
 console.log(percentageOfTotal(1, 4)) // 25
@@ -128,7 +128,7 @@ mathematics is meaningful for your domain.
 ## `formatNumber(value, options?)`
 
 ```ts
-import { formatNumber } from "@kern/core/number"
+import { formatNumber } from "@sousaivan/kern/number"
 
 console.log(formatNumber(1_234_567.89, { locale: "de-DE" })) // "1.234.567,89"
 console.log(formatNumber(12.3, {
@@ -152,7 +152,7 @@ new Intl.NumberFormat("de-DE").format(1_234_567.89)
 ## `formatCompact(value, options?)`
 
 ```ts
-import { formatCompact } from "@kern/core/number"
+import { formatCompact } from "@sousaivan/kern/number"
 
 console.log(formatCompact(1_250, { locale: "en-US" })) // commonly "1.3K"
 console.log(formatCompact(1_250_000, {
@@ -171,7 +171,7 @@ data, so do not parse it back into a number or assert one locale's result for ev
 ## `formatPercentage(percentage, options?)`
 
 ```ts
-import { formatPercentage } from "@kern/core/number"
+import { formatPercentage } from "@sousaivan/kern/number"
 
 console.log(formatPercentage(84, { locale: "en-US" })) // "84%"
 console.log(formatPercentage(12.5, {
@@ -219,7 +219,7 @@ This allows significant-digit formatting, numbering systems, sign display, group
 runtime-supported rounding controls without Kern copying the platform API:
 
 ```ts
-import { formatNumber } from "@kern/core/number"
+import { formatNumber } from "@sousaivan/kern/number"
 
 formatNumber(-1234.567, {
   locale: "ar-EG-u-nu-arab",

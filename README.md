@@ -1,6 +1,6 @@
 # Kern
 
-Kern is a Bun workspace for `@kern/core`, a zero-runtime-dependency, TypeScript-first collection
+Kern is a Bun workspace for `@sousaivan/kern`, a zero-runtime-dependency, TypeScript-first collection
 of small semantic primitives for modern JavaScript runtimes. Version 1.x is the stable public API
 line and follows the package's semantic-versioning and support policies.
 
@@ -8,7 +8,7 @@ line and follows the package's semantic-versioning and support policies.
 
 ```text
 apps/docs/       Astro, Starlight, and Tailwind documentation site
-packages/kern/   Publishable @kern/core package and its tests
+packages/kern/   Publishable @sousaivan/kern package and its tests
 tooling/         Build, package, compatibility, benchmark, and repository automation
 ```
 
@@ -60,8 +60,8 @@ targets, packed artifact, bundle budgets, benchmarks, and dependency audit.
 
 ## Repository policy
 
-- Runtime dependencies for `@kern/core`: **0**
-- Package name: `@kern/core`
+- Runtime dependencies for `@sousaivan/kern`: **0**
+- Package name: `@sousaivan/kern`
 - Supported package runtimes: Node.js 22+, Bun 1.3+, current Deno, and modern evergreen browsers
 - License: [MIT](./LICENSE)
 - Security reports: [SECURITY.md](./SECURITY.md)

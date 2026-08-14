@@ -4,8 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@kern/core": ["../../packages/kern/src/index.ts"],
-      "@kern/core/*": ["../../packages/kern/src/*/index.ts"]
+      "@sousaivan/kern": ["../../packages/kern/src/index.ts"],
+      "@sousaivan/kern/*": ["../../packages/kern/src/*/index.ts"]
     }
   },
   "include": [".astro/types.d.ts", "**/*"],

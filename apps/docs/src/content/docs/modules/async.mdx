@@ -13,7 +13,7 @@ JavaScript represents a future result with a `Promise`. `await` pauses the curre
 until that promise succeeds or fails. It does not freeze the whole browser or server.
 
 ```ts
-import { sleep } from "@kern/core/async"
+import { sleep } from "@sousaivan/kern/async"
 
 async function greetLater(): Promise<void> {
   console.log("Waiting")
@@ -47,7 +47,7 @@ The runnable console prints the successful wait first, then shows the invalid ne
 Signature: `sleep(milliseconds, options?): Promise<void>`.
 
 ```ts
-import { sleep } from "@kern/core/async"
+import { sleep } from "@sousaivan/kern/async"
 
 await sleep(250)
 console.log("250 ms have passed")
@@ -62,7 +62,7 @@ number. Negative values, `NaN`, and infinities throw `RangeError` before a timer
 Use an `AbortSignal` when the caller may cancel the work:
 
 ```ts
-import { sleep } from "@kern/core/async"
+import { sleep } from "@sousaivan/kern/async"
 
 const controller = new AbortController()
 const waiting = sleep(10_000, { signal: controller.signal })
@@ -83,7 +83,7 @@ If the signal is already aborted, or aborts during the wait, the promise rejects
 `RetryOptions`:
 
 ```ts
-import type { AbortOptions } from "@kern/core/async"
+import type { AbortOptions } from "@sousaivan/kern/async"
 
 const options: AbortOptions = { signal: new AbortController().signal }
 ```
@@ -93,7 +93,7 @@ const options: AbortOptions = { signal: new AbortController().signal }
 Signature: `retry(operation, options?): Promise<T>`.
 
 ```ts
-import { retry } from "@kern/core/async"
+import { retry } from "@sousaivan/kern/async"
 
 const response = await retry(
   async (attempt) => {
@@ -118,7 +118,7 @@ successful result.
 | `signal` | `AbortSignal` | None | Cancel before an attempt or during a delay. |
 
 ```ts
-import { retry } from "@kern/core/async"
+import { retry } from "@sousaivan/kern/async"
 
 const value = await retry(
   (attempt) => {
@@ -148,7 +148,7 @@ work unless the operation supports it.
 `RetryOptions` is useful when an application shares one retry policy:
 
 ```ts
-import { type RetryOptions, retry } from "@kern/core/async"
+import { type RetryOptions, retry } from "@sousaivan/kern/async"
 
 const networkRetry: RetryOptions = {
   attempts: 3,
@@ -164,7 +164,7 @@ await retry(() => fetch("https://example.com/health"), networkRetry)
 Signature: `once(callback): callbackWrapper`.
 
 ```ts
-import { once } from "@kern/core/async"
+import { once } from "@sousaivan/kern/async"
 
 let generated = 0
 const getRequestId = once(() => `request-${++generated}`)
@@ -197,7 +197,7 @@ cached, so all callers share the same pending/fulfilled/rejected promise. Recurs
 before the first call completes throws `Error`.
 
 ```ts
-import { once } from "@kern/core/async"
+import { once } from "@sousaivan/kern/async"
 
 const loadConfiguration = once(async () => {
   const response = await fetch("/configuration.json")
@@ -216,7 +216,7 @@ Debouncing is useful for search fields, autosave, and resize work where only the
 a quiet period matters.
 
 ```ts
-import { debounce } from "@kern/core/async"
+import { debounce } from "@sousaivan/kern/async"
 
 const saved: string[] = []
 const saveSearch = debounce((query: string) => saved.push(query), 300)
@@ -242,7 +242,7 @@ Throttling is useful for scroll, pointer, and progress events where the first up
 immediate but later updates should be limited.
 
 ```ts
-import { throttle } from "@kern/core/async"
+import { throttle } from "@sousaivan/kern/async"
 
 const positions: number[] = []
 const trackScroll = throttle((position: number) => positions.push(position), 100)
@@ -281,7 +281,7 @@ exceptions thrown by `.flush()` or timer execution are not swallowed.
 You can name the wrapper type when passing a scheduled function between modules:
 
 ```ts
-import { debounce, type ScheduledFunction } from "@kern/core/async"
+import { debounce, type ScheduledFunction } from "@sousaivan/kern/async"
 
 const save: ScheduledFunction<[value: string], void> = debounce(
   (value) => console.log(value),
@@ -311,7 +311,7 @@ The delay callback receives the failed one-based attempt number and the thrown v
 with `AbortController` to stop both future attempts and a pending delay:
 
 ```ts
-import { retry } from "@kern/core/async"
+import { retry } from "@sousaivan/kern/async"
 
 const controller = new AbortController()
 

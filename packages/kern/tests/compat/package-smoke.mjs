@@ -1,12 +1,12 @@
-import * as root from "@kern/core"
-import * as arrayModule from "@kern/core/array"
-import * as asyncModule from "@kern/core/async"
-import * as dateModule from "@kern/core/date"
-import * as moneyModule from "@kern/core/money"
-import * as numberModule from "@kern/core/number"
-import * as objectModule from "@kern/core/object"
-import * as stringModule from "@kern/core/string"
-import * as validationModule from "@kern/core/validation"
+import * as root from "@sousaivan/kern"
+import * as arrayModule from "@sousaivan/kern/array"
+import * as asyncModule from "@sousaivan/kern/async"
+import * as dateModule from "@sousaivan/kern/date"
+import * as moneyModule from "@sousaivan/kern/money"
+import * as numberModule from "@sousaivan/kern/number"
+import * as objectModule from "@sousaivan/kern/object"
+import * as stringModule from "@sousaivan/kern/string"
+import * as validationModule from "@sousaivan/kern/validation"
 
 const modules = [
   root,

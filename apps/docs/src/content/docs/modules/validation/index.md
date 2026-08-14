@@ -16,7 +16,7 @@ Imagine a form with one required name. The schema describes the rule; `safeParse
 real value:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Person = object({
   name: string().trim().min(1),
@@ -48,7 +48,7 @@ itself.
 ## Your first schema
 
 ```ts
-import { enumeration, number, object, string } from "@kern/core/validation"
+import { enumeration, number, object, string } from "@sousaivan/kern/validation"
 
 const User = object({
   name: string().trim().min(2),
@@ -83,7 +83,7 @@ parsed return value.
 Use `safeParse()` when invalid input is an expected outcome:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const Login = object({ email: string().email() })
 const goodResult = Login.safeParse({ email: "ada@example.com" })
@@ -99,7 +99,7 @@ console.log("Failure:", badResult)
 Use `parse()` when invalid input means the current operation cannot continue:
 
 ```ts
-import { object, string, ValidationError } from "@kern/core/validation"
+import { object, string, ValidationError } from "@sousaivan/kern/validation"
 
 const Login = object({ email: string().email() })
 
@@ -129,7 +129,7 @@ Both methods infer the same output and accept `{ abortEarly?, maxIssues? }`.
 ## Schemas do not coerce by default
 
 ```ts
-import { number } from "@kern/core/validation"
+import { number } from "@sousaivan/kern/validation"
 
 console.log("Success:", number().safeParse(42))
 console.log("Failure:", number().safeParse("42"))
@@ -162,7 +162,7 @@ Every schema supports `.optional()`, `.nullable()`, `.default()`, `.refine()`, `
 Object schemas strip unknown keys by default:
 
 ```ts
-import { object, string } from "@kern/core/validation"
+import { object, string } from "@sousaivan/kern/validation"
 
 const User = object({ name: string() })
 
@@ -204,7 +204,7 @@ preserved when object schemas are composed.
 Defaults and transforms can make a schema's accepted input different from its parsed output:
 
 ```ts
-import { type InferInput, type InferOutput, object, string } from "@kern/core/validation"
+import { type InferInput, type InferOutput, object, string } from "@sousaivan/kern/validation"
 
 const Settings = object({
   theme: string().default("system"),

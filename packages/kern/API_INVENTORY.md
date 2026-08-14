@@ -7,16 +7,16 @@ runtime exports, and type exports; it is not an automated API snapshot.
 
 | Subpath | Runtime exports | Type exports |
 | --- | --- | --- |
-| `@kern/core/array` | `chunk`, `first`, `groupBy`, `last`, `partition`, `unique`, `uniqueBy`, `withoutFalsy` | `NonFalsy` |
-| `@kern/core/async` | `debounce`, `once`, `retry`, `sleep`, `throttle` | `AbortOptions`, `RetryOptions`, `ScheduledFunction` |
-| `@kern/core/date` | `addDays`, `addMonths`, `addYears`, `differenceInCalendarDays`, `endOfDay`, `formatDate`, `formatDateTime`, `formatRelativeTime`, `isAfter`, `isBefore`, `isSameDay`, `isSameInstant`, `isToday`, `isTomorrow`, `isValidDate`, `isYesterday`, `startOfDay`, `subtractDays`, `subtractMonths`, `subtractYears`, `toUTCISODate` | `DateFormatOptions`, `RelativeFormatOptions` |
-| `@kern/core/money` | `addMoney`, `allocateMoney`, `applyDiscount`, `currencyMinorUnitDigits`, `formatMoney`, `multiplyMoney`, `parseMoney`, `percentageOf`, `roundMoney`, `subtractMoney`, `sumMoney` | `MoneyFormatOptions`, `MoneyParseOptions`, `MoneyRoundingMode`, `MoneyRoundingOptions` |
-| `@kern/core/number` | `clamp`, `formatCompact`, `formatNumber`, `formatPercentage`, `isBetween`, `percentageOfTotal`, `round` | `BetweenOptions`, `NumberFormatOptions` |
-| `@kern/core/object` | `deepFreeze`, `hasOwn`, `hasOwnPath`, `omit`, `pick` | `DeepReadonly`, `ObjectPath` |
-| `@kern/core/string` | `camelCase`, `capitalize`, `isBlank`, `kebabCase`, `slugify`, `snakeCase`, `truncate`, `uncapitalize` | `StringCaseOptions` |
-| `@kern/core/validation` | `ValidationError`, `array`, `boolean`, `date`, `enumeration`, `literal`, `number`, `object`, `record`, `string`, `tuple`, `union` | `AnySchema`, `Infer`, `InferInput`, `InferOutput`, `NumberSchema`, `ObjectInput`, `ObjectOutput`, `ObjectSchema`, `ParseOptions`, `PathSegment`, `RefinementOptions`, `SafeParseFailure`, `SafeParseResult`, `SafeParseSuccess`, `Schema`, `SchemaPresence`, `Shape`, `StandardSchemaV1`, `StringSchema`, `UnknownKeyPolicy`, `ValidationIssue`, `ValueKind` |
-| `@kern/core` | Combined named re-exports of the module surfaces above; no unique root-only export | Combined type re-exports of the module surfaces above |
-| `@kern/core/package.json` | Package metadata | — |
+| `@sousaivan/kern/array` | `chunk`, `first`, `groupBy`, `last`, `partition`, `unique`, `uniqueBy`, `withoutFalsy` | `NonFalsy` |
+| `@sousaivan/kern/async` | `debounce`, `once`, `retry`, `sleep`, `throttle` | `AbortOptions`, `RetryOptions`, `ScheduledFunction` |
+| `@sousaivan/kern/date` | `addDays`, `addMonths`, `addYears`, `differenceInCalendarDays`, `endOfDay`, `formatDate`, `formatDateTime`, `formatRelativeTime`, `isAfter`, `isBefore`, `isSameDay`, `isSameInstant`, `isToday`, `isTomorrow`, `isValidDate`, `isYesterday`, `startOfDay`, `subtractDays`, `subtractMonths`, `subtractYears`, `toUTCISODate` | `DateFormatOptions`, `RelativeFormatOptions` |
+| `@sousaivan/kern/money` | `addMoney`, `allocateMoney`, `applyDiscount`, `currencyMinorUnitDigits`, `formatMoney`, `multiplyMoney`, `parseMoney`, `percentageOf`, `roundMoney`, `subtractMoney`, `sumMoney` | `MoneyFormatOptions`, `MoneyParseOptions`, `MoneyRoundingMode`, `MoneyRoundingOptions` |
+| `@sousaivan/kern/number` | `clamp`, `formatCompact`, `formatNumber`, `formatPercentage`, `isBetween`, `percentageOfTotal`, `round` | `BetweenOptions`, `NumberFormatOptions` |
+| `@sousaivan/kern/object` | `deepFreeze`, `hasOwn`, `hasOwnPath`, `omit`, `pick` | `DeepReadonly`, `ObjectPath` |
+| `@sousaivan/kern/string` | `camelCase`, `capitalize`, `isBlank`, `kebabCase`, `slugify`, `snakeCase`, `truncate`, `uncapitalize` | `StringCaseOptions` |
+| `@sousaivan/kern/validation` | `ValidationError`, `array`, `boolean`, `date`, `enumeration`, `literal`, `number`, `object`, `record`, `string`, `tuple`, `union` | `AnySchema`, `Infer`, `InferInput`, `InferOutput`, `NumberSchema`, `ObjectInput`, `ObjectOutput`, `ObjectSchema`, `ParseOptions`, `PathSegment`, `RefinementOptions`, `SafeParseFailure`, `SafeParseResult`, `SafeParseSuccess`, `Schema`, `SchemaPresence`, `Shape`, `StandardSchemaV1`, `StringSchema`, `UnknownKeyPolicy`, `ValidationIssue`, `ValueKind` |
+| `@sousaivan/kern` | Combined named re-exports of the module surfaces above; no unique root-only export | Combined type re-exports of the module surfaces above |
+| `@sousaivan/kern/package.json` | Package metadata | — |
 
 ## Resolved before 1.0
 
