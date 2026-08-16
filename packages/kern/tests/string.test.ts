@@ -14,7 +14,10 @@ describe("string", () => {
   test("changes word casing", () => {
     expect(capitalize("hello")).toBe("Hello")
     expect(uncapitalize("Hello")).toBe("hello")
+    expect(capitalize("𐐨ello")).toBe("𐐀ello")
+    expect(uncapitalize("𐐀ello")).toBe("𐐨ello")
     expect(camelCase("HTTP response-code")).toBe("httpResponseCode")
+    expect(camelCase("𐐨ELLO world")).toBe("𐐨ElloWorld")
     expect(kebabCase("helloWorld value")).toBe("hello-world-value")
     expect(snakeCase("helloWorld value")).toBe("hello_world_value")
   })
@@ -34,6 +37,7 @@ describe("string", () => {
     expect(truncate("👨‍👩‍👧‍👦ab", 2)).toBe("👨‍👩‍👧‍👦…")
     expect(truncate("🇱🇺🇫🇷x", 2)).toBe("🇱🇺…")
     expect(truncate("hello", 1, "👩‍💻")).toBe("👩‍💻")
+    expect(truncate("line\r\nline", 6, "...")).toBe("lin...")
     expect(truncate("hello", 0)).toBe("")
     expect(truncate("hello", 10)).toBe("hello")
     expect(() => truncate("hello", -1)).toThrow(RangeError)

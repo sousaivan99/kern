@@ -50,6 +50,8 @@ export default defineConfig({
           label: "Measurements",
           items: [
             { label: "Package size", slug: "measurements/package-size" },
+            { label: "Runtime benchmarks", slug: "measurements/runtime-benchmarks" },
+            { label: "Module comparisons", slug: "measurements/module-benchmarks" },
             { label: "Validation benchmarks", slug: "measurements/validation-benchmarks" },
           ],
         },
@@ -60,6 +62,10 @@ export default defineConfig({
             { label: "Native first", slug: "concepts/native-first" },
             { label: "Tree-shaking", slug: "concepts/tree-shaking" },
           ],
+        },
+        {
+          label: "Advanced",
+          items: [{ label: "Performance internals", slug: "advanced/performance-internals" }],
         },
         {
           label: "Module guides",

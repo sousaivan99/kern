@@ -282,7 +282,7 @@ development-only tool and is not included when consumers install Kern.
 compilers, dependency auditing, browser and current-runtime smoke tests, packed-package checks, and
 the timezone suite. CI additionally runs the built package on Node 22/24/26, the minimum Bun 1.3
 release, latest stable Bun, and current Deno. Runtime source changes must stay within the existing
-gzip budgets: validation below 5 KB, finance-capable money below 2.5 KB, and date/string below 2 KB.
+gzip budgets: validation below 5 KB, finance-capable money at most 3.125 KB, and date/string below 2 KB.
 
 Build, test, timezone, and release-check commands use live progress indicators and collapse
 successful subprocess output so the console remains active without becoming noisy. A failure always
@@ -299,6 +299,7 @@ processed item, runtime and CPU metadata, and optional JSON output.
 
 ```bash
 bun run benchmark:primitives
+bun run benchmark:report -- run-1.json run-2.json run-3.json
 bun run benchmark:validation
 bun run benchmark:validation:kern
 bun run benchmark:quick

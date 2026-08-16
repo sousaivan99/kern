@@ -132,6 +132,7 @@ export interface InternalSchema<
   Input = Output,
   Presence extends SchemaPresence = "required",
 > extends Schema<Output, Input, Presence> {
+  readonly _fast: FastValidator<Output> | undefined
   readonly _run: Validator<Output>
   readonly _presence: Presence
 }
@@ -144,27 +145,28 @@ export type InferInput<S extends Schema<unknown, unknown, SchemaPresence>> =
 
 export type Infer<S extends Schema<unknown, unknown, SchemaPresence>> = InferOutput<S>
 
-export type InternalResult<T> =
-  | { readonly success: true; readonly data: T }
-  | { readonly success: false }
+/** @internal Unique failure marker that cannot collide with consumer data. */
+export const FAILURE = Symbol("kern.validation.failure")
 
+/** @internal Package-private validator result. */
+export type InternalResult<T> = T | typeof FAILURE
+
+/** @internal Allocation-light validator used only by compatible built-in schema graphs. */
+export type FastValidator<T> = (input: unknown) => InternalResult<T>
+
+/** @internal Mutable state shared by nested validators. */
 export interface ValidationContext {
   readonly issues: ValidationIssue[]
   readonly limit: number
+  path: PathSegment[] | undefined
 }
 
-export type Validator<T> = (
-  input: unknown,
-  path: readonly PathSegment[],
-  context: ValidationContext,
-) => InternalResult<T>
+/** @internal Package-private validator signature. */
+export type Validator<T> = (input: unknown, context: ValidationContext) => InternalResult<T>
 
 export type AnySchema = Schema<unknown, unknown, SchemaPresence>
 
-export function success<T>(data: T): InternalResult<T> {
-  return { success: true, data }
-}
-
+/** @internal Describes an input without retaining it in an issue. */
 export function valueKind(value: unknown): ValueKind {
   if (value === null) return "null"
   if (Array.isArray(value)) return "array"
@@ -173,10 +175,7 @@ export function valueKind(value: unknown): ValueKind {
   return typeof value
 }
 
-export function addIssue(context: ValidationContext, issue: ValidationIssue): void {
-  if (context.issues.length < context.limit) context.issues.push(issue)
-}
-
+/** @internal Reports whether nested validation may emit another issue. */
 export function hasIssueCapacity(context: ValidationContext): boolean {
   return context.issues.length < context.limit
 }

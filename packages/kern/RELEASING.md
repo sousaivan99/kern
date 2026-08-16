@@ -11,10 +11,12 @@
    the pull request.
 5. Merge only after the required `check` job passes.
 6. The merge commit runs CI again on `prod`.
-7. `.github/workflows/release.yml` receives that successful CI result and checks out the exact
-   tested commit. It skips publication when no package-producing input changed since the latest
-   stable release tag. Otherwise, it verifies that the stable version is new, verifies the package
-   artifact, publishes it to npm with provenance, and creates the matching GitHub tag and release.
+7. CI compares the package's publishable inputs with the latest stable release tag. Documentation
+   application and repository-tooling-only changes do not start `.github/workflows/release.yml`.
+   When package inputs changed and the complete CI gate succeeds, CI dispatches the release
+   workflow with the exact tested commit. The release verifies that the stable version is new,
+   verifies the package artifact, publishes it to npm with provenance, and creates the matching
+   GitHub tag and release.
 
 Configure a GitHub ruleset for `prod` that requires pull requests, blocks direct pushes and force
 pushes, and requires the `check` status. The workflow intentionally does not guess whether an

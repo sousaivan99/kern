@@ -1,28 +1,22 @@
 import { decimalRatio, type MoneyRoundingOptions, roundRatio } from "./rounding.js"
+import { assertMinorUnits, checkedNumber } from "./shared.js"
 
 export type { MoneyRoundingMode, MoneyRoundingOptions } from "./rounding.js"
-
-const assertMinorUnits = (value: number): void => {
-  if (!Number.isSafeInteger(value)) {
-    throw new RangeError("Money values must be safe integers in minor units")
-  }
-}
-
-const checkedNumber = (value: bigint): number => {
-  const output = Number(value)
-  if (!Number.isSafeInteger(output)) {
-    throw new RangeError("Money result exceeds the safe integer range")
-  }
-  return output
-}
 
 const scale = (
   minorUnits: number,
   factor: number,
   denominatorScale: bigint,
-  options: MoneyRoundingOptions,
+  options?: MoneyRoundingOptions,
 ): number => {
   assertMinorUnits(minorUnits)
+  if (denominatorScale === 1n && options === undefined && Number.isFinite(factor)) {
+    const product = minorUnits * factor
+    const rounded = product < 0 ? -Math.round(-product) : Math.round(product)
+    if (Math.abs(product) < 1e9 && Math.abs(Math.abs(product - rounded) - 0.5) > 1e-6) {
+      return rounded || 0
+    }
+  }
   const [numerator, denominator] = decimalRatio(factor)
   return checkedNumber(
     roundRatio(BigInt(minorUnits) * numerator, denominator * denominatorScale, options),
@@ -64,7 +58,7 @@ export const roundMoney = (minorUnits: number, options: MoneyRoundingOptions = {
 export const multiplyMoney = (
   minorUnits: number,
   multiplier: number,
-  options: MoneyRoundingOptions = {},
+  options?: MoneyRoundingOptions,
 ): number => scale(minorUnits, multiplier, 1n, options)
 
 /** Returns a percentage of minor units. `percentage` uses percentage points: 15 means 15%. */
@@ -94,41 +88,62 @@ export const allocateMoney = (minorUnits: number, ratios: readonly number[]): nu
   assertMinorUnits(minorUnits)
   if (ratios.length === 0) throw new RangeError("Money allocation ratios cannot be empty")
 
-  let ratioTotal = 0n
+  let numberTotal = 0
+  let numberTotalIsSafe = true
+  let hasPositiveRatio = false
   const weights = ratios.map((ratio) => {
     if (!Number.isSafeInteger(ratio) || ratio < 0) {
       throw new RangeError("Money allocation ratios must be non-negative safe integers")
     }
-    const weight = BigInt(ratio)
-    ratioTotal += weight
-    return weight
+    if (ratio > 0) hasPositiveRatio = true
+    if (numberTotalIsSafe) {
+      const nextTotal = numberTotal + ratio
+      if (Number.isSafeInteger(nextTotal)) numberTotal = nextTotal
+      else numberTotalIsSafe = false
+    }
+    return ratio
   })
-  if (ratioTotal === 0n) throw new RangeError("Money allocation requires a positive ratio")
+  if (!hasPositiveRatio) throw new RangeError("Money allocation requires a positive ratio")
 
   const negative = minorUnits < 0
-  const absolute = BigInt(negative ? -minorUnits : minorUnits)
-  const shares = weights.map((weight, index) => {
-    const numerator = absolute * weight
-    return { index, value: numerator / ratioTotal, remainder: numerator % ratioTotal, weight }
-  })
-  let distributed = shares.reduce((total, share) => total + share.value, 0n)
-  let remaining = absolute - distributed
-  const ranked = shares
-    .filter((share) => share.weight > 0n)
-    .sort((left, right) =>
-      left.remainder === right.remainder
-        ? left.index - right.index
-        : left.remainder > right.remainder
-          ? -1
-          : 1,
-    )
+  const absoluteNumber = negative ? -minorUnits : minorUnits
+  if (numberTotalIsSafe && absoluteNumber % numberTotal === 0) {
+    const factor = absoluteNumber / numberTotal
+    return weights.map((weight) => (weight === 0 ? 0 : (negative ? -weight : weight) * factor))
+  }
 
-  for (let index = 0; remaining > 0n; index += 1) {
-    const share = ranked[index]
-    if (!share) throw new RangeError("Unable to allocate money exactly")
-    share.value += 1n
-    distributed += 1n
-    remaining -= 1n
+  const absolute = BigInt(absoluteNumber)
+  const ratioTotal = numberTotalIsSafe
+    ? BigInt(numberTotal)
+    : weights.reduce((total, weight) => total + BigInt(weight), 0n)
+  const shares = weights.map((weight, index) => {
+    const bigintWeight = BigInt(weight)
+    const numerator = absolute * bigintWeight
+    return {
+      index,
+      value: numerator / ratioTotal,
+      remainder: numerator % ratioTotal,
+      weight: bigintWeight,
+    }
+  })
+  let remaining = absolute - shares.reduce((total, share) => total + share.value, 0n)
+  if (remaining > 0n) {
+    const ranked = shares
+      .filter((share) => share.weight > 0n)
+      .sort((left, right) =>
+        left.remainder === right.remainder
+          ? left.index - right.index
+          : left.remainder > right.remainder
+            ? -1
+            : 1,
+      )
+
+    for (let index = 0; remaining > 0n; index += 1) {
+      const share = ranked[index]
+      if (!share) throw new RangeError("Unable to allocate money exactly")
+      share.value += 1n
+      remaining -= 1n
+    }
   }
 
   return shares.map((share) => checkedNumber(negative ? -share.value : share.value))

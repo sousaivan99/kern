@@ -1,22 +1,47 @@
-import { normalizeLocales } from "../intl.js"
+import { createIntlCache, intlConfiguration, normalizeLocales } from "../intl.js"
+import { assertMinorUnits } from "./shared.js"
 
 /** Native number-format options with `locale` colocated; currency and style are fixed by Kern. */
 export interface MoneyFormatOptions extends Omit<Intl.NumberFormatOptions, "currency" | "style"> {
   readonly locale?: Intl.LocalesArgument
 }
 
-/** Returns the native `Intl` fraction-digit metadata for an ISO 4217 currency code. */
-export const currencyMinorUnitDigits = (
-  currency: string,
-  locale?: Intl.LocalesArgument,
-): number => {
-  const digits = new Intl.NumberFormat(normalizeLocales(locale), {
-    currency,
-    style: "currency",
-  }).resolvedOptions().maximumFractionDigits
-  if (digits === undefined) throw new RangeError(`Unable to determine minor units for ${currency}`)
-  return digits
+interface CurrencyFormatter {
+  readonly digits: number
+  readonly formatter: Intl.NumberFormat
 }
+
+const currencyFormats = createIntlCache<CurrencyFormatter>()
+
+const createCurrencyFormatter = (
+  currency: string,
+  locale: string | string[] | undefined,
+  options: Intl.NumberFormatOptions,
+): CurrencyFormatter => {
+  const formatter = new Intl.NumberFormat(locale, { ...options, currency, style: "currency" })
+  const digits = formatter.resolvedOptions().maximumFractionDigits
+  if (digits === undefined) throw new RangeError(`Unable to determine minor units for ${currency}`)
+  return { digits, formatter }
+}
+
+const currencyFormatter = (currency: string, options: MoneyFormatOptions): CurrencyFormatter => {
+  if (currencyFormats.bypass()) {
+    const { locale, ...formatOptions } = options
+    return createCurrencyFormatter(currency, normalizeLocales(locale), formatOptions)
+  }
+  const configuration = typeof currency === "string" ? intlConfiguration(options) : undefined
+  if (!configuration) {
+    const { locale, ...formatOptions } = options
+    return createCurrencyFormatter(currency, normalizeLocales(locale), formatOptions)
+  }
+  return currencyFormats.get(JSON.stringify([currency, configuration.key]), () =>
+    createCurrencyFormatter(currency, configuration.locale, configuration.options),
+  )
+}
+
+/** Returns the native `Intl` fraction-digit metadata for an ISO 4217 currency code. */
+export const currencyMinorUnitDigits = (currency: string, locale?: Intl.LocalesArgument): number =>
+  currencyFormatter(currency, { locale }).digits
 
 const exactDecimal = (minorUnits: number, digits: number): string => {
   const negative = minorUnits < 0
@@ -38,16 +63,8 @@ export const formatMoney = (
   currency: string,
   options: MoneyFormatOptions = {},
 ): string => {
-  if (!Number.isSafeInteger(minorUnits)) {
-    throw new RangeError("Money values must be safe integers in minor units")
-  }
-  const { locale, ...numberFormatOptions } = options
-  const digits = currencyMinorUnitDigits(currency, locale)
-  const formatter = new Intl.NumberFormat(normalizeLocales(locale), {
-    ...numberFormatOptions,
-    currency,
-    style: "currency",
-  })
+  assertMinorUnits(minorUnits)
+  const { digits, formatter } = currencyFormatter(currency, options)
   // ECMA-402 accepts decimal strings exactly; current TypeScript Intl declarations still omit them.
   const formatExact = formatter.format as unknown as (value: string) => string
   return formatExact(exactDecimal(minorUnits, digits))

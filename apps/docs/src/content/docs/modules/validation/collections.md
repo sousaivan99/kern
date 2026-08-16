@@ -115,6 +115,8 @@ safe own data properties rather than assigned through the legacy prototype sette
 ## Compose object schemas
 
 Object composition is immutable. Every method returns a new schema and leaves the source unchanged.
+The field shape is also snapshotted when `object(shape)` is called. Mutating the caller's original
+shape object later does not alter the schema; create a new schema explicitly when fields must change.
 
 ```ts
 import { boolean, number, object, string } from "@sousaivan/kern/validation"

@@ -28,9 +28,7 @@ export const sleep = (milliseconds: number, options: AbortOptions = {}): Promise
     }, milliseconds)
     const onAbort = (): void => {
       clearTimeout(timer)
-      reject(
-        signal ? abortReason(signal) : new DOMException("The operation was aborted", "AbortError"),
-      )
+      reject(abortReason(signal as AbortSignal))
     }
     signal?.addEventListener("abort", onAbort, { once: true })
   })
@@ -80,24 +78,22 @@ export const retry = async <T>(
 export const once = <Arguments extends unknown[], Result>(
   callback: (...arguments_: Arguments) => Result,
 ): ((...arguments_: Arguments) => Result) => {
-  type State =
-    | { readonly kind: "idle" }
-    | { readonly kind: "running" }
-    | { readonly kind: "returned"; readonly result: Result }
-    | { readonly error: unknown; readonly kind: "threw" }
-  let state: State = { kind: "idle" }
+  let state = 0
+  let result: Result
+  let failure: unknown
   return (...arguments_: Arguments): Result => {
-    if (state.kind === "returned") return state.result
-    if (state.kind === "threw") throw state.error
-    if (state.kind === "running") throw new Error("A once callback cannot be invoked recursively")
+    if (state === 2) return result
+    if (state === 3) throw failure
+    if (state === 1) throw new Error("A once callback cannot be invoked recursively")
 
-    state = { kind: "running" }
+    state = 1
     try {
-      const result = callback(...arguments_)
-      state = { kind: "returned", result }
+      result = callback(...arguments_)
+      state = 2
       return result
     } catch (error) {
-      state = { error, kind: "threw" }
+      failure = error
+      state = 3
       throw error
     }
   }

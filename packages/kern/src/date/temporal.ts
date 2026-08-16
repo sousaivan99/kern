@@ -32,21 +32,16 @@ interface TemporalNamespace {
 const isObject = (value: unknown): value is object =>
   (typeof value === "object" && value !== null) || typeof value === "function"
 
-const callable = (value: object, key: PropertyKey): boolean => {
-  try {
-    return typeof Reflect.get(value, key) === "function"
-  } catch {
-    return false
-  }
-}
+const callable = (value: object, key: PropertyKey): boolean =>
+  typeof Reflect.get(value, key) === "function"
 
-let cachedTemporal: { readonly namespace: TemporalNamespace; readonly source: object } | undefined
+let cachedTemporal: TemporalNamespace | undefined
 
 const temporalNamespace = (): TemporalNamespace | undefined => {
   try {
     const candidate = (globalThis as { readonly Temporal?: unknown }).Temporal
     if (!isObject(candidate)) return undefined
-    if (cachedTemporal?.source === candidate) return cachedTemporal.namespace
+    if (cachedTemporal === candidate) return cachedTemporal
     const instant = Reflect.get(candidate, "Instant") as unknown
     const now = Reflect.get(candidate, "Now") as unknown
     if (!isObject(instant) || !isObject(now)) return undefined
@@ -85,7 +80,7 @@ const zonedDateTime = (date: Date): TemporalZonedDateTime | undefined => {
     ) {
       return undefined
     }
-    cachedTemporal = { namespace: temporal, source: temporal }
+    cachedTemporal = temporal
     return zoned as unknown as TemporalZonedDateTime
   } catch {
     return undefined

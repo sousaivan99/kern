@@ -20,6 +20,16 @@ const toolingModules = join(repositoryRoot, "tooling", "node_modules")
 const temporaryRoot = await mkdtemp(join(tmpdir(), "kern-frameworks-"))
 
 const tutorialPages = ["javascript-typescript.md", "vue.md", "nuxt.md", "react.md"] as const
+const kernSubpaths = [
+  "array",
+  "async",
+  "date",
+  "money",
+  "number",
+  "object",
+  "string",
+  "validation",
+] as const
 const marker =
   /<!-- framework-test: ([a-z]+\/[a-zA-Z0-9._/-]+) -->\r?\n```[^\r\n]*\r?\n([\s\S]*?)\r?\n```/gu
 
@@ -39,6 +49,19 @@ const readTutorialFiles = async (): Promise<readonly TutorialFile[]> => {
   const files: TutorialFile[] = []
   for (const page of tutorialPages) {
     const source = await readFile(join(docsRoot, page), "utf8")
+    const missingSubpaths = kernSubpaths.filter(
+      (subpath) => !source.includes(`from "@sousaivan/kern/${subpath}"`),
+    )
+    if (missingSubpaths.length > 0) {
+      throw new Error(`${page} does not exercise Kern subpaths: ${missingSubpaths.join(", ")}`)
+    }
+    const missingSections = kernSubpaths.filter((subpath) => {
+      const label = `${subpath.charAt(0).toUpperCase()}${subpath.slice(1)}`
+      return !source.includes(`## ${label}:`)
+    })
+    if (missingSections.length > 0) {
+      throw new Error(`${page} does not teach Kern modules: ${missingSections.join(", ")}`)
+    }
     for (const match of source.matchAll(marker)) {
       const path = match[1]
       const code = match[2]
@@ -49,11 +72,39 @@ const readTutorialFiles = async (): Promise<readonly TutorialFile[]> => {
 
   const expected = [
     "nuxt/app/app.vue",
+    "nuxt/app/components/examples/ArrayExample.vue",
+    "nuxt/app/components/examples/AsyncExample.vue",
+    "nuxt/app/components/examples/DateExample.vue",
+    "nuxt/app/components/examples/MoneyExample.vue",
+    "nuxt/app/components/examples/NumberExample.vue",
+    "nuxt/app/components/examples/ObjectExample.vue",
+    "nuxt/app/components/examples/StringExample.vue",
     "nuxt/server/api/contact.post.ts",
     "react/src/App.tsx",
+    "react/src/examples/ArrayExample.tsx",
+    "react/src/examples/AsyncExample.tsx",
+    "react/src/examples/DateExample.tsx",
+    "react/src/examples/MoneyExample.tsx",
+    "react/src/examples/NumberExample.tsx",
+    "react/src/examples/ObjectExample.tsx",
+    "react/src/examples/StringExample.tsx",
+    "vanilla/examples/array.mjs",
+    "vanilla/examples/async.mjs",
+    "vanilla/examples/date.mjs",
+    "vanilla/examples/money.mjs",
+    "vanilla/examples/number.mjs",
+    "vanilla/examples/object.mjs",
+    "vanilla/examples/string.mjs",
     "vanilla/javascript.mjs",
     "vanilla/typescript.ts",
     "vue/src/App.vue",
+    "vue/src/examples/ArrayExample.vue",
+    "vue/src/examples/AsyncExample.vue",
+    "vue/src/examples/DateExample.vue",
+    "vue/src/examples/MoneyExample.vue",
+    "vue/src/examples/NumberExample.vue",
+    "vue/src/examples/ObjectExample.vue",
+    "vue/src/examples/StringExample.vue",
   ]
   const actual = files.map((file) => file.path).sort()
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
@@ -143,9 +194,6 @@ const exerciseFrontend = async (name: string, fixture: string): Promise<void> =>
     if ((await status.textContent()) !== "Ready: ada@example.com") {
       throw new Error(`${name} did not render its initial validation result`)
     }
-    const total = page.getByText("Total: €129.99", { exact: true })
-    if ((await total.count()) !== 1) throw new Error(`${name} did not render the formatted total`)
-
     await page.locator('input[name="email"]').fill("not-an-email")
     await page.getByText("Invalid email address", { exact: true }).waitFor()
     await page.locator('input[name="email"]').fill("grace@example.com")
@@ -205,7 +253,7 @@ const configureVue = async (root: string): Promise<void> => {
   await write(
     root,
     "src/server.ts",
-    'import { createSSRApp } from "vue"\nimport { renderToString } from "vue/server-renderer"\nimport App from "./App.vue"\n\nconst html = await renderToString(createSSRApp(App))\nif (!html.includes("Ready: ada@example.com") || !html.includes("€129.99")) {\n  throw new Error("Unexpected Vue SSR output: " + html)\n}\n',
+    'import { createSSRApp } from "vue"\nimport { renderToString } from "vue/server-renderer"\nimport App from "./App.vue"\n\nconst html = await renderToString(createSSRApp(App))\nif (!html.includes("Ready: ada@example.com")) throw new Error("Unexpected Vue SSR output: " + html)\n',
   )
   await write(
     root,
@@ -236,7 +284,7 @@ const configureReact = async (root: string): Promise<void> => {
   await write(
     root,
     "src/server.tsx",
-    'import { renderToString } from "react-dom/server"\nimport { App } from "./App"\n\nconst html = renderToString(<App />)\nif (!html.includes("Ready: ada@example.com") || !html.includes("€129.99")) {\n  throw new Error("Unexpected React SSR output: " + html)\n}\n',
+    'import { renderToString } from "react-dom/server"\nimport { App } from "./App"\n\nconst html = renderToString(<App />)\nif (!html.includes("Ready: ada@example.com")) throw new Error("Unexpected React SSR output: " + html)\n',
   )
   await write(
     root,
@@ -317,7 +365,7 @@ const request = async (path, init) => {
 try {
   const page = await request("/")
   const html = await page.text()
-  if (!page.ok || !html.includes("Nuxt checkout") || !html.includes("€129.99")) {
+  if (!page.ok || !html.includes("Nuxt contact form") || !html.includes("Ready: ada@example.com")) {
     throw new Error(\`Unexpected Nuxt SSR response (\${page.status}): \${html}\`)
   }
 
@@ -443,7 +491,13 @@ try {
   const binary = (fixture: string, ...path: readonly string[]): string =>
     join(fixture, "node_modules", ...path)
 
-  await run("Run JavaScript tutorial", [node, "javascript.mjs"], vanilla)
+  const vanillaJavaScriptFiles = tutorialFiles
+    .filter(({ path }) => path.startsWith("vanilla/") && path.endsWith(".mjs"))
+    .map(({ path }) => path.slice("vanilla/".length))
+    .sort()
+  for (const file of vanillaJavaScriptFiles) {
+    await run(`Run JavaScript tutorial ${file}`, [node, file], vanilla)
+  }
   await run(
     "Type-check TypeScript tutorial",
     [node, binary(vanilla, "typescript", "bin", "tsc"), "--noEmit"],
@@ -454,7 +508,7 @@ try {
     [
       process.execPath,
       "build",
-      "javascript.mjs",
+      ...vanillaJavaScriptFiles,
       "typescript.ts",
       "--outdir",
       "dist",

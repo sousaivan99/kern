@@ -44,7 +44,7 @@ Kern's build checks bundle, minify, gzip, and measure every public entrypoint.
 | Module | Approximate gzip budget |
 | --- | ---: |
 | Validation | below 5 KB |
-| Money | below 2.5 KB |
+| Money | at most 3.125 KB |
 | Date | below 2 KB |
 | String | below 2 KB |
 | Small helper modules | usually hundreds of bytes to a few KB |

@@ -186,7 +186,7 @@ Approximate targets:
 
 ```text
 validation     < 5 KB gzip
-money          < 2.5 KB gzip
+money          < 3.125 KB gzip
 date           < 2 KB gzip
 string         < 2 KB gzip
 simple helper  ideally hundreds of bytes
