@@ -8,6 +8,7 @@ const steps: readonly WorkflowStep[] = [
   { command: run("typecheck"), name: "TypeScript current" },
   { command: run("typecheck:minimum"), name: "TypeScript minimum" },
   { command: run("test:coverage"), name: "Tests and coverage" },
+  { command: run("test:fuzz"), name: "Seeded property and fuzz tests" },
   { command: run("build:kern"), name: "Package build" },
   { command: run("size:check"), name: "Bundle budgets" },
   { command: run("benchmark:quick"), name: "Benchmark smoke" },

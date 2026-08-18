@@ -37,6 +37,7 @@ describe("string", () => {
     expect(truncate("👨‍👩‍👧‍👦ab", 2)).toBe("👨‍👩‍👧‍👦…")
     expect(truncate("🇱🇺🇫🇷x", 2)).toBe("🇱🇺…")
     expect(truncate("hello", 1, "👩‍💻")).toBe("👩‍💻")
+    expect(truncate("😀", 1, "e\u0301")).toBe("😀")
     expect(truncate("line\r\nline", 6, "...")).toBe("lin...")
     expect(truncate("hello", 0)).toBe("")
     expect(truncate("hello", 10)).toBe("hello")

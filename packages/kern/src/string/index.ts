@@ -98,17 +98,18 @@ export const truncate = (value: string, maximumLength: number, omission = "…")
   }
 
   const omissionCharacters = graphemes(omission)
-  if (omissionCharacters.length >= maximumLength) {
-    return omissionCharacters.slice(0, maximumLength).join("")
-  }
-
-  const prefixLength = maximumLength - omissionCharacters.length
+  const prefixLength = Math.max(0, maximumLength - omissionCharacters.length)
   const prefix: string[] = []
   let length = 0
   for (const part of graphemeSegmenter.segment(value)) {
     if (length < prefixLength) prefix.push(part.segment)
     length += 1
-    if (length > maximumLength) return `${prefix.join("")}${omission}`
+    if (length > maximumLength) {
+      if (omissionCharacters.length >= maximumLength) {
+        return omissionCharacters.slice(0, maximumLength).join("")
+      }
+      return `${prefix.join("")}${omission}`
+    }
   }
   return value
 }

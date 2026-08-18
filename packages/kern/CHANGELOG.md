@@ -37,6 +37,11 @@ No unreleased changes yet.
   grapheme behavior and ambiguous decimal ties retain their existing fallbacks; three rotated full
   runs place every selected string workload and rounding within 10% of the fastest competitor.
 
+### Fixed
+
+- Preserved already-bounded Unicode strings when a multi-code-unit grapheme fits the requested
+  truncation length, even when the omission itself fills that length.
+
 ## [1.0.0] - 2026-08-14
 
 ### Added

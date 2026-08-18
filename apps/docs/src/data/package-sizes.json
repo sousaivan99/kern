@@ -44,8 +44,8 @@
       "import": "@sousaivan/kern/array"
     },
     {
-      "gzipBytes": 903,
-      "rawBytes": 1874,
+      "gzipBytes": 913,
+      "rawBytes": 1884,
       "budgetBytes": 2048,
       "id": "string",
       "import": "@sousaivan/kern/string"
@@ -66,8 +66,8 @@
     }
   ],
   "rootEntrypoint": {
-    "gzipBytes": 11634,
-    "rawBytes": 33459,
+    "gzipBytes": 11638,
+    "rawBytes": 33469,
     "budgetBytes": 16384,
     "id": "index",
     "import": "@sousaivan/kern"
