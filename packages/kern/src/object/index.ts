@@ -1,12 +1,22 @@
-const dangerousSegments = new Set<PropertyKey>(["__proto__", "prototype", "constructor"])
+const isDangerousSegment = (segment: PropertyKey): boolean =>
+  segment === "__proto__" || segment === "prototype" || segment === "constructor"
 
 /**
  * Tests an untrusted value for an own property without coercing primitives.
  * Native equivalent after checking for an object: `Object.hasOwn(value, key)`.
  */
 export const hasOwn = (value: unknown, key: PropertyKey): boolean => {
-  if ((typeof value !== "object" && typeof value !== "function") || value === null) return false
-  return Object.hasOwn(value, key)
+  if (Object(value) !== value) return false
+  return Object.hasOwn(value as object, key)
+}
+
+const plainRecordPrototype = (value: object): object | null => {
+  if (Array.isArray(value)) throw new TypeError("Expected a plain object")
+  const prototype = Object.getPrototypeOf(value)
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new TypeError("Expected a plain object")
+  }
+  return prototype
 }
 
 const isPlainRecord = (value: object): boolean => {
@@ -15,16 +25,19 @@ const isPlainRecord = (value: object): boolean => {
   return prototype === Object.prototype || prototype === null
 }
 
-const assertPlainRecord = (value: object): void => {
-  if (!isPlainRecord(value)) throw new TypeError("Expected a plain object")
-}
-
-const createRecordLike = (source: object): object =>
-  Object.getPrototypeOf(source) === null ? Object.create(null) : {}
-
 const copyProperty = (source: object, target: object, key: PropertyKey): void => {
   const descriptor = Object.getOwnPropertyDescriptor(source, key)
-  if (descriptor) Object.defineProperty(target, key, descriptor)
+  if (!descriptor) return
+  if (descriptor.writable && descriptor.enumerable && descriptor.configurable) {
+    ;(target as Record<PropertyKey, unknown>)[key] = descriptor.value
+  } else {
+    Object.defineProperty(target, key, descriptor)
+  }
+}
+
+const finishRecord = <T extends object>(output: T, prototype: object | null): T => {
+  if (prototype !== null) Object.setPrototypeOf(output, prototype)
+  return output
 }
 
 /**
@@ -35,12 +48,10 @@ export const pick = <T extends object, const K extends keyof T>(
   value: T,
   keys: readonly K[],
 ): Pick<T, K> => {
-  assertPlainRecord(value)
-  const output = createRecordLike(value) as Pick<T, K>
-  for (const key of keys) {
-    if (Object.hasOwn(value, key)) copyProperty(value, output, key)
-  }
-  return output
+  const prototype = plainRecordPrototype(value)
+  const output = Object.create(null) as Pick<T, K>
+  for (const key of keys) copyProperty(value, output, key)
+  return finishRecord(output, prototype)
 }
 
 /**
@@ -52,12 +63,12 @@ export const omit = <T extends object, const K extends keyof T>(
   keys: readonly K[],
 ): Omit<T, K> => {
   const omitted = new Set<PropertyKey>(keys)
-  assertPlainRecord(value)
-  const output = createRecordLike(value) as Omit<T, K>
+  const prototype = plainRecordPrototype(value)
+  const output = Object.create(null) as Omit<T, K>
   for (const key of Reflect.ownKeys(value)) {
     if (!omitted.has(key)) copyProperty(value, output, key)
   }
-  return output
+  return finishRecord(output, prototype)
 }
 
 /** A dotted path or an explicit sequence of own-property path segments. */
@@ -69,8 +80,7 @@ export type ObjectPath = string | readonly (string | number)[]
  */
 export const hasOwnPath = (value: unknown, path: ObjectPath): boolean => {
   const segments = typeof path === "string" ? path.split(".") : path
-  if (segments.length === 0 || segments.some((segment) => dangerousSegments.has(segment)))
-    return false
+  if (segments.length === 0 || segments.some(isDangerousSegment)) return false
 
   let current = value
   for (const segment of segments) {
@@ -128,8 +138,9 @@ type DeepFreezable<T> = [unknown] extends [T]
             ? { readonly [K in keyof T]: DeepFreezable<T[K]> }
             : never
 
-const assertDeepFreezable = (value: unknown): void => {
+const collectDeepFreezable = (value: unknown): object[] => {
   const seen = new WeakSet<object>()
+  const objects: object[] = []
   const visit = (candidate: unknown): void => {
     if (typeof candidate === "function") throw new TypeError("Functions cannot be deeply frozen")
     if (candidate === null || typeof candidate !== "object") return
@@ -145,8 +156,10 @@ const assertDeepFreezable = (value: unknown): void => {
       }
       visit(descriptor.value)
     }
+    objects.push(candidate)
   }
   visit(value)
+  return objects
 }
 
 /**
@@ -154,17 +167,6 @@ const assertDeepFreezable = (value: unknown): void => {
  * @throws {TypeError} For functions, accessors, class instances, or mutable built-in objects.
  */
 export const deepFreeze = <T>(value: T & DeepFreezable<T>): DeepReadonly<T> => {
-  assertDeepFreezable(value)
-  const seen = new WeakSet<object>()
-  const freeze = (candidate: unknown): void => {
-    if (typeof candidate !== "object" || candidate === null || seen.has(candidate)) return
-    seen.add(candidate)
-    for (const key of Reflect.ownKeys(candidate)) {
-      const descriptor = Object.getOwnPropertyDescriptor(candidate, key)
-      if (descriptor && "value" in descriptor) freeze(descriptor.value)
-    }
-    Object.freeze(candidate)
-  }
-  freeze(value)
+  for (const object of collectDeepFreezable(value)) Object.freeze(object)
   return value as DeepReadonly<T>
 }

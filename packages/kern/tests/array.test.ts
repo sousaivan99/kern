@@ -66,6 +66,29 @@ describe("array", () => {
     expect(withoutFalsy([0, 1, false, 2, "", "ok", null, undefined])).toEqual([1, 2, "ok"])
   })
 
+  test("preserves native slice observability while chunking", () => {
+    const sparse = new Array<number>(4)
+    sparse[1] = 1
+    sparse[3] = 2
+    const sparseChunks = chunk(sparse, 2)
+    expect(0 in (sparseChunks[0] as number[])).toBe(false)
+    expect(1 in (sparseChunks[0] as number[])).toBe(true)
+
+    class Values<T> extends Array<T> {}
+    const values = new Values(1, 2, 3)
+    expect(chunk(values, 2).every((part) => part instanceof Values)).toBe(true)
+
+    let lengthReads = 0
+    const observed = new Proxy([1, 2, 3], {
+      get(target, key, receiver) {
+        if (key === "length") lengthReads += 1
+        return Reflect.get(target, key, receiver)
+      },
+    })
+    expect(chunk(observed, 2)).toEqual([[1, 2], [3]])
+    expect(lengthReads).toBe(5)
+  })
+
   test("rejects invalid chunk sizes", () => {
     expect(() => chunk([1], 0)).toThrow(RangeError)
   })

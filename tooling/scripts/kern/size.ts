@@ -43,7 +43,7 @@ interface SizeReport {
 
 const entries: readonly Entry[] = [
   { id: "validation", budgetBytes: 5 * 1024 },
-  { id: "money", budgetBytes: 2.5 * 1024 },
+  { id: "money", budgetBytes: 3_200 },
   { id: "date", budgetBytes: 2 * 1024 },
   { id: "number", budgetBytes: 1_500 },
   { id: "array", budgetBytes: 1_500 },

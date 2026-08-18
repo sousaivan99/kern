@@ -1,6 +1,6 @@
-import { normalizeLocales } from "../intl.js"
-import { currencyMinorUnitDigits } from "./format.js"
+import { createIntlCache, intlConfiguration, normalizeLocales } from "../intl.js"
 import { type MoneyRoundingOptions, roundRatio } from "./rounding.js"
+import { checkedNumber } from "./shared.js"
 
 /** Options for strict locale-aware money parsing. */
 export interface MoneyParseOptions extends MoneyRoundingOptions {
@@ -68,20 +68,6 @@ interface Grouping {
   readonly secondary: number
 }
 
-const groupingFor = (locale: Intl.LocalesArgument | undefined): Grouping => {
-  const formatter = new Intl.NumberFormat(normalizeLocales(locale), {
-    maximumFractionDigits: 0,
-    useGrouping: true,
-  })
-  const integers = formatter
-    .formatToParts(123_456_789_012_345)
-    .filter((part) => part.type === "integer")
-    .map((part) => [...part.value].length)
-  const primary = integers.at(-1) ?? 3
-  const secondary = integers.at(-2) ?? primary
-  return { primary, secondary }
-}
-
 const validGroupedInteger = (segments: readonly string[], grouping: Grouping): boolean => {
   if (segments.length < 2) return false
   const last = segments.at(-1)
@@ -105,12 +91,58 @@ const localeNumberSyntax = (locale: Intl.LocalesArgument | undefined) => {
     decimalFormatter.formatToParts(1.1).find((part) => part.type === "decimal")?.value ?? "."
   const group =
     groupedFormatter.formatToParts(123_456).find((part) => part.type === "group")?.value ?? ","
-  const digitFormatter = new Intl.NumberFormat(normalizedLocale, {
-    maximumFractionDigits: 0,
-    useGrouping: false,
+  const digits = Array.from({ length: 10 }, (_, digit) => groupedFormatter.format(digit))
+  const integerWidths = groupedFormatter
+    .formatToParts(123_456_789_012_345)
+    .filter((part) => part.type === "integer")
+    .map((part) => [...part.value].length)
+  const primary = integerWidths.at(-1) ?? 3
+  return {
+    decimal,
+    digits,
+    group,
+    grouping: { primary, secondary: integerWidths.at(-2) ?? primary },
+  }
+}
+
+interface MoneyParser {
+  readonly digits: number
+  readonly negativePattern: RegExp
+  readonly positivePattern: RegExp
+  readonly syntax: ReturnType<typeof localeNumberSyntax>
+}
+
+const moneyParsers = createIntlCache<MoneyParser>()
+
+const createMoneyParser = (
+  currency: string,
+  locale: Intl.LocalesArgument | undefined,
+): MoneyParser => {
+  const formatter = new Intl.NumberFormat(normalizeLocales(locale), {
+    currency,
+    style: "currency",
   })
-  const digits = Array.from({ length: 10 }, (_, digit) => digitFormatter.format(digit))
-  return { decimal, digits, group, grouping: groupingFor(locale) }
+  const digits = formatter.resolvedOptions().maximumFractionDigits
+  if (digits === undefined) throw new RangeError(`Unable to determine minor units for ${currency}`)
+  return {
+    digits,
+    negativePattern: moneyPattern(formatter.formatToParts(-123_456_789.6)),
+    positivePattern: moneyPattern(formatter.formatToParts(123_456_789.6)),
+    syntax: localeNumberSyntax(locale),
+  }
+}
+
+const moneyParser = (
+  currency: string,
+  locale: Intl.LocalesArgument | undefined,
+  options: MoneyParseOptions,
+): MoneyParser => {
+  if (moneyParsers.bypass()) return createMoneyParser(currency, locale)
+  const configuration = typeof currency === "string" ? intlConfiguration(options) : undefined
+  if (!configuration) return createMoneyParser(currency, locale)
+  return moneyParsers.get(JSON.stringify([currency, configuration.locale]), () =>
+    createMoneyParser(currency, configuration.locale),
+  )
 }
 
 const normalizeNumber = (
@@ -153,30 +185,22 @@ export const parseMoney = (
   options: MoneyParseOptions = {},
 ): number => {
   const { locale } = options
-  const formatter = new Intl.NumberFormat(normalizeLocales(locale), {
+  const { digits, negativePattern, positivePattern, syntax } = moneyParser(
     currency,
-    style: "currency",
-  })
-  const positivePattern = moneyPattern(formatter.formatToParts(123_456_789.6))
-  const negativePattern = moneyPattern(formatter.formatToParts(-123_456_789.6))
+    locale,
+    options,
+  )
   const trimmed = input.trim()
   const negativeMatch = negativePattern.exec(trimmed)
   const positiveMatch = negativeMatch ? undefined : positivePattern.exec(trimmed)
   const matchedNumber = (negativeMatch ?? positiveMatch)?.[1]
-  if (!matchedNumber) throw new RangeError("Invalid monetary value")
-
-  const normalized = normalizeNumber(matchedNumber, localeNumberSyntax(locale))
+  const normalized = matchedNumber ? normalizeNumber(matchedNumber, syntax) : undefined
   if (!normalized) throw new RangeError("Invalid monetary value")
 
   const [whole = "0", fraction = ""] = normalized.split(".")
-  const digits = currencyMinorUnitDigits(currency, locale)
   const factor = 10n ** BigInt(digits)
   const denominator = 10n ** BigInt(fraction.length)
   const absoluteNumerator = BigInt(`${whole}${fraction}` || "0") * factor
   const signedNumerator = negativeMatch ? -absoluteNumerator : absoluteNumerator
-  const result = Number(roundRatio(signedNumerator, denominator, options))
-  if (!Number.isSafeInteger(result)) {
-    throw new RangeError("Money result exceeds the safe integer range")
-  }
-  return result
+  return checkedNumber(roundRatio(signedNumerator, denominator, options))
 }

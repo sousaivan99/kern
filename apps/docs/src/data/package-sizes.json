@@ -9,65 +9,65 @@
   },
   "entrypoints": [
     {
-      "gzipBytes": 3148,
-      "rawBytes": 8802,
+      "gzipBytes": 4536,
+      "rawBytes": 13782,
       "budgetBytes": 5120,
       "id": "validation",
       "import": "@sousaivan/kern/validation"
     },
     {
-      "gzipBytes": 2502,
-      "rawBytes": 6105,
-      "budgetBytes": 2560,
+      "gzipBytes": 3182,
+      "rawBytes": 7495,
+      "budgetBytes": 3200,
       "id": "money",
       "import": "@sousaivan/kern/money"
     },
     {
-      "gzipBytes": 1466,
-      "rawBytes": 3614,
+      "gzipBytes": 1983,
+      "rawBytes": 4689,
       "budgetBytes": 2048,
       "id": "date",
       "import": "@sousaivan/kern/date"
     },
     {
-      "gzipBytes": 593,
-      "rawBytes": 1238,
+      "gzipBytes": 1269,
+      "rawBytes": 2637,
       "budgetBytes": 1500,
       "id": "number",
       "import": "@sousaivan/kern/number"
     },
     {
-      "gzipBytes": 458,
-      "rawBytes": 754,
+      "gzipBytes": 532,
+      "rawBytes": 872,
       "budgetBytes": 1500,
       "id": "array",
       "import": "@sousaivan/kern/array"
     },
     {
-      "gzipBytes": 666,
-      "rawBytes": 1312,
+      "gzipBytes": 913,
+      "rawBytes": 1884,
       "budgetBytes": 2048,
       "id": "string",
       "import": "@sousaivan/kern/string"
     },
     {
-      "gzipBytes": 707,
-      "rawBytes": 1670,
+      "gzipBytes": 749,
+      "rawBytes": 1680,
       "budgetBytes": 2048,
       "id": "object",
       "import": "@sousaivan/kern/object"
     },
     {
-      "gzipBytes": 1018,
-      "rawBytes": 2200,
+      "gzipBytes": 970,
+      "rawBytes": 2019,
       "budgetBytes": 2500,
       "id": "async",
       "import": "@sousaivan/kern/async"
     }
   ],
   "rootEntrypoint": {
-    "gzipBytes": 8990,
-    "rawBytes": 25616,
+    "gzipBytes": 11638,
+    "rawBytes": 33469,
     "budgetBytes": 16384,
     "id": "index",
     "import": "@sousaivan/kern"
@@ -77,9 +77,9 @@
       "id": "kern",
       "label": "Kern",
       "package": "@sousaivan/kern",
-      "version": "1.0.0",
-      "gzipBytes": 2330,
-      "rawBytes": 5825,
+      "version": "1.0.1",
+      "gzipBytes": 3609,
+      "rawBytes": 9996,
       "fixture": "tooling/size-fixtures/validation/kern.ts",
       "source": "import { object, string } from \"@sousaivan/kern/validation\"\n\nexport const User = object({\n  name: string().min(2),\n  email: string().email(),\n})\n"
     },

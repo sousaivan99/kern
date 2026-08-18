@@ -1,18 +1,14 @@
 import { createSchema, failure } from "../schema.js"
 import {
+  FAILURE,
   type InternalResult,
-  type PathSegment,
   type Schema,
-  success,
   type ValidationContext,
   valueKind,
 } from "../types.js"
 
-type StringOperation = (
-  value: string,
-  path: readonly PathSegment[],
-  context: ValidationContext,
-) => InternalResult<string>
+type StringOperation = (value: string, context?: ValidationContext) => InternalResult<string>
+type FastStringOperation = (value: string) => InternalResult<string>
 
 /** Fluent transformations and constraints for a non-coercive string schema. */
 export interface StringSchema extends Schema<string> {
@@ -37,95 +33,149 @@ const validLength = (length: number): void => {
   }
 }
 
-const createStringSchema = (operations: readonly StringOperation[] = []): StringSchema => {
-  const base = createSchema<string>((input, path, context) => {
+const baseFastValidator = (input: unknown): InternalResult<string> =>
+  typeof input === "string" ? input : FAILURE
+
+const createStringSchema = (
+  operations: readonly StringOperation[] = [],
+  fastValidator = baseFastValidator,
+): StringSchema => {
+  const validate = (input: unknown, context?: ValidationContext): InternalResult<string> => {
     if (typeof input !== "string") {
-      return failure(context, path, "invalid_type", "Expected a string", {
+      return failure(context, "invalid_type", "Expected a string", {
         expected: "string",
         received: valueKind(input),
       })
     }
-
     let value = input
     for (const operation of operations) {
-      const result = operation(value, path, context)
-      if (!result.success) return result
-      value = result.data
+      const result = operation(value, context)
+      if (result === FAILURE) return FAILURE
+      value = result
     }
-    return success(value)
-  })
+    return value
+  }
+  const base = createSchema<string>(validate, "required", fastValidator, undefined, false)
 
-  const append = (operation: StringOperation): StringSchema =>
-    createStringSchema([...operations, operation])
-  const check = (
-    predicate: (value: string) => boolean,
-    code: string,
-    message: string,
-    details?: Readonly<Record<string, string | number | boolean | null>>,
-  ): StringSchema =>
-    append((value, path, context) =>
-      predicate(value)
-        ? success(value)
-        : failure(context, path, code, message, {
-            received: "string",
-            ...(details ? { details } : {}),
-          }),
-    )
+  const append = (operation: StringOperation, fastOperation: FastStringOperation): StringSchema =>
+    createStringSchema([...operations, operation], (input) => {
+      const result = fastValidator(input)
+      return result === FAILURE ? FAILURE : fastOperation(result)
+    })
 
   return Object.assign(base, {
     min(length: number, message = `Expected at least ${length} characters`) {
       validLength(length)
-      return check((value) => value.length >= length, "too_small", message, { minimum: length })
+      return append(
+        (value, context) =>
+          value.length >= length
+            ? value
+            : failure(context, "too_small", message, {
+                received: "string",
+                details: { minimum: length },
+              }),
+        (value) => (value.length >= length ? value : FAILURE),
+      )
     },
     max(length: number, message = `Expected at most ${length} characters`) {
       validLength(length)
-      return check((value) => value.length <= length, "too_big", message, { maximum: length })
+      return append(
+        (value, context) =>
+          value.length <= length
+            ? value
+            : failure(context, "too_big", message, {
+                received: "string",
+                details: { maximum: length },
+              }),
+        (value) => (value.length <= length ? value : FAILURE),
+      )
     },
     length(length: number, message = `Expected exactly ${length} characters`) {
       validLength(length)
-      return check((value) => value.length === length, "invalid_length", message, { length })
-    },
-    email(message = "Invalid email address") {
-      return check((value) => emailPattern.test(value), "invalid_email", message)
-    },
-    url(message = "Invalid URL") {
-      return check(
-        (value) => {
-          try {
-            new URL(value)
-            return true
-          } catch {
-            return false
-          }
-        },
-        "invalid_url",
-        message,
+      return append(
+        (value, context) =>
+          value.length === length
+            ? value
+            : failure(context, "invalid_length", message, {
+                received: "string",
+                details: { length },
+              }),
+        (value) => (value.length === length ? value : FAILURE),
       )
     },
+    email(message = "Invalid email address") {
+      return append(
+        (value, context) =>
+          emailPattern.test(value)
+            ? value
+            : failure(context, "invalid_email", message, { received: "string" }),
+        (value) => (emailPattern.test(value) ? value : FAILURE),
+      )
+    },
+    url(message = "Invalid URL") {
+      const validateUrl = (value: string): InternalResult<string> => {
+        try {
+          new URL(value)
+          return value
+        } catch {
+          return FAILURE
+        }
+      }
+      return append((value, context) => {
+        const result = validateUrl(value)
+        return result === FAILURE
+          ? failure(context, "invalid_url", message, { received: "string" })
+          : result
+      }, validateUrl)
+    },
     uuid(message = "Invalid UUID") {
-      return check((value) => uuidPattern.test(value), "invalid_uuid", message)
+      return append(
+        (value, context) =>
+          uuidPattern.test(value)
+            ? value
+            : failure(context, "invalid_uuid", message, { received: "string" }),
+        (value) => (uuidPattern.test(value) ? value : FAILURE),
+      )
     },
     regex(pattern: RegExp, message = "String does not match the required pattern") {
       const localPattern = new RegExp(pattern.source, pattern.flags)
-      return check(
-        (value) => {
-          localPattern.lastIndex = 0
-          const matches = localPattern.test(value)
-          localPattern.lastIndex = 0
-          return matches
-        },
-        "invalid_string",
-        message,
+      const matches = (value: string): InternalResult<string> => {
+        localPattern.lastIndex = 0
+        const valid = localPattern.test(value)
+        localPattern.lastIndex = 0
+        return valid ? value : FAILURE
+      }
+      return append(
+        (value, context) =>
+          matches(value) === FAILURE
+            ? failure(context, "invalid_string", message, { received: "string" })
+            : value,
+        matches,
       )
     },
     startsWith(prefix: string, message = `Expected a string starting with ${prefix}`) {
-      return check((value) => value.startsWith(prefix), "invalid_starts_with", message)
+      return append(
+        (value, context) =>
+          value.startsWith(prefix)
+            ? value
+            : failure(context, "invalid_starts_with", message, { received: "string" }),
+        (value) => (value.startsWith(prefix) ? value : FAILURE),
+      )
     },
     endsWith(suffix: string, message = `Expected a string ending with ${suffix}`) {
-      return check((value) => value.endsWith(suffix), "invalid_ends_with", message)
+      return append(
+        (value, context) =>
+          value.endsWith(suffix)
+            ? value
+            : failure(context, "invalid_ends_with", message, { received: "string" }),
+        (value) => (value.endsWith(suffix) ? value : FAILURE),
+      )
     },
     trim() {
-      return append((value) => success(value.trim()))
+      return append(
+        (value) => value.trim(),
+        (value) => value.trim(),
+      )
     },
   })
 }

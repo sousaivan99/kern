@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, prod]
   pull_request:
-    branches: [main, prod]
+    branches: [develop, main, prod]
   workflow_dispatch:
 
 concurrency:
@@ -222,3 +222,64 @@ jobs:
           test "${{ needs.docs.result }}" = success
           test "${{ needs.frameworks.result }}" = success
           test "${{ needs.runtime.result }}" = success
+
+  release-changes:
+    name: Detect release changes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      release_required: ${{ steps.release.outputs.required }}
+    steps:
+      - name: Check out the candidate commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Compare package inputs with the latest release
+        id: release
+        shell: bash
+        run: |
+          LAST_RELEASE_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n 1)
+          if [ -z "$LAST_RELEASE_TAG" ]; then
+            echo "required=true" >> "$GITHUB_OUTPUT"
+            echo "No stable release tag exists; package publication is required."
+            exit 0
+          fi
+
+          if git diff --quiet "$LAST_RELEASE_TAG" HEAD -- \
+            packages/kern/src \
+            packages/kern/package.json \
+            packages/kern/README.md \
+            packages/kern/CHANGELOG.md \
+            packages/kern/SEMVER.md \
+            packages/kern/SUPPORT.md \
+            packages/kern/LICENSE \
+            packages/kern/tsconfig.json \
+            packages/kern/tsconfig.build.json \
+            tooling/scripts/kern/build.ts; then
+            echo "required=false" >> "$GITHUB_OUTPUT"
+            echo "No publishable package inputs changed since $LAST_RELEASE_TAG; skipping release."
+          else
+            echo "required=true" >> "$GITHUB_OUTPUT"
+            echo "Publishable package inputs changed since $LAST_RELEASE_TAG; release is required."
+          fi
+
+  release:
+    name: Start release
+    needs: [check, release-changes]
+    if: >-
+      always() &&
+      needs.check.result == 'success' &&
+      needs.release-changes.result == 'success' &&
+      needs.release-changes.outputs.release_required == 'true'
+    permissions:
+      actions: write
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Dispatch the tested commit to the release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: gh workflow run release.yml --ref prod --field release_sha="$RELEASE_SHA"

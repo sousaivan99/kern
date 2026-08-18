@@ -67,8 +67,8 @@ export function partition<T>(
   const remaining: T[] = []
   for (let index = 0; index < values.length; index += 1) {
     const value = values[index] as T
-    if (predicate(value, index)) matching.push(value)
-    else remaining.push(value)
+    const target = predicate(value, index) ? matching : remaining
+    target.push(value)
   }
   return [matching, remaining]
 }
@@ -81,10 +81,22 @@ export const chunk = <T>(values: readonly T[], size: number): T[][] => {
   if (!Number.isSafeInteger(size) || size <= 0) {
     throw new RangeError("Chunk size must be a positive safe integer")
   }
-  const output: T[][] = []
-  for (let index = 0; index < values.length; index += size) {
-    output.push(values.slice(index, index + size))
+  let length = values.length
+  if (length === 0) return []
+
+  const firstChunk = values.slice(0, size)
+  length = values.length
+  if (size >= length) return [firstChunk]
+
+  const output = new Array<T[]>(Math.ceil(length / size))
+  output[0] = firstChunk
+  let outputIndex = 1
+  for (let index = size; index < length; index += size) {
+    output[outputIndex] = values.slice(index, index + size)
+    outputIndex += 1
+    length = values.length
   }
+  output.length = outputIndex
   return output
 }
 
