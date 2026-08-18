@@ -5,6 +5,10 @@ All notable changes to `@sousaivan/kern` are recorded here. Kern follows
 
 ## [Unreleased]
 
+No unreleased changes yet.
+
+## [1.0.1] - 2026-08-18
+
 ### Changed
 
 - Improved successful validation throughput with pollution-safe object construction, snapshotted
@@ -51,5 +55,6 @@ All notable changes to `@sousaivan/kern` are recorded here. Kern follows
 - CI coverage for TypeScript 5 and current TypeScript, Node 22/24/26, Bun 1.3/current, current Deno,
   Chromium, supported timezones, package contents, bundle budgets, and dependency auditing.
 
-[Unreleased]: https://github.com/sousaivan99/kern/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/sousaivan99/kern/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/sousaivan99/kern/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/sousaivan99/kern/releases/tag/v1.0.0
