@@ -39,7 +39,7 @@ The module comparison adds 23 scenarios and 69 timed adapters across array, obje
 date, money, async control, and async retry. Each scenario has exactly three adapters. Scalar number
 and money inputs rotate through bounded 32-value pools to resist constant folding without allocating
 inside the timed call. Use the exact three global orders documented on the
-[module benchmark page](../../apps/docs/src/content/docs/measurements/module-benchmarks.md); the
+[module benchmark page](../../apps/docs/src/content/docs/measurements/module-benchmarks.mdx); the
 reporter verifies the Latin-square order relative to each scenario's own competitors.
 
 Each timed case is warmed up before adaptive calibration. The full report uses 21 timed samples and

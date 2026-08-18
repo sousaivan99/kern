@@ -1,0 +1,276 @@
+---
+import { CalendarDays, Cpu, Gauge, GitCommitHorizontal } from "lucide-astro"
+
+const environments = [
+  {
+    badge: "Snapshot A",
+    captured: "16 Aug 2026",
+    cpu: "AMD Ryzen 5 5600X",
+    frequency: "1.74–3.85 GHz snapshots",
+    git: "Working-tree benchmark state",
+    label: "Original baseline",
+  },
+  {
+    badge: "Snapshot B",
+    captured: "17 Aug 2026",
+    cpu: "AMD Ryzen 9 7950X",
+    frequency: "3.01–5.49 GHz snapshots",
+    git: "e88c29e · clean tree",
+    label: "Current recheck",
+  },
+] as const
+---
+
+<section class="kern-benchmark-environments not-content" aria-labelledby="benchmark-environments">
+  <header>
+    <p class="kern-benchmark-environments__eyebrow">
+      <Gauge aria-hidden="true" size={16} stroke-width={1.8} />
+      Verified environments
+    </p>
+    <h2 id="benchmark-environments">One suite, two machines</h2>
+    <p>
+      Each snapshot is a median of three full runs. Compare libraries{" "}
+      <strong>within one machine</strong>; use agreement across machines as a replication signal,
+      not as a CPU race.
+    </p>
+  </header>
+
+  <div class="kern-benchmark-environments__grid">
+    {environments.map((environment) => (
+      <article>
+        <div class="kern-benchmark-environments__card-topline">
+          <span>{environment.badge}</span>
+          <small>{environment.label}</small>
+        </div>
+        <div class="kern-benchmark-environments__cpu">
+          <Cpu aria-hidden="true" size={20} stroke-width={1.7} />
+          <h3>{environment.cpu}</h3>
+        </div>
+        <dl>
+          <div>
+            <dt><Gauge aria-hidden="true" size={15} /> Environment</dt>
+            <dd>Bun 1.3.14 · Linux x64 · powersave</dd>
+          </div>
+          <div>
+            <dt><CalendarDays aria-hidden="true" size={15} /> Captured</dt>
+            <dd>{environment.captured}</dd>
+          </div>
+          <div>
+            <dt><Cpu aria-hidden="true" size={15} /> Frequency</dt>
+            <dd>{environment.frequency}</dd>
+          </div>
+          <div>
+            <dt><GitCommitHorizontal aria-hidden="true" size={15} /> Source</dt>
+            <dd>{environment.git}</dd>
+          </div>
+        </dl>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-content > table")) {
+  if (table.parentElement?.classList.contains("kern-benchmark-table-scroll")) continue
+
+  let sibling: Element | null = table.previousElementSibling
+  let heading: Element | null = null
+  while (sibling && !heading) {
+    heading = /^H[2-4]$/.test(sibling.tagName) ? sibling : sibling.querySelector("h2, h3, h4")
+    sibling = sibling.previousElementSibling
+  }
+
+  const wrapper = document.createElement("div")
+  const headingText = heading?.textContent?.trim()
+  wrapper.className = "kern-benchmark-table-scroll"
+  wrapper.dataset.columns = String(table.querySelectorAll("thead th").length)
+  wrapper.tabIndex = 0
+  wrapper.setAttribute("role", "region")
+  wrapper.setAttribute("aria-label", headingText ? `${headingText} table` : "Benchmark table")
+  table.before(wrapper)
+  wrapper.append(table)
+}
+</script>
+
+<style>
+.kern-benchmark-environments {
+  position: relative;
+  overflow: hidden;
+  margin-block: 2rem 2.75rem;
+  border: 1px solid var(--sl-color-hairline-light);
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(in oklab, var(--sl-color-accent) 13%, transparent),
+      transparent 38%
+    ),
+    var(--sl-color-bg-sidebar);
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.kern-benchmark-environments > header {
+  max-width: 46rem;
+}
+
+.kern-benchmark-environments__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.45rem;
+  color: var(--kern-color-interactive);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kern-benchmark-environments h2 {
+  margin: 0;
+  color: var(--kern-color-text-strong);
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  letter-spacing: -0.035em;
+}
+
+.kern-benchmark-environments > header > p:last-child {
+  margin: 0.7rem 0 0;
+  color: var(--kern-color-text-elevated);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.kern-benchmark-environments__grid {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.35rem;
+}
+
+.kern-benchmark-environments article {
+  min-width: 0;
+  border: 1px solid var(--sl-color-hairline-light);
+  border-radius: 0.55rem;
+  background: color-mix(in oklab, var(--sl-color-bg) 90%, transparent);
+  padding: 1rem;
+}
+
+.kern-benchmark-environments article:last-child {
+  border-color: color-mix(in oklab, var(--sl-color-accent) 45%, var(--sl-color-hairline-light));
+}
+
+.kern-benchmark-environments__card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.kern-benchmark-environments__card-topline span {
+  border-radius: 999px;
+  background: var(--sl-color-accent-low);
+  padding: 0.25rem 0.5rem;
+  color: var(--sl-color-accent-high);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.kern-benchmark-environments__card-topline small {
+  color: var(--kern-color-text-muted);
+  font-size: 0.75rem;
+}
+
+.kern-benchmark-environments__cpu {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+  color: var(--kern-color-interactive);
+}
+
+.kern-benchmark-environments__cpu h3 {
+  margin: 0;
+  color: var(--kern-color-text-strong);
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+}
+
+.kern-benchmark-environments dl {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem 0 0;
+}
+
+.kern-benchmark-environments dl > div {
+  display: grid;
+  grid-template-columns: minmax(5.75rem, 0.38fr) minmax(0, 1fr);
+  gap: 0.6rem;
+  border-top: 1px solid var(--sl-color-hairline);
+  padding-top: 0.6rem;
+}
+
+.kern-benchmark-environments dt {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--kern-color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.kern-benchmark-environments dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--kern-color-text-body);
+  font-family: var(--__sl-font-mono);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+@media (min-width: 44rem) {
+  .kern-benchmark-environments__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 27rem) {
+  .kern-benchmark-environments dl > div {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .kern-benchmark-environments dd {
+    text-align: left;
+  }
+}
+</style>
+
+<style is:global>
+.kern-benchmark-table-scroll {
+  overflow-x: auto;
+  margin-block: 1.25rem;
+  border-radius: 0.25rem;
+  scrollbar-color: var(--kern-color-functional-border) transparent;
+}
+
+.kern-benchmark-table-scroll > table {
+  width: max-content;
+  min-width: 100%;
+  margin-block: 0;
+}
+
+.kern-benchmark-table-scroll[data-columns="4"] > table {
+  min-width: 42rem;
+}
+
+.kern-benchmark-table-scroll[data-columns="5"] > table {
+  min-width: 52rem;
+}
+
+.kern-benchmark-table-scroll[data-columns="6"] > table {
+  min-width: 61rem;
+}
+</style>

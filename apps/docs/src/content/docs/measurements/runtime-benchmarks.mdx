@@ -3,6 +3,8 @@ title: Runtime benchmarks
 description: Reproduce Kern-only array, string, money, object, and Intl scaling measurements.
 ---
 
+import BenchmarkEnvironments from "../../../components/BenchmarkEnvironments.astro";
+
 This suite measures Kern's non-validation modules across small and scaling workloads. It records
 absolute latency rather than assigning an overall score. It also does not compare unrelated helper
 libraries: matching a function name is not evidence that two helpers preserve the same semantics.
@@ -11,6 +13,8 @@ See [validation benchmarks](./validation-benchmarks/) for the public-API compari
 Valibot, and [module comparisons](./module-benchmarks/) for array, object, string, number, date,
 money, and async competitors. For the implementation behind these results, read [performance
 internals](../../advanced/performance-internals/).
+
+<BenchmarkEnvironments />
 
 ## Run the suite
 
@@ -34,22 +38,29 @@ run medians, input SHA-256 hashes, and environment metadata. The fixtures and re
 are inspectable in the
 [primitive benchmark source](https://github.com/sousaivan99/kern/blob/main/tooling/benchmarks/primitives.bench.ts).
 
-## Recorded snapshot
+## Recorded snapshots
 
-These representative rows were recorded on Bun 1.3.14, Linux x64, and an AMD Ryzen 5 5600X on
-2026-08-16. Each run used 21 timed samples per case with approximately 20 ms per sample and 20 ms
-of warmup. Lower latency is better.
+Both snapshots use Bun 1.3.14 on Linux x64. Each value is the median of three run medians; every
+run used 21 timed samples per case with approximately 20 ms per sample and 20 ms of warmup. Lower
+latency is better. Read down one machine column when evaluating a workload.
 
-| Module and operation | Stable scenario ID | Work per operation | Median of run medians |
-| --- | --- | ---: | ---: |
-| Array `chunk` | `primitives:array-chunk-size-100:10000` | 10,000 items, chunks of 100 | 7.80 µs |
-| Array `partition` | `primitives:array-partition-even-odd:10000` | 10,000 numeric items | 28.83 µs |
-| Money `allocateMoney` | `primitives:money-allocatemoney:10000` | 10,000 exact-share recipients | 57.99 µs |
-| String `camelCase` | `primitives:string-camelcase:10000` | 10,000 UTF-16 code units | 258.77 µs |
-| Number formatting | `primitives:intl-numberformat-repeated-configuration` | One warm repeated configuration | 956.5 ns |
-| Date formatting | `primitives:intl-datetimeformat-repeated-explicit-zone` | One warm explicit-zone configuration | 1.35 µs |
-| Money formatting | `primitives:intl-money-format-repeated-configuration` | One warm repeated configuration | 1.04 µs |
-| Money parsing | `primitives:intl-money-parse-repeated-configuration` | One warm repeated configuration | 1.57 µs |
+| Module and operation | Work per operation | 5600X · A | 7950X · B |
+| --- | ---: | ---: | ---: |
+| Array `chunk` | 10,000 items, chunks of 100 | 7.80 µs | 8.55 µs |
+| Array `partition` | 10,000 numeric items | 28.83 µs | 23.74 µs |
+| Money `allocateMoney` | 10,000 exact-share recipients | 57.99 µs | 45.11 µs |
+| String `camelCase` | 10,000 UTF-16 code units | 258.77 µs | 195.21 µs |
+| Number formatting | One warm repeated configuration | 956.5 ns | 684.5 ns |
+| Date formatting | One warm explicit-zone configuration | 1.35 µs | 1.06 µs |
+| Money formatting | One warm repeated configuration | 1.04 µs | 790.8 ns |
+| Money parsing | One warm repeated configuration | 1.57 µs | 1.22 µs |
+
+The stable scenario IDs, in row order, are `primitives:array-chunk-size-100:10000`,
+`primitives:array-partition-even-odd:10000`, `primitives:money-allocatemoney:10000`,
+`primitives:string-camelcase:10000`, `primitives:intl-numberformat-repeated-configuration`,
+`primitives:intl-datetimeformat-repeated-explicit-zone`,
+`primitives:intl-money-format-repeated-configuration`, and
+`primitives:intl-money-parse-repeated-configuration`.
 
 The `Intl` rows are deliberately labeled warm: an untimed verification call populates an eligible
 cache entry before sampling. They do not represent import plus first-call latency. Run the isolated
@@ -60,12 +71,22 @@ bun run benchmark:intl:cold -- --json
 bun run benchmark:intl:memory -- --json
 ```
 
-In the recorded isolated-process cold run, import plus first call had medians of 10.70 ms for number
-formatting, 11.81 ms for explicit-zone date formatting, 11.35 ms for money formatting, and 13.23 ms
-for money parsing. Its raw JSON SHA-256 is
-`46387f2050d6dbb4a73889c533d853a0b8e3e7e4873292fa063e5e48eb8876cb`.
+The isolated-process cold results are also machine-local:
+
+| Import plus first call | 5600X · A | 7950X · B |
+| --- | ---: | ---: |
+| Number formatting | 10.70 ms | 8.08 ms |
+| Explicit-zone date formatting | 11.81 ms | 8.48 ms |
+| Money formatting | 11.35 ms | 7.68 ms |
+| Money parsing | 13.23 ms | 8.95 ms |
+
+The cold-run raw JSON SHA-256 values are
+`46387f2050d6dbb4a73889c533d853a0b8e3e7e4873292fa063e5e48eb8876cb` for A and
+`8cd0407afd9c2c20fbaa7e8b1c6c10663c12044d49b88c13f82beb6275707af5` for B.
 
 ## Snapshot provenance
+
+### Snapshot A · Ryzen 5 5600X
 
 | Run | UTC timestamp | CPU frequency snapshot | Raw JSON SHA-256 |
 | --- | --- | ---: | --- |
@@ -82,6 +103,28 @@ All three runs reported the `powersave` governor and shared these source fingerp
 | Git HEAD | `1d096e5c22e93e91e8a38fa82074349480afe2f5` |
 | Tracked binary diff | `6e86004fe26854980577987a59b85e8b6609d89754182c1613fc0f0135d74a40` |
 | Untracked-file manifest | `d91414aec5cb96a9f34edd4ca42066b62908e881fa58cacfa0b7b13f16ca2d1e` |
+
+### Snapshot B · Ryzen 9 7950X
+
+| Run | UTC timestamp | CPU frequency snapshot | Raw JSON SHA-256 |
+| --- | --- | ---: | --- |
+| 1 | 2026-08-17 06:53:27 | 3,012 MHz | `f2b83540ae261e04311746a10ee08132a8f262be5a07a2489842b664dc80cabc` |
+| 2 | 2026-08-17 06:54:06 | 5,304 MHz | `0a33b1300a432a4d52421dcaed404f1e82573324fb0bb706548d3838adbbba19` |
+| 3 | 2026-08-17 06:54:43 | 5,458 MHz | `ccdbef0dbfda84bcb728ab155e0fc6282e31cacbc27f38e08ff53aeea0d253cb` |
+
+All three runs reported the `powersave` governor and a clean working tree:
+
+| Input | SHA-256 or revision |
+| --- | --- |
+| Bun lockfile | `6f54539d94f80f932f93207d5565f31360520fed7b671caa34fb5bfd80dc7d11` |
+| Benchmark sources and fixtures | `cbeacdd520b8d816ebe00e73f9deec1c04e2734a08d6d028b4ff77f615b25147` |
+| Git HEAD | `e88c29e064a15195a4aeea26fc437bc0a7b45eab` |
+| Tracked binary diff | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| Untracked-file manifest | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+Snapshot A remains a historical working-tree measurement; snapshot B is the clean committed-source
+recheck. Their benchmark-source fingerprints differ, so the two columns demonstrate the observed
+range on two environments but do not support a percentage claim about CPU or revision speed.
 
 ## Interpretation limits
 
