@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [develop, main, prod]
+    branches: [main, prod]
   pull_request:
     branches: [develop, main, prod]
   workflow_dispatch:
