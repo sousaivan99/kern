@@ -206,6 +206,34 @@ describe("date", () => {
     expect(toUTCISODate(date)).toBe("2024-01-02")
   })
 
+  test("never caches date formatting that uses the system time zone", () => {
+    const NativeDateTimeFormat = Intl.DateTimeFormat
+    let constructions = 0
+    class CountingDateTimeFormat extends NativeDateTimeFormat {
+      constructor(...arguments_: ConstructorParameters<typeof Intl.DateTimeFormat>) {
+        super(...arguments_)
+        constructions += 1
+      }
+    }
+    Object.defineProperty(Intl, "DateTimeFormat", {
+      configurable: true,
+      value: CountingDateTimeFormat,
+      writable: true,
+    })
+    try {
+      const date = new Date("2024-01-02T03:04:00.000Z")
+      const options = { dateStyle: "long", locale: "en-US" } as const
+      expect(formatDate(date, options)).toBe(formatDate(date, options))
+      expect(constructions).toBe(2)
+    } finally {
+      Object.defineProperty(Intl, "DateTimeFormat", {
+        configurable: true,
+        value: NativeDateTimeFormat,
+        writable: true,
+      })
+    }
+  })
+
   test("handles local-calendar years from 0 through 99 without 1900 remapping", () => {
     const createLocalDate = (year: number, month: number, day: number): Date => {
       const date = new Date(0)
@@ -218,5 +246,14 @@ describe("date", () => {
     const year100 = createLocalDate(100, 0, 1)
     expect(differenceInCalendarDays(year100, year99)).toBe(1)
     expect(addMonths(createLocalDate(0, 0, 31), 1).getDate()).toBe(29)
+  })
+
+  test("bounds explicit-time-zone formatter caching", () => {
+    const date = new Date("2024-01-02T03:04:00.000Z")
+    for (let index = 0; index < 34; index += 1) {
+      expect(
+        formatDate(date, { locale: `en-US-x-date${index}`, timeZone: "UTC", dateStyle: "long" }),
+      ).toBeTypeOf("string")
+    }
   })
 })

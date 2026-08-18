@@ -1,4 +1,4 @@
-import { normalizeLocales } from "../intl.js"
+import { createIntlCache, intlConfiguration, normalizeLocales } from "../intl.js"
 
 const assertBounds = (minimum: number, maximum: number): void => {
   if (Number.isNaN(minimum) || Number.isNaN(maximum)) {
@@ -23,10 +23,38 @@ const shiftDecimal = (value: number, places: number): number => {
  * `NaN` and infinities are returned unchanged.
  */
 export const round = (value: number, precision = 0): number => {
+  if (precision === 2 && value > -1e9 && value < 1e9) {
+    const scaled = value * 100
+    const rounded = Math.round(scaled)
+    if (Math.abs(scaled - rounded) < 0.4999) {
+      const output = rounded / 100
+      return output === 0 ? 0 : output
+    }
+  }
+
   if (!Number.isInteger(precision) || precision < -100 || precision > 100) {
     throw new RangeError("Precision must be an integer between -100 and 100")
   }
   if (!Number.isFinite(value)) return value
+  if (precision === 0) {
+    const rounded = Math.round(value)
+    return rounded === 0 ? 0 : rounded
+  }
+
+  if (precision >= -15 && precision <= 15) {
+    const magnitude = precision === 2 ? 100 : 10 ** Math.abs(precision)
+    const scaled = precision > 0 ? value * magnitude : value / magnitude
+    if (Number.isFinite(scaled) && scaled !== 0 && Math.abs(scaled) <= 1e15) {
+      const absolute = Math.abs(scaled)
+      const rounded = Math.round(scaled)
+      const halfDistance = Math.abs(Math.abs(scaled - rounded) - 0.5)
+      const uncertainty = Number.EPSILON * Math.max(1, absolute) * 4
+      if (halfDistance > uncertainty) {
+        const output = precision > 0 ? rounded / magnitude : rounded * magnitude
+        return output === 0 ? 0 : output
+      }
+    }
+  }
   return shiftDecimal(Math.round(shiftDecimal(value, precision)), -precision)
 }
 
@@ -68,19 +96,40 @@ export interface NumberFormatOptions extends Intl.NumberFormatOptions {
   readonly locale?: Intl.LocalesArgument
 }
 
+const numberFormats = createIntlCache<Intl.NumberFormat>()
+
+const numberFormatter = (
+  options: NumberFormatOptions,
+  overrides?: Intl.NumberFormatOptions,
+): Intl.NumberFormat => {
+  if (numberFormats.bypass()) {
+    const { locale, ...formatOptions } = options
+    return new Intl.NumberFormat(
+      normalizeLocales(locale),
+      overrides ? { ...formatOptions, ...overrides } : formatOptions,
+    )
+  }
+  const configuration = intlConfiguration(options)
+  if (!configuration) {
+    const { locale, ...formatOptions } = options
+    return new Intl.NumberFormat(
+      normalizeLocales(locale),
+      overrides ? { ...formatOptions, ...overrides } : formatOptions,
+    )
+  }
+  const resolved = overrides ? { ...configuration.options, ...overrides } : configuration.options
+  const key = overrides ? JSON.stringify([configuration.key, overrides]) : configuration.key
+  return numberFormats.get(key, () => new Intl.NumberFormat(configuration.locale, resolved))
+}
+
 /** Formats a number. Native equivalent: `new Intl.NumberFormat(locale, options).format(value)`. */
 export const formatNumber = (value: number, options: NumberFormatOptions = {}): string => {
-  const { locale, ...formatOptions } = options
-  return new Intl.NumberFormat(normalizeLocales(locale), formatOptions).format(value)
+  return numberFormatter(options).format(value)
 }
 
 /** Formats a number with native compact notation. */
 export const formatCompact = (value: number, options: NumberFormatOptions = {}): string => {
-  const { locale, ...formatOptions } = options
-  return new Intl.NumberFormat(normalizeLocales(locale), {
-    ...formatOptions,
-    notation: "compact",
-  }).format(value)
+  return numberFormatter(options, { notation: "compact" }).format(value)
 }
 
 /**
@@ -88,9 +137,5 @@ export const formatCompact = (value: number, options: NumberFormatOptions = {}):
  * Native equivalent: `new Intl.NumberFormat(locale, { style: "percent" }).format(value / 100)`.
  */
 export const formatPercentage = (percentage: number, options: NumberFormatOptions = {}): string => {
-  const { locale, ...formatOptions } = options
-  return new Intl.NumberFormat(normalizeLocales(locale), {
-    ...formatOptions,
-    style: "percent",
-  }).format(percentage / 100)
+  return numberFormatter(options, { style: "percent" }).format(percentage / 100)
 }

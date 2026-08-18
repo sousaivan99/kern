@@ -40,6 +40,71 @@ describe("object", () => {
     expect(() => omit(new Account(), [])).toThrow(TypeError)
   })
 
+  test("copies descriptors without consulting inherited setters", () => {
+    const symbol = Symbol("hidden")
+    const source = Object.create(null) as Record<PropertyKey, unknown>
+    Object.defineProperty(source, "readonly", {
+      configurable: false,
+      enumerable: false,
+      value: 1,
+      writable: false,
+    })
+    Object.defineProperty(source, "__proto__", {
+      configurable: true,
+      enumerable: true,
+      value: "safe",
+      writable: true,
+    })
+    Object.defineProperty(source, symbol, {
+      configurable: true,
+      enumerable: true,
+      value: 2,
+      writable: true,
+    })
+
+    let getterCalls = 0
+    Object.defineProperty(source, "computed", {
+      configurable: true,
+      enumerable: true,
+      get() {
+        getterCalls += 1
+        return 3
+      },
+    })
+
+    const inheritedKey = "__kernHostileSetter__"
+    Object.defineProperty(Object.prototype, inheritedKey, {
+      configurable: true,
+      set() {
+        throw new Error("inherited setter was invoked")
+      },
+    })
+    Object.defineProperty(source, inheritedKey, {
+      configurable: true,
+      enumerable: true,
+      value: 4,
+      writable: true,
+    })
+
+    try {
+      const selected = pick(source, ["readonly", "__proto__", "computed", inheritedKey, symbol])
+      const remaining = omit(source, ["readonly"])
+      expect(getterCalls).toBe(0)
+      expect(Object.getOwnPropertyDescriptor(selected, "readonly")).toEqual({
+        configurable: false,
+        enumerable: false,
+        value: 1,
+        writable: false,
+      })
+      expect(Object.getOwnPropertyDescriptor(selected, "__proto__")?.value).toBe("safe")
+      expect(Object.getOwnPropertyDescriptor(selected, "computed")?.get).toBeTypeOf("function")
+      expect(Object.getOwnPropertyDescriptor(selected, inheritedKey)?.value).toBe(4)
+      expect(Object.getOwnPropertyDescriptor(remaining, symbol)?.value).toBe(2)
+    } finally {
+      Reflect.deleteProperty(Object.prototype, inheritedKey)
+    }
+  })
+
   test("reads safe nested own-property paths", () => {
     const value = { user: { contacts: [{ email: "a@example.com" }] } }
     expect(hasOwnPath(value, ["user", "contacts", 0, "email"])).toBe(true)

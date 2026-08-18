@@ -5,23 +5,17 @@ export const isValidDate = validDate
 
 /** Tests whether `left` is before `right`. Native equivalent: `left.getTime() < right.getTime()`. */
 export const isBefore = (left: Date, right: Date): boolean => {
-  assertValidDate(left)
-  assertValidDate(right)
-  return left.getTime() < right.getTime()
+  return assertValidDate(left) < assertValidDate(right)
 }
 
 /** Tests whether `left` is after `right`. Native equivalent: `left.getTime() > right.getTime()`. */
 export const isAfter = (left: Date, right: Date): boolean => {
-  assertValidDate(left)
-  assertValidDate(right)
-  return left.getTime() > right.getTime()
+  return assertValidDate(left) > assertValidDate(right)
 }
 
 /** Tests whether two valid dates represent the same instant. */
 export const isSameInstant = (left: Date, right: Date): boolean => {
-  assertValidDate(left)
-  assertValidDate(right)
-  return left.getTime() === right.getTime()
+  return assertValidDate(left) === assertValidDate(right)
 }
 
 const calendarStamp = (date: Date): number => {

@@ -1,6 +1,6 @@
 {
   "name": "@sousaivan/kern",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Zero-dependency, TypeScript-first utility primitives for modern JavaScript runtimes.",
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/sousaivan99/kern.git",
     "directory": "packages/kern"
   },
-  "homepage": "https://github.com/sousaivan99/kern#readme",
+  "homepage": "https://sousaivan99.github.io/kern/",
   "bugs": {
     "url": "https://github.com/sousaivan99/kern/issues"
   },

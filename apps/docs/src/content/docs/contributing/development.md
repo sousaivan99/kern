@@ -44,6 +44,7 @@ by compatibility/accessibility tests. None are runtime dependencies of `@sousaiv
 | `bun run size:report` | Regenerate the versioned package-size report used by the docs. |
 | `bun run benchmark:quick` | Verify benchmark fixtures and smoke the harness. |
 | `bun run benchmark` | Run the complete benchmark suite. |
+| `bun run benchmark:report -- run-1.json run-2.json run-3.json` | Verify and summarize three full JSON runs. |
 
 Start with the smallest checks relevant to your change. Runtime changes require at least tests,
 type checking, build, size, and benchmark smoke.

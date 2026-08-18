@@ -37,6 +37,7 @@ const largeArrayBenchmarks = sizes.flatMap((size): BenchmarkCase[] => {
   finalFailure[size - 1] = 0.5
   return [
     {
+      itemsPerOperation: size,
       name: "array success",
       run: () => integerArraySchema.safeParse(valid),
       size,
@@ -45,6 +46,7 @@ const largeArrayBenchmarks = sizes.flatMap((size): BenchmarkCase[] => {
       verify: verifySuccess,
     },
     {
+      itemsPerOperation: size,
       name: "array one failure at end",
       run: () => integerArraySchema.safeParse(finalFailure),
       size,
@@ -87,6 +89,7 @@ const wideSchemaBenchmarks = [100, 1_000, 10_000].map((size): BenchmarkCase => {
   }
   const schema = object(shape)
   return {
+    itemsPerOperation: size,
     name: "object wide schema success",
     run: () => schema.safeParse(input),
     size,
@@ -101,6 +104,7 @@ const recordBenchmarks = sizes.map((size): BenchmarkCase => {
   for (let index = 0; index < size; index += 1) input[`key${index}`] = index
   const schema = record(number().integer())
   return {
+    itemsPerOperation: size,
     name: "record success",
     run: () => schema.safeParse(input),
     size,
@@ -113,6 +117,7 @@ const recordBenchmarks = sizes.map((size): BenchmarkCase => {
 const allFailureBenchmarks = [1_000, 10_000].map((size): BenchmarkCase => {
   const input = Array.from({ length: size }, () => 0.5)
   return {
+    itemsPerOperation: size,
     name: "array all items fail",
     run: () => integerArraySchema.safeParse(input),
     size,

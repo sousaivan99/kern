@@ -8,3 +8,4 @@ apps/docs/src/content/docs/reference/
 .env
 .env.*
 !.env.example
+.benchmarks/

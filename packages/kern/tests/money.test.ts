@@ -53,6 +53,39 @@ describe("money", () => {
     }
   })
 
+  test("re-reads cacheable money options and bypasses accessors", () => {
+    const formatOptions: {
+      currencyDisplay: Intl.NumberFormatOptions["currencyDisplay"]
+      locale: string
+    } = { currencyDisplay: "code", locale: "en-US" }
+    const code = formatMoney(1099, "USD", formatOptions)
+    formatOptions.currencyDisplay = "name"
+    expect(formatMoney(1099, "USD", formatOptions)).not.toBe(code)
+
+    const parseOptions: { locale: string } = { locale: "en-US" }
+    expect(parseMoney("$10.99", "USD", parseOptions)).toBe(1099)
+    parseOptions.locale = "de-DE"
+    expect(parseMoney("10,99 $", "USD", parseOptions)).toBe(1099)
+
+    let locale = "en-US"
+    let reads = 0
+    const accessor = {
+      get locale() {
+        reads += 1
+        return locale
+      },
+    }
+    expect(formatMoney(1099, "USD", accessor)).toBe("$10.99")
+    locale = "de-DE"
+    expect(formatMoney(1099, "USD", accessor)).toContain("10,99")
+    expect(reads).toBe(2)
+
+    for (let index = 0; index < 33; index += 1) {
+      expect(formatMoney(1099, "USD", { locale: `en-US-x-money${index}` })).toBeTypeOf("string")
+      expect(parseMoney("$10.99", "USD", { locale: `en-US-x-money-parse${index}` })).toBe(1099)
+    }
+  })
+
   test("uses checked integer arithmetic", () => {
     expect(addMoney(100, 25)).toBe(125)
     expect(subtractMoney(100, 25)).toBe(75)
@@ -60,6 +93,10 @@ describe("money", () => {
     expect(sumMoney([])).toBe(0)
     expect(multiplyMoney(101, 1.5)).toBe(152)
     expect(multiplyMoney(-101, 1.5)).toBe(-152)
+    expect(multiplyMoney(-100, 1.15)).toBe(-115)
+    expect(multiplyMoney(100, 1.005)).toBe(101)
+    expect(multiplyMoney(1, 2.5)).toBe(3)
+    expect(multiplyMoney(-1, 2.5)).toBe(-3)
     expect(percentageOf(999, 15)).toBe(150)
     expect(applyDiscount(999, 15)).toBe(849)
     expect(() => addMoney(Number.MAX_SAFE_INTEGER, 1)).toThrow(RangeError)
@@ -129,6 +166,7 @@ describe("money", () => {
     expect(allocateMoney(2, [1, 1, 1])).toEqual([1, 1, 0])
     expect(allocateMoney(-100, [1, 1, 1])).toEqual([-34, -33, -33])
     expect(allocateMoney(10, [0, 1, 0, 1])).toEqual([0, 5, 0, 5])
+    expect(allocateMoney(-10, [0, 1, 0, 1])).toEqual([0, -5, 0, -5])
     expect(allocateMoney(0, [1, 2])).toEqual([0, 0])
     expect(allocateMoney(Number.MAX_SAFE_INTEGER, [1])).toEqual([Number.MAX_SAFE_INTEGER])
   })

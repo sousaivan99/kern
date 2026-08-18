@@ -1,17 +1,24 @@
-import { assertValidDate, copyDate } from "./shared.js"
+import { assertValidDate } from "./shared.js"
 import { addWithTemporal } from "./temporal.js"
 
 const assertInteger = (amount: number): void => {
   if (!Number.isSafeInteger(amount)) throw new RangeError("Date amounts must be safe integers")
 }
 
+const daysInMonth = (year: number, month: number): number => {
+  if (month === 1) {
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28
+  }
+  return month === 3 || month === 5 || month === 8 || month === 10 ? 30 : 31
+}
+
 /** Adds local-calendar days without mutating the supplied date. */
 export const addDays = (date: Date, amount: number): Date => {
   assertInteger(amount)
-  assertValidDate(date)
+  const timestamp = assertValidDate(date)
   const temporal = addWithTemporal(date, { days: amount })
   if (temporal) return temporal
-  const output = copyDate(date)
+  const output = new Date(timestamp)
   output.setDate(output.getDate() + amount)
   return output
 }
@@ -22,17 +29,16 @@ export const subtractDays = (date: Date, amount: number): Date => addDays(date, 
 /** Adds local-calendar months and clamps the day at the destination month end. */
 export const addMonths = (date: Date, amount: number): Date => {
   assertInteger(amount)
-  assertValidDate(date)
+  const timestamp = assertValidDate(date)
   const temporal = addWithTemporal(date, { months: amount })
   if (temporal) return temporal
-  const output = copyDate(date)
+  const output = new Date(timestamp)
   const day = output.getDate()
-  output.setDate(1)
-  output.setMonth(output.getMonth() + amount)
-  const monthEnd = copyDate(output)
-  monthEnd.setMonth(monthEnd.getMonth() + 1, 0)
-  const lastDay = monthEnd.getDate()
-  output.setDate(Math.min(day, lastDay))
+  const monthIndex = output.getMonth() + amount
+  const yearOffset = Math.floor(monthIndex / 12)
+  const month = monthIndex - yearOffset * 12
+  const year = output.getFullYear() + yearOffset
+  output.setFullYear(year, month, Math.min(day, daysInMonth(year, month)))
   return output
 }
 
@@ -43,9 +49,6 @@ export const subtractMonths = (date: Date, amount: number): Date => addMonths(da
 export const addYears = (date: Date, amount: number): Date => {
   assertInteger(amount)
   assertInteger(amount * 12)
-  assertValidDate(date)
-  const temporal = addWithTemporal(date, { years: amount })
-  if (temporal) return temporal
   return addMonths(date, amount * 12)
 }
 

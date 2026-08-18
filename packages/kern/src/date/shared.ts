@@ -2,11 +2,9 @@
 export const isValidDate = (value: unknown): value is Date =>
   value instanceof Date && !Number.isNaN(value.getTime())
 
-export const assertValidDate = (date: Date): void => {
-  if (!isValidDate(date)) throw new RangeError("Expected a valid Date")
-}
-
-export const copyDate = (date: Date): Date => {
-  assertValidDate(date)
-  return new Date(date.getTime())
+export const assertValidDate = (date: Date): number => {
+  if (!(date instanceof Date)) throw new RangeError("Expected a valid Date")
+  const timestamp = date.getTime()
+  if (Number.isNaN(timestamp)) throw new RangeError("Expected a valid Date")
+  return timestamp
 }
