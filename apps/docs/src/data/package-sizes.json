@@ -103,7 +103,7 @@
       "id": "kern",
       "label": "Kern",
       "package": "@sousaivan/kern",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "gzipBytes": 3610,
       "rawBytes": 9996,
       "fixture": "tooling/size-fixtures/validation/kern.ts",
