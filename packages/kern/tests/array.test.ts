@@ -8,6 +8,7 @@ import {
   unique,
   uniqueBy,
   withoutFalsy,
+  withoutNullish,
 } from "../src/array/index.js"
 
 describe("array", () => {
@@ -64,6 +65,10 @@ describe("array", () => {
     expect(uniqueBy([10, 20, 30], (_value, index) => index % 2)).toEqual([10, 20])
     expect(chunk([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]])
     expect(withoutFalsy([0, 1, false, 2, "", "ok", null, undefined])).toEqual([1, 2, "ok"])
+    const nullishInput = [0, false, "", Number.NaN, null, undefined, "ready"] as const
+    const present = withoutNullish(nullishInput)
+    expect(present).toEqual([0, false, "", Number.NaN, "ready"])
+    expect(present).not.toBe(nullishInput)
   })
 
   test("preserves native slice observability while chunking", () => {

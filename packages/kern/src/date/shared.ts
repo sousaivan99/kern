@@ -8,3 +8,10 @@ export const assertValidDate = (date: Date): number => {
   if (Number.isNaN(timestamp)) throw new RangeError("Expected a valid Date")
   return timestamp
 }
+
+export const assertValidDateResult = (date: Date): Date => {
+  if (Number.isNaN(date.getTime())) {
+    throw new RangeError("Date result is outside the supported range")
+  }
+  return date
+}

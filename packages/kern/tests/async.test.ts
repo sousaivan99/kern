@@ -37,6 +37,36 @@ describe("async", () => {
     ).rejects.toThrow("final")
   })
 
+  test("advances retry delays deterministically and aborts pending timers", async () => {
+    jest.useFakeTimers()
+    const attempts: number[] = []
+    const completed = retry(
+      (attempt) => {
+        attempts.push(attempt)
+        if (attempt < 3) throw new Error("again")
+        return "done"
+      },
+      { attempts: 3, delay: 100 },
+    )
+    await Promise.resolve()
+    expect(attempts).toEqual([1])
+    jest.advanceTimersByTime(100)
+    await Promise.resolve()
+    expect(attempts).toEqual([1, 2])
+    jest.advanceTimersByTime(100)
+    await expect(completed).resolves.toBe("done")
+
+    const controller = new AbortController()
+    const aborted = retry(() => Promise.reject(new Error("again")), {
+      attempts: 3,
+      delay: 100,
+      signal: controller.signal,
+    })
+    await Promise.resolve()
+    controller.abort(new Error("stopped"))
+    await expect(aborted).rejects.toThrow("stopped")
+  })
+
   test("rejects invalid retry delays", async () => {
     await expect(
       retry(

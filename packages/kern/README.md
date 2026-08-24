@@ -31,7 +31,10 @@ versions, so supported environments are exercised by compatibility smoke tests.
 ## Install
 
 ```bash
+npm install @sousaivan/kern
 bun add @sousaivan/kern
+pnpm add @sousaivan/kern
+yarn add @sousaivan/kern
 ```
 
 Prefer the smallest relevant subpath:
@@ -56,7 +59,7 @@ If you are new to Kern, use this order:
 6. **API reference** provides generated signatures and source links for exact lookup.
 
 The full guide source lives in
-[`apps/docs/src/content/docs`](https://github.com/sousaivan99/kern/tree/main/apps/docs/src/content/docs).
+[`apps/docs/src/content/docs`](https://github.com/sousaivan99/kern/tree/develop/apps/docs/src/content/docs).
 
 ## Principles
 
@@ -78,6 +81,7 @@ equivalent so developers can understand both forms:
 | `last(values)` | `values.at(-1)` |
 | `unique(values)` | `[...new Set(values)]` |
 | `withoutFalsy(values)` | `values.filter(Boolean)` |
+| `withoutNullish(values)` | `values.filter(value => value != null)` |
 | `groupBy(values, selector)` | `Object.groupBy(values, selector)` |
 | `isBefore(left, right)` | `left.getTime() < right.getTime()` |
 | `isAfter(left, right)` | `left.getTime() > right.getTime()` |
@@ -125,7 +129,7 @@ intentionally preserve an own property whose value is `undefined`. Unknown objec
 stripped. Object schemas compose immutably with `pick`, `omit`, `partial`, and `extend`. Use
 `strip()` (the default), `strict()`, or `passthrough()` for explicit unknown-key behavior.
 
-Available schemas are `string`, `number`, `boolean`, `date`, `literal`, `array`, `object`, `tuple`,
+Available schemas are `unknown`, `string`, `number`, `boolean`, `date`, `literal`, `array`, `object`, `tuple`,
 `record`, `union`, and `enumeration`. All schemas support `optional`, `nullable`, `default`,
 `transform`, and `refine`. Boolean refinements preserve the source type; TypeScript type guards
 may narrow it.
@@ -240,19 +244,20 @@ immutability helper for plain data, not a security sandbox.
 
 | Module | Public API |
 | --- | --- |
-| `validation` | `string`, `number`, `boolean`, `date`, `literal`, `array`, `object`, `tuple`, `record`, `union`, `enumeration`, `ValidationError`, validation types |
+| `validation` | `unknown`, `string`, `number`, `boolean`, `date`, `literal`, `array`, `object`, `tuple`, `record`, `union`, `enumeration`, `ValidationError`, validation types |
 | `money` | `formatMoney`, `parseMoney`, `currencyMinorUnitDigits`, `addMoney`, `subtractMoney`, `sumMoney`, `multiplyMoney`, `percentageOf`, `applyDiscount`, `roundMoney`, `allocateMoney` |
 | `date` | `formatDate`, `formatDateTime`, `formatRelativeTime`, `addDays`, `addMonths`, `addYears`, `subtractDays`, `subtractMonths`, `subtractYears`, `startOfDay`, `endOfDay`, `isValidDate`, `isBefore`, `isAfter`, `isSameInstant`, `isSameDay`, `isToday`, `isTomorrow`, `isYesterday`, `differenceInCalendarDays`, `toUTCISODate` |
 | `number` | `clamp`, `round`, `isBetween`, `percentageOfTotal`, `formatNumber`, `formatCompact`, `formatPercentage` |
 | `string` | `capitalize`, `uncapitalize`, `camelCase`, `kebabCase`, `snakeCase`, `truncate`, `slugify`, `isBlank` |
-| `array` | `first`, `last`, `unique`, `uniqueBy`, `groupBy`, `partition`, `chunk`, `withoutFalsy` |
+| `array` | `first`, `last`, `unique`, `uniqueBy`, `groupBy`, `partition`, `chunk`, `withoutFalsy`, `withoutNullish` |
 | `object` | `pick`, `omit`, `hasOwn`, `hasOwnPath`, `deepFreeze` |
 | `async` | `sleep`, `retry`, `once`, `debounce`, `throttle` |
 
 `once()` caches its first return value or thrown error and never invokes the callback again.
 `debounce()` and `throttle()` expose `cancel()` and `flush()` and support `AbortSignal`.
 `withoutFalsy()` uses JavaScript truthiness, including removal of `false`, numeric zero, empty
-strings, `null`, `undefined`, and `NaN`.
+strings, `null`, `undefined`, and `NaN`. `withoutNullish()` removes only `null` and `undefined` and
+returns `Array<NonNullable<T>>`.
 
 Case conversion is deterministic by default and becomes locale-sensitive only when a locale is
 explicitly requested. Word splitting is Unicode-aware but is not linguistic segmentation.
@@ -307,7 +312,7 @@ bun run benchmark -- --json > benchmark-results.json
 ```
 
 Quick mode verifies benchmark fixtures as part of `bun run check`; use the full suite for
-performance conclusions. See the [benchmark methodology](https://github.com/sousaivan99/kern/blob/main/tooling/benchmarks/README.md) for methodology and
+performance conclusions. See the [benchmark methodology](https://github.com/sousaivan99/kern/blob/develop/tooling/benchmarks/README.md) for methodology and
 comparison guidance.
 
 ## Build and releases
@@ -323,14 +328,14 @@ bun run check
 bun run pack:dry
 ```
 
-Pull requests into `main` or `prod` run the full CI matrix. Merging a release pull request into the
+Pull requests into `develop` or `prod` run the full CI matrix. Merging a release pull request into the
 protected `prod` branch runs CI again on the merge commit; only a successful `prod` CI run can
 trigger the provenance-enabled npm release workflow. Maintainers should follow
 [RELEASING.md](./RELEASING.md), including the one-time npm scope/trusted-publisher setup.
 
 ## Security
 
-See the repository [security policy](https://github.com/sousaivan99/kern/blob/main/SECURITY.md) for
+See the repository [security policy](https://github.com/sousaivan99/kern/blob/develop/SECURITY.md) for
 the private reporting channel. Validation is not sanitization, syntactically valid URLs are not
 necessarily safe destinations, and freezing plain data does not isolate untrusted code.
 

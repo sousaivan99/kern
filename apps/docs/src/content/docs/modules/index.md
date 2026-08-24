@@ -41,12 +41,13 @@ Validation turns untrusted `unknown` input into checked, typed output.
 | Function or class | What it does | Detailed guide |
 | --- | --- | --- |
 | `string()` | Builds a non-coercive string schema with text constraints and transforms. | [Primitive schemas](./validation/primitives/) |
+| `unknown()` | Accepts and preserves any JavaScript value for an explicitly opaque field. | [Primitive schemas](./validation/primitives/) |
 | `number()` | Builds a non-coercive number schema with range and numeric constraints. | [Primitive schemas](./validation/primitives/) |
 | `boolean()` | Accepts only the actual values `true` and `false`. | [Primitive schemas](./validation/primitives/) |
 | `date()` | Accepts valid native `Date` instances without parsing strings. | [Primitive schemas](./validation/primitives/) |
 | `literal(value)` | Accepts one exact primitive value using `Object.is`. | [Primitive schemas](./validation/primitives/) |
 | `enumeration(values)` | Accepts one string from a non-empty list. | [Primitive schemas](./validation/primitives/) |
-| `array(schema)` | Validates every array item with one schema. | [Collection schemas](./validation/collections/) |
+| `array(schema)` | Validates every array item and supports min/max/exact length bounds. | [Collection schemas](./validation/collections/) |
 | `tuple(schemas)` | Validates a fixed-length array with a schema for each position. | [Collection schemas](./validation/collections/) |
 | `object(shape)` | Validates a plain object's named properties. | [Collection schemas](./validation/collections/) |
 | `record(schema)` | Validates arbitrary string-keyed values in a plain object. | [Collection schemas](./validation/collections/) |
@@ -137,6 +138,7 @@ distinction.
 | `partition` | Splits values into matches and non-matches. | [Array](./array/) |
 | `chunk` | Copies values into fixed-size batches. | [Array](./array/) |
 | `withoutFalsy` | Removes JavaScript-falsy values with useful type narrowing. | [Array](./array/) |
+| `withoutNullish` | Removes only `null` and `undefined` using `NonNullable<T>`. | [Array](./array/) |
 
 ## Object
 
@@ -168,7 +170,7 @@ Each module guide also explains its public TypeScript types next to the function
 - money: formatting, parsing, and exact rounding option types;
 - date and number: native `Intl` option extensions;
 - string: locale-aware case options;
-- array: `NonFalsy<T>`;
+- array: `NonFalsy<T>` (while `withoutNullish` uses built-in `NonNullable<T>`);
 - object: `ObjectPath` and `DeepReadonly<T>`;
 - async: cancellation, retry, and scheduled-function contracts.
 

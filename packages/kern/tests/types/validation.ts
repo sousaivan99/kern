@@ -1,5 +1,7 @@
 import type { StandardSchemaV1 as OfficialStandardSchemaV1 } from "@standard-schema/spec"
 import {
+  type ArraySchema,
+  array,
   type Infer,
   type InferInput,
   type InferOutput,
@@ -9,11 +11,31 @@ import {
   type Schema,
   type StandardSchemaV1,
   string,
+  unknown as unknownSchema,
 } from "../../src/validation/index.js"
 
 type Equal<Left, Right> =
   (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right ? 1 : 2 ? true : false
 type Assert<T extends true> = T
+
+const boundedStrings = array(string()).min(1).max(3).length(2)
+const boundedSchema: ArraySchema<ReturnType<typeof string>> = boundedStrings
+type _BoundedArrayOutput = Assert<Equal<InferOutput<typeof boundedStrings>, string[]>>
+type _BoundedArrayInput = Assert<Equal<InferInput<typeof boundedStrings>, string[]>>
+void boundedSchema
+
+const unknownValueSchema = object({ value: unknownSchema() })
+type UnknownOutput = InferOutput<typeof unknownValueSchema>
+type UnknownInput = InferInput<typeof unknownValueSchema>
+type _UnknownOutput = Assert<Equal<UnknownOutput["value"], unknown>>
+type _UnknownInput = Assert<Equal<UnknownInput["value"], unknown>>
+const unknownOutput: UnknownOutput = { value: undefined }
+const unknownInput: UnknownInput = { value: undefined }
+void unknownOutput
+void unknownInput
+// @ts-expect-error unknown fields remain required even when their value may be undefined
+const missingUnknownInput: UnknownInput = {}
+void missingUnknownInput
 
 const User = object({
   name: string(),

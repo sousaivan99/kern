@@ -297,12 +297,12 @@ semantics are not.
 
 ## Read and reproduce
 
-- [Validation schema boundary](https://github.com/sousaivan99/kern/blob/main/packages/kern/src/validation/schema.ts)
-- [Collection validators and safe output construction](https://github.com/sousaivan99/kern/blob/main/packages/kern/src/validation/collections/index.ts)
-- [`Intl` normalization and bounded caches](https://github.com/sousaivan99/kern/blob/main/packages/kern/src/intl.ts)
-- [Exact money allocation](https://github.com/sousaivan99/kern/blob/main/packages/kern/src/money/arithmetic.ts)
-- [String hot paths](https://github.com/sousaivan99/kern/blob/main/packages/kern/src/string/index.ts)
-- [Benchmark methodology and report command](https://github.com/sousaivan99/kern/blob/main/tooling/benchmarks/README.md)
+- [Validation schema boundary](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/validation/schema.ts)
+- [Collection validators and safe output construction](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/validation/collections/index.ts)
+- [`Intl` normalization and bounded caches](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/intl.ts)
+- [Exact money allocation](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/money/arithmetic.ts)
+- [String hot paths](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/string/index.ts)
+- [Benchmark methodology and report command](https://github.com/sousaivan99/kern/blob/develop/tooling/benchmarks/README.md)
 
 Use the stable scenario IDs from the measurement pages with `bun run benchmark:report`. The report
 rejects source, runtime, fixture, or run-order mismatches before calculating a median of run medians.

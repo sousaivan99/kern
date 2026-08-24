@@ -1,71 +1,81 @@
-# Kern
+# `@sousaivan/kern`
 
-Kern is a Bun workspace for `@sousaivan/kern`, a zero-runtime-dependency, TypeScript-first collection
-of small semantic primitives for modern JavaScript runtimes. Version 1.x is the stable public API
-line and follows the package's semantic-versioning and support policies.
+[![npm](https://img.shields.io/npm/v/@sousaivan/kern)](https://www.npmjs.com/package/@sousaivan/kern)
+[![CI](https://github.com/sousaivan99/kern/actions/workflows/ci.yml/badge.svg?branch=prod)](https://github.com/sousaivan99/kern/actions/workflows/ci.yml)
+[![dependencies](https://img.shields.io/badge/runtime_dependencies-0-2ea44f)](./packages/kern/package.json)
+[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
-## Workspace
+Kern is a small, TypeScript-first utility package for validation, exact minor-unit money,
+calendar-safe dates, arrays, objects, strings, numbers, and cancellable async control flow. It is
+ESM-only, framework-agnostic, side-effect free, tree-shakeable, and has zero runtime dependencies.
 
-```text
-apps/docs/       Astro, Starlight, and Tailwind documentation site
-packages/kern/   Publishable @sousaivan/kern package and its tests
-tooling/         Build, package, compatibility, benchmark, and repository automation
+[Read the live documentation](https://sousaivan99.github.io/kern/) ·
+[Browse the package guide](./packages/kern/README.md) ·
+[See package sizes](https://sousaivan99.github.io/kern/measurements/package-size/)
+
+## Install
+
+```bash
+npm install @sousaivan/kern
+bun add @sousaivan/kern
+pnpm add @sousaivan/kern
+yarn add @sousaivan/kern
 ```
 
-The library remains ESM-only, side-effect free, framework-agnostic, and split into independently
-importable modules for validation, money, date, number, string, array, object, and async control
-flow. See [`packages/kern/README.md`](./packages/kern/README.md) for the npm-facing package guide or
-[`apps/docs/src/content/docs`](./apps/docs/src/content/docs) for the complete documentation source.
+Prefer focused subpath imports so ownership and tree-shaking stay obvious:
 
-## Start here
+```ts
+import { withoutNullish } from "@sousaivan/kern/array"
+import { formatMoney, sumMoney } from "@sousaivan/kern/money"
+import { array, number, object, string, unknown } from "@sousaivan/kern/validation"
 
-The documentation is written as a progressive guide: begin with installation, follow one complete
-order example, then learn the six shared ideas before choosing a module. Every module guide lists
-its functions, options, defaults, return values, errors, mutation behavior, edge cases, and native
-equivalents where relevant.
+const Request = object({
+  customer: string().trim().min(2),
+  prices: array(number().integer()).min(1),
+  metadata: unknown().optional(),
+})
 
-- [Installation](./apps/docs/src/content/docs/getting-started/installation.md)
-- [Quick start](./apps/docs/src/content/docs/getting-started/quick-start.md)
-- [Core ideas](./apps/docs/src/content/docs/getting-started/core-ideas.md)
-- [JavaScript and TypeScript](./apps/docs/src/content/docs/frameworks/javascript-typescript.md)
-- [Vue](./apps/docs/src/content/docs/frameworks/vue.md)
-- [Nuxt](./apps/docs/src/content/docs/frameworks/nuxt.md)
-- [React](./apps/docs/src/content/docs/frameworks/react.md)
-- [Validation](./apps/docs/src/content/docs/modules/validation/index.md)
-- [Money](./apps/docs/src/content/docs/modules/money/index.md)
-- [Date](./apps/docs/src/content/docs/modules/date/index.md)
-- [Number](./apps/docs/src/content/docs/modules/number.mdx)
-- [String](./apps/docs/src/content/docs/modules/string.mdx)
-- [Array](./apps/docs/src/content/docs/modules/array.mdx)
-- [Object](./apps/docs/src/content/docs/modules/object.mdx)
-- [Async](./apps/docs/src/content/docs/modules/async.mdx)
+const request = Request.parse(input)
+const total = sumMoney(withoutNullish(request.prices))
+console.log(formatMoney(total, "EUR", { locale: "en-IE" }))
+```
 
-## Development
+Validation failures are structured and inferred. Money values are safe-integer minor units such
+as cents. Date helpers do not mutate their input, and every public module has an enforced gzip
+budget.
+
+## Choose Kern when
+
+- You want a compact, dependency-free foundation instead of a large general-purpose toolkit.
+- Type inference, structured validation errors, exact money arithmetic, and tree-shaking matter.
+- Native JavaScript and Web APIs should remain visible rather than hidden behind a framework.
+- Node 22+, Bun 1.3+, current Deno, and evergreen browsers cover your runtime targets.
+
+## Choose something else when
+
+- You need exhaustive Lodash, Zod, or date-fns compatibility and their broader ecosystems.
+- You need time-zone database arithmetic, foreign exchange, a ledger, or locale data bundled in.
+- You require CommonJS, legacy browsers, or older Node versions.
+- Your application needs recursive/discriminated schemas or domain-specific validation primitives.
+
+## Repository
+
+The published package is in [`packages/kern`](./packages/kern), documentation is in
+[`apps/docs`](./apps/docs), and build/benchmark automation is in [`tooling`](./tooling). Kern 1.x
+follows the package [SemVer policy](./packages/kern/SEMVER.md) and
+[support policy](./packages/kern/SUPPORT.md).
 
 ```bash
 bun install
-bun run dev
-bun run test
-bun run typecheck
-bun run build
-bun run docs:a11y
-bun run docs:check
-bun run package:check
 bun run check
 ```
 
-`bun run check` is the full local release gate across the package, documentation, compatibility
-targets, packed artifact, bundle budgets, benchmarks, and dependency audit.
-`bun run docs:a11y` rebuilds the site and checks every generated route in light and dark themes.
+`bun run check` is the one complete local gate. It runs the full correctness, type, package,
+runtime, browser, documentation, accessibility, bundle-size, benchmark-smoke, and audit coverage
+through a bounded dependency-aware workflow.
 
-## Repository policy
+Development flows from `develop` to the protected `prod` release branch. See
+[CONTRIBUTING.md](./CONTRIBUTING.md), [ROADMAP.md](./ROADMAP.md), and
+[RELEASING.md](./packages/kern/RELEASING.md).
 
-- Runtime dependencies for `@sousaivan/kern`: **0**
-- Package name: `@sousaivan/kern`
-- Supported package runtimes: Node.js 22+, Bun 1.3+, current Deno, and modern evergreen browsers
-- License: [MIT](./LICENSE)
-- Security reports: [SECURITY.md](./SECURITY.md)
-- Changelog: [packages/kern/CHANGELOG.md](./packages/kern/CHANGELOG.md)
-- Semantic versioning: [packages/kern/SEMVER.md](./packages/kern/SEMVER.md)
-- Support: [packages/kern/SUPPORT.md](./packages/kern/SUPPORT.md)
-- Releases: [packages/kern/RELEASING.md](./packages/kern/RELEASING.md)
+MIT © Ivan Sousa.

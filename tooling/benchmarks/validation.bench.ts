@@ -10,6 +10,7 @@ const nestedSchema = object({
   }),
 })
 const integerArraySchema = array(number().integer())
+const constrainedIntegerArraySchema = array(number().integer()).min(1).max(100_000)
 const boundedFailureInput = Array.from({ length: 1_000 }, () => 0.5)
 const composedSchema = simpleSchema
   .pick(["name", "age"])
@@ -55,6 +56,19 @@ const largeArrayBenchmarks = sizes.flatMap((size): BenchmarkCase[] => {
       verify: (result) => verifyFailureCount(result, 1),
     },
   ]
+})
+
+const constrainedArrayBenchmarks = sizes.map((size): BenchmarkCase => {
+  const valid = Array.from({ length: size }, (_, index) => index)
+  return {
+    itemsPerOperation: size,
+    name: "constrained array success",
+    run: () => constrainedIntegerArraySchema.safeParse(valid),
+    size,
+    suite: "validation-kern",
+    unit: "items",
+    verify: verifySuccess,
+  }
 })
 
 const wideInputBenchmarks = sizes.map((size): BenchmarkCase => {
@@ -200,6 +214,7 @@ export const validationBenchmarks: readonly BenchmarkCase[] = [
     },
   },
   ...largeArrayBenchmarks,
+  ...constrainedArrayBenchmarks,
   ...wideInputBenchmarks,
   ...wideSchemaBenchmarks,
   ...recordBenchmarks,

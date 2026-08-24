@@ -5,6 +5,7 @@ import {
   unique,
   uniqueBy,
   withoutFalsy,
+  withoutNullish,
 } from "../../packages/kern/src/array/index.js"
 import { formatDate } from "../../packages/kern/src/date/index.js"
 import {
@@ -38,6 +39,7 @@ const arrayBenchmarks = arraySizes.flatMap((size): BenchmarkCase[] => {
   const numbers = Array.from({ length: size }, (_, index) => index % halfSize)
   const objects = numbers.map((identity) => ({ identity }))
   const mixed = numbers.map((value, index) => (index % 4 === 0 ? 0 : value + 1))
+  const nullish = numbers.map((value, index) => (index % 4 === 0 ? null : value))
   return [
     {
       itemsPerOperation: size,
@@ -102,6 +104,15 @@ const arrayBenchmarks = arraySizes.flatMap((size): BenchmarkCase[] => {
       suite: "primitives",
       unit: "items",
       verify: (result) => assertArrayLength(result, size - Math.ceil(size / 4), "withoutFalsy"),
+    },
+    {
+      itemsPerOperation: size,
+      name: "array withoutNullish (25% nullish)",
+      run: () => withoutNullish(nullish),
+      size,
+      suite: "primitives",
+      unit: "items",
+      verify: (result) => assertArrayLength(result, size - Math.ceil(size / 4), "withoutNullish"),
     },
   ]
 })

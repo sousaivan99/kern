@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { createServer } from "node:http"
+import { availableParallelism } from "node:os"
 import { extname, join, relative, resolve, sep } from "node:path"
 import AxeBuilder from "@axe-core/playwright"
 import { chromium, type Page } from "playwright"
@@ -187,36 +188,41 @@ const browser = await chromium.launch({ headless: true })
 const failures: AccessibilityFailure[] = []
 
 try {
-  for (const theme of ["light", "dark"] as const) {
-    const context = await browser.newContext({
-      colorScheme: theme,
-      viewport: { width: 1440, height: 900 },
-    })
-    await context.addInitScript((selectedTheme) => {
-      localStorage.setItem("starlight-theme", selectedTheme)
-    }, theme)
-    const workerCount = Math.min(4, routes.length)
-    const pages = await Promise.all(
-      Array.from({ length: workerCount }, async () => await context.newPage()),
-    )
-    let auditedRoutes = 0
+  const totalWorkers = Math.min(8, availableParallelism(), routes.length * 2)
+  const workersPerTheme = Math.max(1, Math.floor(totalWorkers / 2))
+  await Promise.all(
+    (["light", "dark"] as const).map(async (theme) => {
+      const context = await browser.newContext({
+        colorScheme: theme,
+        viewport: { width: 1440, height: 900 },
+      })
+      await context.addInitScript((selectedTheme) => {
+        localStorage.setItem("starlight-theme", selectedTheme)
+      }, theme)
+      const pages = await Promise.all(
+        Array.from({ length: Math.min(workersPerTheme, routes.length) }, async () =>
+          context.newPage(),
+        ),
+      )
+      let auditedRoutes = 0
 
-    await Promise.all(
-      pages.map(async (page, workerIndex) => {
-        for (let index = workerIndex; index < routes.length; index += workerCount) {
-          const route = routes[index]
-          if (!route) continue
-          failures.push(...(await auditPage(page, route, theme)))
-          auditedRoutes += 1
-          if (auditedRoutes % 25 === 0) {
-            terminal.info(`${theme}: audited ${auditedRoutes}/${routes.length} routes`)
+      await Promise.all(
+        pages.map(async (page, workerIndex) => {
+          for (let index = workerIndex; index < routes.length; index += pages.length) {
+            const route = routes[index]
+            if (!route) continue
+            failures.push(...(await auditPage(page, route, theme)))
+            auditedRoutes += 1
+            if (auditedRoutes % 25 === 0) {
+              terminal.info(`${theme}: audited ${auditedRoutes}/${routes.length} routes`)
+            }
           }
-        }
-      }),
-    )
+        }),
+      )
 
-    await context.close()
-  }
+      await context.close()
+    }),
+  )
 } finally {
   await browser.close()
   server.closeAllConnections()
@@ -225,6 +231,11 @@ try {
 
 if (failures.length > 0) {
   const details = failures
+    .sort((left, right) =>
+      `${left.theme}\0${left.route}\0${left.rule}`.localeCompare(
+        `${right.theme}\0${right.route}\0${right.rule}`,
+      ),
+    )
     .map(
       (failure) =>
         `${failure.theme} ${failure.route} [${failure.impact ?? "unknown"}] ${failure.rule}: ${failure.help}\n  ${failure.nodes.join("\n  ")}`,

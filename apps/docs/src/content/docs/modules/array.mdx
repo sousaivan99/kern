@@ -40,6 +40,7 @@ these and other terms.
 | `partition` | Split values into matches and non-matches | `[[], []]` |
 | `chunk` | Split values into fixed-size pages/batches | `[]` |
 | `withoutFalsy` | Remove JavaScript-falsy values | `[]` |
+| `withoutNullish` | Remove only `null` and `undefined` | `[]` |
 
 ## `first(values)`
 
@@ -216,11 +217,25 @@ type Present = NonFalsy<Input> // string
 const names: Present[] = withoutFalsy(["Ada", null, "Grace", undefined])
 ```
 
+## Remove only nullish values
+
+Use `withoutNullish()` when zero, `false`, an empty string, or `NaN` are valid data:
+
+```ts
+import { withoutNullish } from "@sousaivan/kern/array"
+
+const values = withoutNullish([0, null, false, undefined, "", Number.NaN])
+// Array<number | false | string>: [0, false, "", NaN]
+```
+
+It removes only `null` and `undefined`, preserves order and duplicates, and returns a new array.
+Its result uses TypeScript's built-in `NonNullable<T>` type; Kern adds no extra public type.
+
 ## Mutation and errors
 
 | Helper | Mutates input? | Can throw because of its options? |
 | --- | --- | --- |
-| `first`, `last`, `unique`, `withoutFalsy` | No | No |
+| `first`, `last`, `unique`, `withoutFalsy`, `withoutNullish` | No | No |
 | `uniqueBy`, `groupBy`, `partition` | No | A selector/predicate exception passes through. |
 | `chunk` | No | `RangeError` for an invalid size. |
 
@@ -229,7 +244,7 @@ const names: Present[] = withoutFalsy(["Ada", null, "Grace", undefined])
 - `unique()` compares objects by identity, not by matching fields. Use `uniqueBy(users, user =>
   user.id)` for an ID-based comparison.
 - `withoutFalsy()` removes useful numeric zeroes as well as missing values. Do not use it when `0`
-  is valid data.
+  is valid data; use `withoutNullish()` for that case.
 - `chunk(values, 0)` cannot make progress and throws. The size must be a positive safe integer.
 - Selector and predicate callbacks are your application code. If one throws, Kern does not hide
   that error.

@@ -1,4 +1,4 @@
-import { assertValidDate } from "./shared.js"
+import { assertValidDate, assertValidDateResult } from "./shared.js"
 import { addWithTemporal } from "./temporal.js"
 
 const assertInteger = (amount: number): void => {
@@ -17,10 +17,10 @@ export const addDays = (date: Date, amount: number): Date => {
   assertInteger(amount)
   const timestamp = assertValidDate(date)
   const temporal = addWithTemporal(date, { days: amount })
-  if (temporal) return temporal
+  if (temporal) return assertValidDateResult(temporal)
   const output = new Date(timestamp)
   output.setDate(output.getDate() + amount)
-  return output
+  return assertValidDateResult(output)
 }
 
 /** Subtracts local-calendar days without mutating the supplied date. */
@@ -31,7 +31,7 @@ export const addMonths = (date: Date, amount: number): Date => {
   assertInteger(amount)
   const timestamp = assertValidDate(date)
   const temporal = addWithTemporal(date, { months: amount })
-  if (temporal) return temporal
+  if (temporal) return assertValidDateResult(temporal)
   const output = new Date(timestamp)
   const day = output.getDate()
   const monthIndex = output.getMonth() + amount
@@ -39,7 +39,7 @@ export const addMonths = (date: Date, amount: number): Date => {
   const month = monthIndex - yearOffset * 12
   const year = output.getFullYear() + yearOffset
   output.setFullYear(year, month, Math.min(day, daysInMonth(year, month)))
-  return output
+  return assertValidDateResult(output)
 }
 
 /** Subtracts local-calendar months with the same month-end clamping as `addMonths`. */

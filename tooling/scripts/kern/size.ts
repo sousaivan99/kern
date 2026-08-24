@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { gzipSync } from "node:zlib"
 import { type TableColumn, terminal } from "../shared/console.js"
+import { moduleManifest } from "../shared/modules.js"
 
 interface Entry {
   readonly budgetBytes: number
@@ -30,6 +31,7 @@ interface ExampleMeasurement {
 interface SizeReport {
   readonly entrypoints: readonly SizeMeasurement[]
   readonly examples: readonly ExampleMeasurement[]
+  readonly featureFixtures: readonly FeatureFixtureMeasurement[]
   readonly measurement: {
     readonly bunVersion: string
     readonly compression: "gzip, level 9"
@@ -41,22 +43,29 @@ interface SizeReport {
   readonly schemaVersion: 1
 }
 
+interface FeatureFixtureMeasurement {
+  readonly afterFixture: string
+  readonly afterGzipBytes: number
+  readonly beforeFixture?: string
+  readonly beforeGzipBytes?: number
+  readonly deltaGzipBytes?: number
+  readonly id: string
+  readonly label: string
+}
+
 const entries: readonly Entry[] = [
-  { id: "validation", budgetBytes: 5 * 1024 },
-  { id: "money", budgetBytes: 3_200 },
-  { id: "date", budgetBytes: 2 * 1024 },
-  { id: "number", budgetBytes: 1_500 },
-  { id: "array", budgetBytes: 1_500 },
-  { id: "string", budgetBytes: 2 * 1024 },
-  { id: "object", budgetBytes: 2 * 1024 },
-  { id: "async", budgetBytes: 2_500 },
-  { id: "index", budgetBytes: 16 * 1024 },
+  ...moduleManifest.modules.map((module) => ({
+    budgetBytes: module.gzipBudgetBytes,
+    id: module.id,
+  })),
+  { id: moduleManifest.root.id, budgetBytes: moduleManifest.root.gzipBudgetBytes },
 ]
 
 const repositoryRoot = resolve(import.meta.dir, "../../..")
 const packageRoot = join(repositoryRoot, "packages", "kern")
 const reportPath = join(repositoryRoot, "apps", "docs", "src", "data", "package-sizes.json")
 const fixtureRoot = join(repositoryRoot, "tooling", "size-fixtures", "validation")
+const featureFixtureRoot = join(repositoryRoot, "tooling", "size-fixtures", "expansion")
 
 const arguments_ = new Set(process.argv.slice(2))
 const knownArguments = new Set(["--check", "--json", "--write-report"])
@@ -152,6 +161,43 @@ for (const example of exampleDefinitions) {
   })
 }
 
+const featureFixtureDefinitions = [
+  {
+    id: "array-bounds",
+    label: "Array schema bounds",
+    before: "array-bounds-before.ts",
+    after: "array-bounds-after.ts",
+  },
+  {
+    id: "without-nullish",
+    label: "withoutNullish",
+    before: "without-nullish-before.ts",
+    after: "without-nullish-after.ts",
+  },
+  { id: "unknown", label: "Required unknown field", after: "unknown.ts" },
+] as const
+const featureFixtures: FeatureFixtureMeasurement[] = []
+for (const fixture of featureFixtureDefinitions) {
+  const afterPath = join(featureFixtureRoot, fixture.after)
+  const after = await measureBundle(afterPath)
+  const beforeName = "before" in fixture ? fixture.before : undefined
+  const beforePath = beforeName ? join(featureFixtureRoot, beforeName) : undefined
+  const before = beforePath ? await measureBundle(beforePath) : undefined
+  featureFixtures.push({
+    id: fixture.id,
+    label: fixture.label,
+    afterFixture: relative(repositoryRoot, afterPath).split(sep).join("/"),
+    afterGzipBytes: after.gzipBytes,
+    ...(before && beforePath
+      ? {
+          beforeFixture: relative(repositoryRoot, beforePath).split(sep).join("/"),
+          beforeGzipBytes: before.gzipBytes,
+          deltaGzipBytes: after.gzipBytes - before.gzipBytes,
+        }
+      : {}),
+  })
+}
+
 const rootEntrypoint = entrypointMeasurements.find((entry) => entry.id === "index")
 if (!rootEntrypoint) throw new Error("Root entrypoint measurement is missing")
 
@@ -165,6 +211,7 @@ const report: SizeReport = {
     target: "browser",
   },
   entrypoints: entrypointMeasurements.filter((entry) => entry.id !== "index"),
+  featureFixtures,
   rootEntrypoint,
   examples: exampleMeasurements,
 }
@@ -209,6 +256,24 @@ terminal.heading("Bundle sizes")
 terminal.table(entrypointMeasurements, columns)
 terminal.heading("Realistic validation schema")
 terminal.table(exampleMeasurements, exampleColumns)
+terminal.heading("Tree-shaken 1.1 fixtures")
+terminal.table(featureFixtures, [
+  { header: "fixture", style: "cyan", value: (row) => row.label },
+  {
+    align: "right",
+    header: "before gzip",
+    value: (row) => (row.beforeGzipBytes === undefined ? "n/a" : `${row.beforeGzipBytes} B`),
+  },
+  { align: "right", header: "after gzip", value: (row) => `${row.afterGzipBytes} B` },
+  {
+    align: "right",
+    header: "delta",
+    value: (row) =>
+      row.deltaGzipBytes === undefined
+        ? "n/a"
+        : `${row.deltaGzipBytes >= 0 ? "+" : ""}${row.deltaGzipBytes} B`,
+  },
+] satisfies readonly TableColumn<FeatureFixtureMeasurement>[])
 
 const failures = entrypointMeasurements.filter((row) => row.gzipBytes > row.budgetBytes)
 let reportIsCurrent = true

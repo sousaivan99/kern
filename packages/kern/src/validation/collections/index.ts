@@ -18,9 +18,55 @@ const internalSchema = <S extends AnySchema>(
 ): InternalSchema<InferOutput<S>, InferInput<S>, SchemaPresence> =>
   schema as unknown as InternalSchema<InferOutput<S>, InferInput<S>, SchemaPresence>
 
-/** Validates every array element and reports indexed paths. */
-export const array = <S extends AnySchema>(element: S): Schema<InferOutput<S>[], InferInput<S>[]> =>
-  createSchema(
+export interface ArraySchema<S extends AnySchema>
+  extends Schema<InferOutput<S>[], InferInput<S>[]> {
+  min(length: number, message?: string): ArraySchema<S>
+  max(length: number, message?: string): ArraySchema<S>
+  length(length: number, message?: string): ArraySchema<S>
+}
+
+type ArrayConstraint = readonly [kind: "min" | "max" | "length", length: number, message: string]
+
+const assertArrayLength = (length: number): void => {
+  if (!Number.isSafeInteger(length) || length < 0) {
+    throw new RangeError("Array lengths must be non-negative safe integers")
+  }
+}
+
+const createArraySchema = <S extends AnySchema>(
+  element: S,
+  constraints: readonly ArrayConstraint[] = [],
+): ArraySchema<S> => {
+  const hasConstraints = constraints.length > 0
+  const validateLength = (input: readonly unknown[], context?: ValidationContext): boolean => {
+    for (const [kind, length, message] of constraints) {
+      const valid =
+        kind === "min"
+          ? input.length >= length
+          : kind === "max"
+            ? input.length <= length
+            : input.length === length
+      if (valid) continue
+      failure(
+        context,
+        kind === "min" ? "too_small" : kind === "max" ? "too_big" : "invalid_length",
+        message,
+        {
+          received: "array",
+          details:
+            kind === "min"
+              ? { minimum: length }
+              : kind === "max"
+                ? { maximum: length }
+                : { length },
+        },
+      )
+      return false
+    }
+    return true
+  }
+
+  const base = createSchema<InferOutput<S>[], InferInput<S>[]>(
     (input, context) => {
       if (!Array.isArray(input)) {
         return failure(context, "invalid_type", "Expected an array", {
@@ -32,7 +78,7 @@ export const array = <S extends AnySchema>(element: S): Schema<InferOutput<S>[],
       context.path ??= []
       const path = context.path
       const output: InferOutput<S>[] = []
-      let valid = true
+      let valid = hasConstraints ? validateLength(input, context) : true
       for (let index = 0; index < input.length && hasIssueCapacity(context); index += 1) {
         path.push(index)
         const result = internalSchema(element)._run(input[index], context)
@@ -46,7 +92,7 @@ export const array = <S extends AnySchema>(element: S): Schema<InferOutput<S>[],
     (() => {
       const fast = internalSchema(element)._fast
       if (!fast) return undefined
-      return (input: unknown) => {
+      const parseElements = (input: unknown) => {
         if (!Array.isArray(input)) return FAILURE
         const output = new Array<InferOutput<S>>(input.length)
         let index = 0
@@ -61,8 +107,36 @@ export const array = <S extends AnySchema>(element: S): Schema<InferOutput<S>[],
         }
         return output
       }
+      return hasConstraints
+        ? (input: unknown) => {
+            if (!Array.isArray(input) || !validateLength(input)) return FAILURE
+            return parseElements(input)
+          }
+        : parseElements
     })(),
   )
+
+  const append = (constraint: ArrayConstraint): ArraySchema<S> =>
+    createArraySchema(element, [...constraints, constraint])
+
+  return Object.assign(base, {
+    min(length: number, message = `Expected at least ${length} items`) {
+      assertArrayLength(length)
+      return append(["min", length, message])
+    },
+    max(length: number, message = `Expected at most ${length} items`) {
+      assertArrayLength(length)
+      return append(["max", length, message])
+    },
+    length(length: number, message = `Expected exactly ${length} items`) {
+      assertArrayLength(length)
+      return append(["length", length, message])
+    },
+  })
+}
+
+/** Validates every array element and reports indexed paths. */
+export const array = <S extends AnySchema>(element: S): ArraySchema<S> => createArraySchema(element)
 
 export type Shape = Readonly<Record<string, AnySchema>>
 export type UnknownKeyPolicy = "strip" | "strict" | "passthrough"

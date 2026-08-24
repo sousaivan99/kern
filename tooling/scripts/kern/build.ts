@@ -2,12 +2,13 @@ import { rm } from "node:fs/promises"
 import { join, resolve } from "node:path"
 import { progress } from "@clack/prompts"
 import { terminal } from "../shared/console.js"
+import { moduleManifest } from "../shared/modules.js"
 import { printCapturedFailure, runCaptured } from "../shared/process.js"
 
 const repositoryRoot = resolve(import.meta.dir, "../../..")
 const packageRoot = join(repositoryRoot, "packages", "kern")
 const outputDirectory = join(packageRoot, "dist")
-const modules = ["validation", "money", "date", "number", "string", "array", "object", "async"]
+const modules = moduleManifest.modules.map((module) => module.id)
 const entrypoints = ["", ...modules]
 const bar = progress({ max: entrypoints.length + 1, size: 32, style: "block" })
 

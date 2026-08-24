@@ -23,6 +23,14 @@ interface SizeReport {
     readonly source: string
     readonly version: string
   }>
+  readonly featureFixtures: ReadonlyArray<{
+    readonly afterFixture: string
+    readonly afterGzipBytes: number
+    readonly beforeFixture?: string
+    readonly beforeGzipBytes?: number
+    readonly deltaGzipBytes?: number
+    readonly id: string
+  }>
   readonly measurement: {
     readonly bunVersion: string
     readonly compression: string
@@ -65,6 +73,21 @@ describe("versioned package-size report", () => {
     }
     expect(report.rootEntrypoint.rawBytes).toBeGreaterThan(0)
     expect(report.rootEntrypoint.gzipBytes).toBeGreaterThan(0)
+    expect(report.featureFixtures.map((fixture) => fixture.id)).toEqual([
+      "array-bounds",
+      "without-nullish",
+      "unknown",
+    ])
+    for (const fixture of report.featureFixtures) {
+      expect(fixture.afterGzipBytes).toBeGreaterThan(0)
+      expect(await Bun.file(join(repositoryRoot, fixture.afterFixture)).exists()).toBe(true)
+      if (fixture.beforeFixture) {
+        expect(fixture.beforeGzipBytes).toBeGreaterThan(0)
+        expect(fixture.deltaGzipBytes).toBe(
+          fixture.afterGzipBytes - (fixture.beforeGzipBytes as number),
+        )
+      }
+    }
   })
 
   test("keeps package versions and displayed sources synchronized with fixtures", async () => {
