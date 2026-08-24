@@ -1,4 +1,5 @@
 export interface CapturedProcess {
+  readonly aborted?: boolean
   readonly command: readonly string[]
   readonly exitCode: number
   readonly stderr: string
@@ -9,6 +10,7 @@ export interface CapturedProcessOptions {
   readonly cwd?: string
   readonly env?: Readonly<Record<string, string | undefined>>
   readonly onLine?: (line: string) => void
+  readonly signal?: AbortSignal
 }
 
 const capturedOutput = (result: CapturedProcess): string =>
@@ -86,6 +88,14 @@ export const runCaptured = async (
     stderr: "pipe",
     stdout: "pipe",
   })
+  let aborted = false
+  const abort = (): void => {
+    if (child.exitCode !== null) return
+    aborted = true
+    child.kill()
+  }
+  if (options.signal?.aborted) abort()
+  else options.signal?.addEventListener("abort", abort, { once: true })
   const stdout = consumeStream(child.stdout, options.onLine)
   const stderr = consumeStream(child.stderr, options.onLine)
   const [exitCode, capturedStdout, capturedStderr] = await Promise.all([
@@ -93,7 +103,14 @@ export const runCaptured = async (
     stdout,
     stderr,
   ])
-  return { command, exitCode, stderr: capturedStderr, stdout: capturedStdout }
+  options.signal?.removeEventListener("abort", abort)
+  return {
+    ...(aborted ? { aborted: true } : {}),
+    command,
+    exitCode,
+    stderr: capturedStderr,
+    stdout: capturedStdout,
+  }
 }
 
 export const printCapturedFailure = (result: CapturedProcess): void => {

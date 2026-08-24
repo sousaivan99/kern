@@ -11,7 +11,7 @@ person, and creates an estimated delivery date.
 ## 1. Describe valid input
 
 ```ts
-import { array, enumeration, number, object, string } from "@sousaivan/kern/validation"
+import { array, enumeration, number, object, string, unknown } from "@sousaivan/kern/validation"
 
 const Order = object({
   customer: object({
@@ -24,16 +24,18 @@ const Order = object({
       unitPriceMinor: number().integer().positive(),
       quantity: number().integer().positive(),
     }),
-  ),
+  ).min(1).max(100),
   currency: enumeration(["EUR", "USD", "GBP"] as const),
   discountPercent: number().min(0).max(100).default(0),
+  metadata: unknown().optional(),
 })
 ```
 
 Read the schema from the outside inward:
 
 - `object({...})` describes an object and its fields.
-- `array(schema)` applies one schema to every array item.
+- `array(schema).min(1).max(100)` checks every item and bounds the request size.
+- `unknown()` preserves an optional opaque metadata value without pretending to understand it.
 - `string()` and `number()` check types without coercing them.
 - Fluent methods such as `.trim()`, `.integer()`, and `.positive()` add behavior.
 - `.default(0)` allows the field to be missing and produces `0` in parsed output.
@@ -122,8 +124,9 @@ helper explicitly says UTC.
 
 ```ts
 import { addDays, formatDate } from "@sousaivan/kern/date"
+import { withoutNullish } from "@sousaivan/kern/array"
 import { applyDiscount, formatMoney, multiplyMoney, sumMoney } from "@sousaivan/kern/money"
-import { array, enumeration, number, object, string } from "@sousaivan/kern/validation"
+import { array, enumeration, number, object, string, unknown } from "@sousaivan/kern/validation"
 
 const Order = object({
   customer: object({
@@ -136,9 +139,11 @@ const Order = object({
       unitPriceMinor: number().integer().positive(),
       quantity: number().integer().positive(),
     }),
-  ),
+  ).min(1).max(100),
   currency: enumeration(["EUR", "USD", "GBP"] as const),
   discountPercent: number().min(0).max(100).default(0),
+  creditsMinor: array(number().integer().nullable()).default([]),
+  metadata: unknown().optional(),
 })
 
 const input: unknown = {
@@ -146,13 +151,16 @@ const input: unknown = {
   items: [{ name: "Keyboard", unitPriceMinor: 12_999, quantity: 1 }],
   currency: "EUR",
   discountPercent: 10,
+  creditsMinor: [500, null],
+  metadata: { campaign: "launch" },
 }
 
 const order = Order.parse(input)
 const subtotal = sumMoney(
   order.items.map((item) => multiplyMoney(item.unitPriceMinor, item.quantity)),
 )
-const total = applyDiscount(subtotal, order.discountPercent)
+const credits = sumMoney(withoutNullish(order.creditsMinor))
+const total = applyDiscount(subtotal - credits, order.discountPercent)
 const estimatedDelivery = addDays(new Date(), 3)
 
 console.log({

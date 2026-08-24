@@ -1,4 +1,4 @@
-import { copyFile, mkdtemp, readdir, rm, writeFile } from "node:fs/promises"
+import { copyFile, mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { terminal } from "../shared/console.js"
@@ -6,6 +6,8 @@ import { terminal } from "../shared/console.js"
 const repositoryRoot = resolve(import.meta.dir, "../../..")
 const root = join(repositoryRoot, "packages", "kern")
 const temporaryDirectory = await mkdtemp(join(tmpdir(), "kern-package-smoke-"))
+const outputArgument = process.argv.find((argument) => argument.startsWith("--tarball-output="))
+const tarballOutput = outputArgument?.slice("--tarball-output=".length)
 
 try {
   const packed = Bun.spawnSync(
@@ -17,6 +19,10 @@ try {
   const tarballName = (await readdir(temporaryDirectory)).find((name) => name.endsWith(".tgz"))
   if (!tarballName) throw new Error("Package smoke test could not find the packed tarball")
   const tarball = join(temporaryDirectory, tarballName)
+  if (tarballOutput) {
+    await mkdir(resolve(tarballOutput, ".."), { recursive: true })
+    await copyFile(tarball, resolve(tarballOutput))
+  }
 
   await writeFile(
     join(temporaryDirectory, "package.json"),
@@ -72,6 +78,11 @@ try {
   }
 
   const installedPackageRoot = join(temporaryDirectory, "node_modules", "@sousaivan", "kern")
+  const metadata = Bun.spawnSync(
+    [process.execPath, "x", "publint", "--strict", installedPackageRoot],
+    { cwd: root, stderr: "inherit", stdout: "inherit" },
+  )
+  if (metadata.exitCode !== 0) process.exit(metadata.exitCode)
   for (const policyFile of ["CHANGELOG.md", "SEMVER.md", "SUPPORT.md"]) {
     if (!(await Bun.file(join(installedPackageRoot, policyFile)).exists())) {
       throw new Error(`Packed package is missing ${policyFile}`)
@@ -88,13 +99,18 @@ try {
   )
   if (typechecked.exitCode !== 0) process.exit(typechecked.exitCode)
 
-  const executed = Bun.spawnSync(["node", "package-smoke.mjs"], {
-    cwd: temporaryDirectory,
-    stderr: "inherit",
-    stdout: "inherit",
-  })
-  if (executed.exitCode !== 0) process.exit(executed.exitCode)
-  terminal.success("Packed package smoke test passed")
+  for (const [runtime, command] of [
+    ["Node", ["node", "package-smoke.mjs"]],
+    ["Bun", [process.execPath, "package-smoke.mjs"]],
+  ] as const) {
+    const executed = Bun.spawnSync([...command], {
+      cwd: temporaryDirectory,
+      stderr: "inherit",
+      stdout: "inherit",
+    })
+    if (executed.exitCode !== 0) process.exit(executed.exitCode)
+    terminal.success(`Packed package smoke test passed in ${runtime}`)
+  }
 } finally {
   await rm(temporaryDirectory, { force: true, recursive: true })
 }

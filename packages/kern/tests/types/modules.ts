@@ -6,6 +6,7 @@ import {
   partition,
   unique,
   withoutFalsy,
+  withoutNullish,
 } from "../../src/array/index.js"
 import { debounce, once } from "../../src/async/index.js"
 import {
@@ -36,6 +37,14 @@ const firstValue: 1 | 2 | undefined = first(readonlyValues)
 const lastValue: 1 | 2 | undefined = last(readonlyValues)
 const uniqueValues: Array<1 | 2> = unique(readonlyValues)
 const nonFalsyValues: Array<1 | 2> = withoutFalsy([0, 1, false, 2] as const)
+const nonNullishValues: Array<0 | false | "" | "ready"> = withoutNullish([
+  0,
+  false,
+  "",
+  "ready",
+  null,
+  undefined,
+] as const)
 const groupedValues = groupBy(readonlyValues, (value) => (value === 1 ? "one" : "two"))
 type _GroupedValues = Assert<
   Equal<typeof groupedValues, Partial<Record<"one" | "two", Array<1 | 2>>>>
@@ -44,6 +53,7 @@ void firstValue
 void lastValue
 void uniqueValues
 void nonFalsyValues
+void nonNullishValues
 type _NonFalsy = Assert<Equal<NonFalsy<0 | "" | "ready" | null>, "ready">>
 
 const tuple = ["first", 2, true] as const

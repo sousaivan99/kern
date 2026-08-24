@@ -150,6 +150,11 @@ an inclusive end can be harder to reason about than using an exclusive start-of-
 | `date` | A valid native `Date`. Invalid dates throw `RangeError`. |
 | `amount` | A safe integer. Positive, zero, and negative amounts are accepted. |
 
+If arithmetic or a day boundary would fall outside the native `Date` range, every helper throws
+`RangeError("Date result is outside the supported range")` instead of returning an invalid date.
+The behavior is the same whether Kern uses the runtime's Temporal implementation or its native
+`Date` fallback.
+
 Passing a negative amount reverses direction, so `addDays(date, -2)` is equivalent to
 `subtractDays(date, 2)`. Fractional, infinite, `NaN`, and unsafe amounts throw `RangeError`.
 

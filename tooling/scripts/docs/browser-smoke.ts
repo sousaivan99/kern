@@ -157,31 +157,47 @@ const server = Bun.serve({
 
 const browser = await chromium.launch({ headless: true })
 try {
+  const routePages = await Promise.all(
+    Array.from({ length: Math.min(4, routes.length) }, () =>
+      browser.newPage({ viewport: { width: 1440, height: 900 } }),
+    ),
+  )
+  await Promise.all(
+    routePages.map(async (routePage, workerIndex) => {
+      const browserErrors: string[] = []
+      routePage.on("console", (message) => {
+        if (message.type() === "error") browserErrors.push(message.text())
+      })
+      routePage.on("pageerror", (error) => browserErrors.push(error.message))
+      for (let index = workerIndex; index < routes.length; index += routePages.length) {
+        const route = routes[index]
+        if (!route) continue
+        browserErrors.length = 0
+        const response = await routePage.goto(new URL(route, server.url).href)
+        if (!response?.ok()) {
+          throw new Error(`${route} returned ${response?.status() ?? "no response"}`)
+        }
+        if ((await routePage.locator("main h1").count()) !== 1)
+          throw new Error(`${route} must have one main h1`)
+        if ((await routePage.locator("main").count()) !== 1)
+          throw new Error(`${route} must have one main landmark`)
+        if ((await routePage.locator("html").getAttribute("lang")) !== "en")
+          throw new Error(`${route} must declare English as its document language`)
+        if (!(await routePage.title()).trim())
+          throw new Error(`${route} must have a meaningful page title`)
+        const overflow = await routePage.evaluate(
+          () => document.documentElement.scrollWidth > window.innerWidth,
+        )
+        if (overflow) throw new Error(`${route} overflows horizontally at desktop width`)
+        if (browserErrors.length > 0) {
+          throw new Error(`${route} reported browser errors:\n${browserErrors.join("\n")}`)
+        }
+      }
+    }),
+  )
+  await Promise.all(routePages.map(async (routePage) => routePage.close()))
+
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-  const browserErrors: string[] = []
-  page.on("console", (message) => {
-    if (message.type() === "error") browserErrors.push(message.text())
-  })
-  page.on("pageerror", (error) => browserErrors.push(error.message))
-  for (const route of routes) {
-    browserErrors.length = 0
-    const response = await page.goto(new URL(route, server.url).href)
-    if (!response?.ok()) throw new Error(`${route} returned ${response?.status() ?? "no response"}`)
-    if ((await page.locator("main h1").count()) !== 1)
-      throw new Error(`${route} must have one main h1`)
-    if ((await page.locator("main").count()) !== 1)
-      throw new Error(`${route} must have one main landmark`)
-    if ((await page.locator("html").getAttribute("lang")) !== "en")
-      throw new Error(`${route} must declare English as its document language`)
-    if (!(await page.title()).trim()) throw new Error(`${route} must have a meaningful page title`)
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth,
-    )
-    if (overflow) throw new Error(`${route} overflows horizontally at desktop width`)
-    if (browserErrors.length > 0) {
-      throw new Error(`${route} reported browser errors:\n${browserErrors.join("\n")}`)
-    }
-  }
 
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto(new URL("/", server.url).href)

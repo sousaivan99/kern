@@ -5,7 +5,30 @@ All notable changes to `@sousaivan/kern` are recorded here. Kern follows
 
 ## [Unreleased]
 
-No unreleased changes yet.
+### Added
+
+- Added immutable `array(schema).min()`, `.max()`, and `.length()` validation constraints with
+  structured size issues, aggregate element validation, and inferred `ArraySchema` chaining.
+- Added `unknown()` for required or modified opaque validation fields while preserving exact input
+  identity, plus `withoutNullish()` for order-preserving `NonNullable<T>` array filtering.
+
+### Changed
+
+- Made the authoritative `bun run check` dependency-aware and bounded-concurrent, with one package
+  build, one documentation build, reusable packed artifacts, captured diagnostics, and clean
+  cancellation of dependent work.
+- Centralized public module ownership, gzip budgets, documentation routes, and benchmark categories
+  in a drift-audited tooling manifest.
+- Standardized maintained repository and release references on `develop` to `prod`, and centralized
+  release-version, changelog, tag, and npm availability validation.
+- Expanded nightly property coverage, packed Node/Bun/Deno execution, multi-engine browser smoke,
+  documentation worker pools, API benchmarks, and consumer-facing project guidance.
+
+### Fixed
+
+- Date-producing arithmetic and day-boundary helpers now throw
+  `RangeError("Date result is outside the supported range")` instead of returning invalid dates,
+  consistently across native and Temporal-backed paths.
 
 ## [1.0.1] - 2026-08-18
 

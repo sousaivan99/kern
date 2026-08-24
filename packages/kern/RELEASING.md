@@ -2,11 +2,11 @@
 
 ## Branch flow
 
-`main` is the development branch. `prod` is the release branch.
+`develop` is the development branch. `prod` is the release branch.
 
-1. Open a pull request into `main` for normal development.
-2. Prepare a release by updating `packages/kern/package.json` and `CHANGELOG.md` on `main`.
-3. Open a pull request from `main` into `prod`.
+1. Open a pull request into `develop` for normal development.
+2. Prepare a release by updating `packages/kern/package.json` and `CHANGELOG.md` on `develop`.
+3. Open a pull request from `develop` into `prod`.
 4. CI runs the complete quality, test, package, documentation, framework, and runtime matrix for
    the pull request.
 5. Merge only after the required `check` job passes.

@@ -44,6 +44,7 @@
     "docs:a11y": "bun run build:docs && bun --filter @kern/docs a11y",
     "docs:check": "bun --filter @kern/docs check",
     "package:check": "bun --filter @sousaivan/kern package:check",
+    "modules:check": "bun tooling/scripts/kern/module-check.ts",
     "pack:dry": "bun --filter @sousaivan/kern pack:dry",
     "audit": "bun audit",
     "check": "bun tooling/scripts/check.ts"

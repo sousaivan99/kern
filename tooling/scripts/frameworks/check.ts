@@ -5,6 +5,7 @@ import { tmpdir } from "node:os"
 import { dirname, join, resolve, sep } from "node:path"
 import { chromium } from "playwright"
 import { terminal } from "../shared/console.js"
+import { moduleManifest } from "../shared/modules.js"
 import { printCapturedFailure, runCaptured } from "../shared/process.js"
 
 interface TutorialFile {
@@ -20,16 +21,7 @@ const toolingModules = join(repositoryRoot, "tooling", "node_modules")
 const temporaryRoot = await mkdtemp(join(tmpdir(), "kern-frameworks-"))
 
 const tutorialPages = ["javascript-typescript.md", "vue.md", "nuxt.md", "react.md"] as const
-const kernSubpaths = [
-  "array",
-  "async",
-  "date",
-  "money",
-  "number",
-  "object",
-  "string",
-  "validation",
-] as const
+const kernSubpaths = moduleManifest.modules.map((module) => module.id)
 const marker =
   /<!-- framework-test: ([a-z]+\/[a-zA-Z0-9._/-]+) -->\r?\n```[^\r\n]*\r?\n([\s\S]*?)\r?\n```/gu
 

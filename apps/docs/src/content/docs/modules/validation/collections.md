@@ -13,7 +13,7 @@ collector and preserve the exact path to each failure.
 ```ts
 import { array, string } from "@sousaivan/kern/validation"
 
-const Tags = array(string().trim().min(1))
+const Tags = array(string().trim().min(1)).min(1).max(5)
 
 console.log("Success:", Tags.safeParse([" typescript ", "kern"]))
 console.log("Failure:", Tags.safeParse(["valid", ""])) // issue path: [1]
@@ -21,21 +21,24 @@ console.log("Failure:", Tags.safeParse(["valid", ""])) // issue path: [1]
 
 `array(elementSchema)` accepts only arrays and runs the element schema for every index until the
 shared issue limit is reached. It returns a new array containing each parsed/transformed output.
-Sparse positions are read as `undefined` and validated normally.
-
-There are no built-in array length constraints. Use `.refine()` when the application needs one:
+Sparse positions are read as `undefined` and validated normally. Array constraints compose
+immutably and execute in chain order:
 
 ```ts
 import { array, string } from "@sousaivan/kern/validation"
 
-const NonEmptyTags = array(string()).refine((tags) => tags.length > 0, {
-  code: "empty_tags",
-  message: "Add at least one tag",
-})
+const NonEmptyTags = array(string()).min(1, "Add at least one tag")
+const Pair = array(string()).length(2)
 
 console.log("Success:", NonEmptyTags.safeParse(["kern"]))
 console.log("Failure:", NonEmptyTags.safeParse([]))
 ```
+
+`.min(length)`, `.max(length)`, and `.length(length)` use `too_small`, `too_big`, and
+`invalid_length`, with `{ minimum }`, `{ maximum }`, and `{ length }` metadata. Their default
+messages say “items.” Lengths must be non-negative safe integers or schema construction throws
+`RangeError`. A size issue belongs to the array's own path; element validation continues while
+issue capacity remains, so callers can fix both size and item failures in one pass.
 
 ## Tuples
 

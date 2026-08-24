@@ -7,6 +7,25 @@ sidebar:
 
 Primitive schemas check one runtime value. They never coerce another type into the expected one.
 
+## Unknown schema
+
+`unknown()` deliberately accepts every JavaScript value and returns the exact input value or
+reference. It is useful for a required opaque field that application code will interpret later.
+
+```ts
+import { object, unknown } from "@sousaivan/kern/validation"
+
+const Envelope = object({ payload: unknown() })
+const payload = { source: "webhook" }
+
+console.log(Envelope.parse({ payload }).payload === payload) // true
+console.log(Envelope.safeParse({}).success) // false: the field is still required
+console.log(Envelope.safeParse({ payload: undefined }).success) // true
+```
+
+It emits no issue by itself, does not clone or coerce, and supports the same modifiers,
+refinements, transforms, inference, and synchronous Standard Schema interface as every schema.
+
 ## String schema
 
 Start with `string()`, then chain transformations and constraints in the order they should run:
@@ -179,7 +198,7 @@ For mixed primitive values or non-string alternatives, use `union([literal(...),
 
 ## Type mismatch metadata
 
-Primitive type issues use `invalid_type` and normally include:
+Primitive type issues use `invalid_type` and normally include (while `unknown()` emits none):
 
 - `expected`, a safe description such as `"string"`;
 - `received`, a safe value kind such as `"array"`, `"null"`, `"date"`, or `"nan"`.
