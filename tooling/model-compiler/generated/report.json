@@ -1,0 +1,63 @@
+[
+  {
+    "exportName": "AdvancedUser",
+    "mode": "compiled",
+    "modelName": "AdvancedUser",
+    "notices": [
+      "AdvancedUser.profile.displayName is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "AdvancedUser.profile.biography is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "AdvancedUser.profile.address.street is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "AdvancedUser.profile.address.city is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "AdvancedUser.profile.address.countryCode is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "AdvancedUser.profile.address.postalCode is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "AdvancedUser.roles[] is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "AdvancedUser.preferences.locale is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it."
+    ]
+  },
+  {
+    "exportName": "RuntimeOnlyUser",
+    "mode": "runtime-fallback",
+    "modelName": "RuntimeOnlyUser",
+    "notices": [
+      "RuntimeOnlyUser.username uses a custom application check. Runtime validation keeps it; JSON Schema and OpenAPI describe only its built-in rules.",
+      "RuntimeOnlyUser.username is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "RuntimeOnlyUser.email is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it."
+    ]
+  },
+  {
+    "exportName": "User",
+    "mode": "compiled",
+    "modelName": "User",
+    "notices": [
+      "User.username is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "User.email is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it."
+    ]
+  },
+  {
+    "exportName": "UserBatch",
+    "mode": "compiled",
+    "modelName": "UserBatch",
+    "notices": [
+      "UserBatch.users[].username is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it.",
+      "UserBatch.users[].email is trimmed by Kern at runtime. JSON Schema and OpenAPI can describe the string but cannot transform it."
+    ]
+  },
+  {
+    "exportName": "Wide10",
+    "mode": "compiled",
+    "modelName": "Wide10",
+    "notices": []
+  },
+  {
+    "exportName": "Wide100",
+    "mode": "compiled",
+    "modelName": "Wide100",
+    "notices": []
+  },
+  {
+    "exportName": "Wide1000",
+    "mode": "compiled",
+    "modelName": "Wide1000",
+    "notices": []
+  }
+]

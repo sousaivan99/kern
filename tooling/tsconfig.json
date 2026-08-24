@@ -7,5 +7,5 @@
       "@sousaivan/kern/*": ["../packages/kern/src/*/index.ts"]
     }
   },
-  "include": ["benchmarks", "scripts", "tests"]
+  "include": ["benchmarks", "model-compiler", "scripts", "tests"]
 }

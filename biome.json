@@ -8,6 +8,7 @@
       "!**/node_modules",
       "!**/.astro",
       "!**/.benchmarks",
+      "!tooling/model-compiler/generated",
       "!apps/docs/src/content/docs/reference"
     ]
   },
