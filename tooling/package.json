@@ -27,7 +27,7 @@
     "@playwright/browser-chromium": "^1.62.1",
     "@types/bun": "^1.2.22",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "24",
+    "@types/node": "26",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",
