@@ -3,7 +3,7 @@ import report from "../data/package-sizes.json"
 
 const formatBytes = (bytes: number) => `${bytes.toLocaleString("en-US")} B`
 const formatKibibytes = (bytes: number) => `${(bytes / 1024).toFixed(2)} KiB`
-const repositoryUrl = "https://github.com/sousaivan99/kern/blob/main"
+const repositoryUrl = "https://github.com/sousaivan99/kern/blob/develop"
 ---
 
 <div class="kern-size-report not-content">
@@ -94,6 +94,43 @@ const repositoryUrl = "https://github.com/sousaivan99/kern/blob/main"
           <pre><code>{example.source}</code></pre>
         </details>
       ))}
+    </div>
+  </section>
+
+  <section aria-labelledby="feature-fixture-sizes">
+    <h2 id="feature-fixture-sizes">Tree-shaken 1.1 API fixtures</h2>
+    <p>
+      The before columns use the documented pre-1.1 native/refinement expression. A negative delta
+      means the dedicated API retains fewer compressed bytes. <code>unknown()</code> has no exact
+      pre-1.1 equivalent, so only its resulting bundle is shown.
+    </p>
+    <div
+      class="kern-size-table-scroll"
+      data-size-scroll
+      data-size-label="Scrollable feature fixture size table"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Fixture</th>
+            <th scope="col">Before gzip</th>
+            <th scope="col">After gzip</th>
+            <th scope="col">Delta</th>
+            <th scope="col">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {report.featureFixtures.map((fixture) => (
+            <tr>
+              <th scope="row">{fixture.label}</th>
+              <td>{fixture.beforeGzipBytes === undefined ? "not applicable" : formatBytes(fixture.beforeGzipBytes)}</td>
+              <td><strong>{formatBytes(fixture.afterGzipBytes)}</strong></td>
+              <td>{fixture.deltaGzipBytes === undefined ? "not applicable" : `${fixture.deltaGzipBytes >= 0 ? "+" : ""}${formatBytes(fixture.deltaGzipBytes)}`}</td>
+              <td><a href={`${repositoryUrl}/${fixture.afterFixture}`}>After source</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   </section>
 

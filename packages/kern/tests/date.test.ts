@@ -159,6 +159,40 @@ describe("date", () => {
     expect(date.getHours()).toBe(12)
   })
 
+  test("throws when arithmetic or boundaries exceed the native Date range", () => {
+    const maximum = new Date(8_640_000_000_000_000)
+    const minimum = new Date(-8_640_000_000_000_000)
+    const overflow = "Date result is outside the supported range"
+
+    for (const [name, operation] of [
+      ["addDays", () => addDays(maximum, 1)],
+      ["subtractDays", () => subtractDays(minimum, 1)],
+      ["addMonths", () => addMonths(maximum, 1)],
+      ["subtractMonths", () => subtractMonths(minimum, 1)],
+      ["addYears", () => addYears(maximum, 1)],
+      ["subtractYears", () => subtractYears(minimum, 1)],
+    ] as const) {
+      try {
+        operation()
+        throw new Error(`${name} did not reject an out-of-range result`)
+      } catch (error) {
+        expect(error).toBeInstanceOf(RangeError)
+        expect((error as Error).message).toBe(overflow)
+      }
+    }
+
+    const temporalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Temporal")
+    Object.defineProperty(globalThis, "Temporal", { configurable: true, value: undefined })
+    try {
+      expect(() => endOfDay(maximum)).toThrow(overflow)
+    } finally {
+      if (temporalDescriptor) Object.defineProperty(globalThis, "Temporal", temporalDescriptor)
+      else Reflect.deleteProperty(globalThis, "Temporal")
+    }
+    expect(maximum.getTime()).toBe(8_640_000_000_000_000)
+    expect(minimum.getTime()).toBe(-8_640_000_000_000_000)
+  })
+
   test("compares instants and local calendar days", () => {
     const base = new Date(2024, 0, 10, 23)
     const tomorrow = new Date(2024, 0, 11, 1)

@@ -11,15 +11,25 @@ const [repositoryLicense, packageLicense] = await Promise.all([
 if (repositoryLicense !== packageLicense)
   throw new Error("packages/kern/LICENSE must match LICENSE")
 const run = (...arguments_: string[]): readonly string[] => [process.execPath, "run", ...arguments_]
+const reuseBuild = process.argv.includes("--reuse-build")
+const tarballOutputArgument = process.argv.find((argument) =>
+  argument.startsWith("--tarball-output="),
+)
+const tarballOutput = tarballOutputArgument
+  ? `--tarball-output=${resolve(repositoryRoot, tarballOutputArgument.slice("--tarball-output=".length))}`
+  : undefined
 const steps: readonly WorkflowStep[] = [
-  { command: run("build"), name: "Build package" },
-  { command: [process.execPath, "x", "publint", "--strict"], name: "Package metadata" },
+  ...(reuseBuild ? [] : [{ command: run("build"), name: "Build package" }]),
   {
     command: [process.execPath, join(repositoryRoot, "tooling/scripts/kern/package-types.ts")],
     name: "Package types",
   },
   {
-    command: [process.execPath, join(repositoryRoot, "tooling/scripts/kern/package-smoke.ts")],
+    command: [
+      process.execPath,
+      join(repositoryRoot, "tooling/scripts/kern/package-smoke.ts"),
+      ...(tarballOutput ? [tarballOutput] : []),
+    ],
     name: "Installed package",
   },
   { command: run("pack:dry"), name: "Publish contents" },

@@ -46,5 +46,5 @@ General implementation help is best handled through a focused GitHub discussion 
 is provided on a best-effort basis without a guaranteed response time.
 
 Do not report suspected vulnerabilities publicly. Follow the repository
-[security policy](https://github.com/sousaivan99/kern/blob/main/SECURITY.md) and use the private
+[security policy](https://github.com/sousaivan99/kern/blob/develop/SECURITY.md) and use the private
 reporting channel documented there.

@@ -41,3 +41,13 @@ if (
 ) {
   throw new Error("Packed validation object policy did not execute correctly")
 }
+const marker = { stable: true }
+if (validationModule.unknown().parse(marker) !== marker) {
+  throw new Error("Packed unknown schema did not preserve identity")
+}
+if (!validationModule.array(validationModule.string()).min(1).safeParse(["kern"]).success) {
+  throw new Error("Packed constrained array schema did not execute correctly")
+}
+if (arrayModule.withoutNullish([0, null, false, undefined, ""]).join(",") !== "0,false,") {
+  throw new Error("Packed withoutNullish helper did not execute correctly")
+}

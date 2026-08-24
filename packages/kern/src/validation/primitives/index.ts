@@ -4,6 +4,14 @@ import { FAILURE, type Schema, valueKind } from "../types.js"
 export { type NumberSchema, number } from "./number.js"
 export { type StringSchema, string } from "./string.js"
 
+/** Accepts any value without cloning or coercion. */
+export const unknown = (): Schema<unknown> =>
+  createSchema(
+    (input) => input,
+    "required",
+    (input) => input,
+  )
+
 /** Validates a boolean without coercion. */
 export const boolean = (): Schema<boolean> =>
   createSchema(

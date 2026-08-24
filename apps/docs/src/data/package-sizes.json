@@ -9,8 +9,8 @@
   },
   "entrypoints": [
     {
-      "gzipBytes": 4536,
-      "rawBytes": 13782,
+      "gzipBytes": 4845,
+      "rawBytes": 14585,
       "budgetBytes": 5120,
       "id": "validation",
       "import": "@sousaivan/kern/validation"
@@ -23,8 +23,8 @@
       "import": "@sousaivan/kern/money"
     },
     {
-      "gzipBytes": 1983,
-      "rawBytes": 4689,
+      "gzipBytes": 2026,
+      "rawBytes": 4825,
       "budgetBytes": 2048,
       "id": "date",
       "import": "@sousaivan/kern/date"
@@ -37,8 +37,8 @@
       "import": "@sousaivan/kern/number"
     },
     {
-      "gzipBytes": 532,
-      "rawBytes": 872,
+      "gzipBytes": 560,
+      "rawBytes": 935,
       "budgetBytes": 1500,
       "id": "array",
       "import": "@sousaivan/kern/array"
@@ -65,9 +65,35 @@
       "import": "@sousaivan/kern/async"
     }
   ],
+  "featureFixtures": [
+    {
+      "id": "array-bounds",
+      "label": "Array schema bounds",
+      "afterFixture": "tooling/size-fixtures/expansion/array-bounds-after.ts",
+      "afterGzipBytes": 2158,
+      "beforeFixture": "tooling/size-fixtures/expansion/array-bounds-before.ts",
+      "beforeGzipBytes": 2163,
+      "deltaGzipBytes": -5
+    },
+    {
+      "id": "without-nullish",
+      "label": "withoutNullish",
+      "afterFixture": "tooling/size-fixtures/expansion/without-nullish-after.ts",
+      "afterGzipBytes": 92,
+      "beforeFixture": "tooling/size-fixtures/expansion/without-nullish-before.ts",
+      "beforeGzipBytes": 85,
+      "deltaGzipBytes": 7
+    },
+    {
+      "id": "unknown",
+      "label": "Required unknown field",
+      "afterFixture": "tooling/size-fixtures/expansion/unknown.ts",
+      "afterGzipBytes": 2918
+    }
+  ],
   "rootEntrypoint": {
-    "gzipBytes": 11638,
-    "rawBytes": 33469,
+    "gzipBytes": 12004,
+    "rawBytes": 34477,
     "budgetBytes": 16384,
     "id": "index",
     "import": "@sousaivan/kern"
@@ -77,8 +103,8 @@
       "id": "kern",
       "label": "Kern",
       "package": "@sousaivan/kern",
-      "version": "1.0.1",
-      "gzipBytes": 3609,
+      "version": "1.1.0",
+      "gzipBytes": 3610,
       "rawBytes": 9996,
       "fixture": "tooling/size-fixtures/validation/kern.ts",
       "source": "import { object, string } from \"@sousaivan/kern/validation\"\n\nexport const User = object({\n  name: string().min(2),\n  email: string().email(),\n})\n"

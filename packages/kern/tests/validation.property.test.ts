@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { type AnySchema, number, object, string } from "../src/validation/index.js"
+import { type AnySchema, array, number, object, string } from "../src/validation/index.js"
 import { checkProperty } from "./support/property.js"
 
 interface ValidationCase {
@@ -135,6 +135,39 @@ test("property: hostile validation inputs stay bounded and sanitized", () => {
         expect(issue).not.toHaveProperty("stack")
       }
       if (secret) expect(JSON.stringify(result)).not.toContain(secret)
+    },
+  )
+})
+
+test("property: optimized and diagnostic validation paths have equivalent public results", () => {
+  checkProperty(
+    "validation path equivalence",
+    (random, index) => {
+      const size = random.integer(0, 24)
+      const policy = index % 3
+      const presence = index % 4
+      const valueSchema =
+        presence === 0
+          ? number().integer().optional()
+          : presence === 1
+            ? number().integer().default(0)
+            : number().integer()
+      const base = object({
+        values: array(valueSchema)
+          .min(size)
+          .max(size + 2),
+      })
+      const schema = policy === 0 ? base.strip() : policy === 1 ? base.strict() : base.passthrough()
+      const values = Array.from({ length: size + random.integer(0, 3) }, (_, itemIndex) =>
+        itemIndex % 7 === 0 && random.boolean() ? 0.5 : random.integer(-100, 100),
+      )
+      return {
+        input: { values, ...(policy === 1 && random.boolean() ? { extra: true } : {}) },
+        schema,
+      }
+    },
+    ({ input, schema }) => {
+      expect(schema.safeParse(input)).toEqual(schema.safeParse(input, { abortEarly: false }))
     },
   )
 })

@@ -2,8 +2,9 @@ import starlight from "@astrojs/starlight"
 import tailwindcss from "@tailwindcss/vite"
 import { defineConfig } from "astro/config"
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc"
+import moduleManifest from "../../tooling/config/modules.json" with { type: "json" }
 
-const modules = ["validation", "money", "date", "number", "string", "array", "object", "async"]
+const modules = moduleManifest.modules.map((module) => module.id)
 const docsBase = process.env.DOCS_BASE_PATH ?? "/"
 
 export default defineConfig({
@@ -23,7 +24,7 @@ export default defineConfig({
         SiteTitle: "./src/components/SiteTitle.astro",
       },
       editLink: {
-        baseUrl: "https://github.com/sousaivan99/kern/edit/main/apps/docs/",
+        baseUrl: "https://github.com/sousaivan99/kern/edit/develop/apps/docs/",
       },
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/sousaivan99/kern" }],
       sidebar: [
@@ -143,7 +144,7 @@ export default defineConfig({
             excludePrivate: true,
             excludeProtected: true,
             gitRemote: "origin",
-            gitRevision: "main",
+            gitRevision: "develop",
             readme: "none",
             requiredToBeDocumented: [
               "Class",

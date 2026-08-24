@@ -11,10 +11,35 @@ import {
   string,
   tuple,
   union,
+  unknown as unknownSchema,
   ValidationError,
 } from "../src/validation/index.js"
 
 describe("validation primitives", () => {
+  test("accepts unknown values without cloning or coercion", () => {
+    const schema = unknownSchema()
+    const objectValue = { value: true }
+    const values: readonly unknown[] = [undefined, null, false, 0, "", Symbol("value"), objectValue]
+    for (const value of values) {
+      expect(schema.parse(value)).toBe(value)
+      expect(schema.safeParse(value)).toEqual({ success: true, data: value })
+    }
+    expect(schema.parse(objectValue)).toBe(objectValue)
+
+    const required = object({ value: unknownSchema() })
+    expect(required.safeParse({ value: undefined })).toEqual({
+      success: true,
+      data: { value: undefined },
+    })
+    expect(required.safeParse({}).success).toBe(false)
+    expect(record(unknownSchema()).parse({ value: objectValue }).value).toBe(objectValue)
+    expect(
+      unknownSchema()
+        .transform((value) => typeof value)
+        .parse(1),
+    ).toBe("number")
+  })
+
   test("parses and transforms fluent strings in chain order", () => {
     const schema = string().trim().min(2).max(4).startsWith("a").endsWith("c")
     expect(schema.parse(" abc ")).toBe("abc")
@@ -99,6 +124,98 @@ describe("validation primitives", () => {
     expect(enumeration(["draft", "live"] as const).parse("live")).toBe("live")
     expect(enumeration(["draft", "live"] as const).safeParse("other").success).toBe(false)
     expect(() => string().min(-1)).toThrow(RangeError)
+  })
+})
+
+describe("validation arrays", () => {
+  test("composes immutable length constraints and aggregates element issues", () => {
+    const base = array(string())
+    const bounded = base.min(2).max(3)
+    const input = ["first", "second"]
+    const output = bounded.parse(input)
+    expect(output).toEqual(input)
+    expect(output).not.toBe(input)
+    expect(base.safeParse([]).success).toBe(true)
+
+    const nested = object({ items: array(string()).min(2, "Need two items") })
+    expect(nested.safeParse({ items: [1] })).toEqual({
+      success: false,
+      issues: [
+        {
+          path: ["items"],
+          code: "too_small",
+          message: "Need two items",
+          received: "array",
+          details: { minimum: 2 },
+        },
+        {
+          path: ["items", 0],
+          code: "invalid_type",
+          message: "Expected a string",
+          expected: "string",
+          received: "number",
+        },
+      ],
+    })
+    expect(nested.safeParse({ items: [1] }, { abortEarly: true })).toEqual({
+      success: false,
+      issues: [
+        {
+          path: ["items"],
+          code: "too_small",
+          message: "Need two items",
+          received: "array",
+          details: { minimum: 2 },
+        },
+      ],
+    })
+  })
+
+  test("uses inclusive bounds, exact lengths, and chain-order failures", () => {
+    expect(array(number()).min(1).parse([1])).toEqual([1])
+    expect(array(number()).max(1).parse([1])).toEqual([1])
+    expect(array(number()).length(1).parse([1])).toEqual([1])
+    expect(array(number()).max(0).safeParse([1])).toEqual({
+      success: false,
+      issues: [
+        {
+          path: [],
+          code: "too_big",
+          message: "Expected at most 0 items",
+          received: "array",
+          details: { maximum: 0 },
+        },
+      ],
+    })
+    expect(array(number()).length(2).safeParse([1])).toEqual({
+      success: false,
+      issues: [
+        {
+          path: [],
+          code: "invalid_length",
+          message: "Expected exactly 2 items",
+          received: "array",
+          details: { length: 2 },
+        },
+      ],
+    })
+    expect(array(number()).min(3, "first").length(2, "second").safeParse([1])).toEqual({
+      success: false,
+      issues: [
+        {
+          path: [],
+          code: "too_small",
+          message: "first",
+          received: "array",
+          details: { minimum: 3 },
+        },
+      ],
+    })
+    for (const length of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(() => array(number()).min(length)).toThrow(RangeError)
+      expect(() => array(number()).max(length)).toThrow(RangeError)
+      expect(() => array(number()).length(length)).toThrow(RangeError)
+    }
   })
 })
 

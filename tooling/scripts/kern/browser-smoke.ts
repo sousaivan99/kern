@@ -1,9 +1,13 @@
 import { join, resolve, sep } from "node:path"
-import { chromium } from "playwright"
+import { chromium, firefox, webkit } from "playwright"
 import { terminal } from "../shared/console.js"
 
 const repositoryRoot = resolve(import.meta.dir, "../../..")
 const packageRoot = join(repositoryRoot, "packages", "kern")
+const browserName =
+  process.argv.find((argument) => argument.startsWith("--browser="))?.slice(10) ?? "chromium"
+const browserType = { chromium, firefox, webkit }[browserName as "chromium" | "firefox" | "webkit"]
+if (!browserType) throw new Error(`Unsupported browser engine: ${browserName}`)
 const contentTypes: Readonly<Record<string, string>> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -32,17 +36,22 @@ const server = Bun.serve({
   },
 })
 
-const browser = await chromium.launch({ headless: true })
+const browser = await browserType.launch({ headless: true })
 try {
   const page = await browser.newPage()
   await page.goto(server.url.href)
   const result = await page.evaluate(async (moduleUrl) => {
-    try {
-      const module = await import(moduleUrl)
-      return module.smokePassed === true ? "ok" : "Smoke module did not report success"
-    } catch (error) {
-      return error instanceof Error ? (error.stack ?? error.message) : String(error)
+    let lastError = "Browser smoke module did not load"
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const module = await import(`${moduleUrl}?attempt=${attempt}`)
+        return module.smokePassed === true ? "ok" : "Smoke module did not report success"
+      } catch (error) {
+        lastError = error instanceof Error ? (error.stack ?? error.message) : String(error)
+        await new Promise((resolve) => setTimeout(resolve, 50))
+      }
     }
+    return lastError
   }, new URL("/tests/compat/runtime-smoke.mjs", server.url).href)
   if (result !== "ok") throw new Error(result)
 } finally {
@@ -50,4 +59,4 @@ try {
   server.stop(true)
 }
 
-terminal.success("Browser smoke test passed")
+terminal.success(`${browserName} smoke test passed`)

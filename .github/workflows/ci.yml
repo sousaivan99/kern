@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, prod]
+    branches: [develop, prod]
   pull_request:
-    branches: [develop, main, prod]
+    branches: [develop, prod]
   workflow_dispatch:
 
 concurrency:
@@ -81,7 +81,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
       - name: Verify packed package
-        run: bun run package:check
+        run: bun tooling/scripts/kern/package-check.ts --tarball-output=.artifacts/kern.tgz
       - name: Enforce bundle budgets
         run: bun run size:check
       - name: Benchmark smoke
@@ -93,6 +93,13 @@ jobs:
         with:
           name: kern-runtime-build
           path: packages/kern/dist
+          if-no-files-found: error
+          retention-days: 1
+      - name: Upload packed package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: kern-package-tarball
+          path: .artifacts/kern.tgz
           if-no-files-found: error
           retention-days: 1
 
@@ -140,6 +147,32 @@ jobs:
       - name: Verify framework tutorials
         run: bun run test:frameworks
 
+  browser-engines:
+    name: Browser / ${{ matrix.browser }}
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+      - name: Install browser engine
+        run: bun tooling/node_modules/playwright/cli.js install --with-deps "${{ matrix.browser }}"
+      - name: Download runtime build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: kern-runtime-build
+          path: packages/kern/dist
+      - name: Verify browser bundle
+        run: bun tooling/scripts/kern/browser-smoke.ts --browser="${{ matrix.browser }}"
+
   runtime:
     name: Runtime / ${{ matrix.name }}
     needs: package
@@ -169,11 +202,11 @@ jobs:
             version: v2.x
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Download runtime build
+      - name: Download packed package
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: kern-runtime-build
-          path: packages/kern/dist
+          name: kern-package-tarball
+          path: .artifacts
       - name: Set up Node
         if: matrix.runtime == 'node'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -192,25 +225,44 @@ jobs:
           deno-version: ${{ matrix.version }}
       - name: Test Node runtime
         if: matrix.runtime == 'node'
-        run: node packages/kern/tests/compat/runtime-smoke.mjs
+        run: node tooling/scripts/kern/packed-runtime-smoke.mjs --runtime=node --tarball=.artifacts/kern.tgz
       - name: Test native Temporal across time zones
         if: matrix.runtime == 'node' && matrix.version == '26'
         run: |
-          TZ=UTC node packages/kern/tests/compat/runtime-smoke.mjs
-          TZ=America/New_York node packages/kern/tests/compat/runtime-smoke.mjs
-          TZ=Europe/Luxembourg node packages/kern/tests/compat/runtime-smoke.mjs
-          TZ=Australia/Lord_Howe node packages/kern/tests/compat/runtime-smoke.mjs
+          TZ=UTC node tooling/scripts/kern/packed-runtime-smoke.mjs --runtime=node --tarball=.artifacts/kern.tgz
+          TZ=America/New_York node tooling/scripts/kern/packed-runtime-smoke.mjs --runtime=node --tarball=.artifacts/kern.tgz
+          TZ=Europe/Luxembourg node tooling/scripts/kern/packed-runtime-smoke.mjs --runtime=node --tarball=.artifacts/kern.tgz
+          TZ=Australia/Lord_Howe node tooling/scripts/kern/packed-runtime-smoke.mjs --runtime=node --tarball=.artifacts/kern.tgz
       - name: Test Bun runtime
         if: matrix.runtime == 'bun'
-        run: bun packages/kern/tests/compat/runtime-smoke.mjs
+        run: node tooling/scripts/kern/packed-runtime-smoke.mjs --runtime=bun --tarball=.artifacts/kern.tgz
       - name: Test Deno runtime
         if: matrix.runtime == 'deno'
-        run: deno run --allow-read packages/kern/tests/compat/runtime-smoke.mjs
+        run: node tooling/scripts/kern/packed-runtime-smoke.mjs --runtime=deno --tarball=.artifacts/kern.tgz
+
+  release-contract:
+    name: Release contract
+    if: github.event_name == 'pull_request' && github.base_ref == 'prod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Require the development branch
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: test "$HEAD_BRANCH" = develop
+      - name: Validate release version and changelog
+        run: bun tooling/scripts/kern/release-contract.ts --check-npm
 
   check:
     name: check
     if: always()
-    needs: [quality, tests, package, docs, frameworks, runtime]
+    needs: [quality, tests, package, docs, frameworks, browser-engines, runtime, release-contract]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -221,7 +273,9 @@ jobs:
           test "${{ needs.package.result }}" = success
           test "${{ needs.docs.result }}" = success
           test "${{ needs.frameworks.result }}" = success
+          test "${{ needs.browser-engines.result }}" = success
           test "${{ needs.runtime.result }}" = success
+          test "${{ needs.release-contract.result }}" = success || test "${{ needs.release-contract.result }}" = skipped
 
   release-changes:
     name: Detect release changes
@@ -229,40 +283,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      release_required: ${{ steps.release.outputs.required }}
+      release_required: ${{ steps.release.outputs.release_required }}
     steps:
       - name: Check out the candidate commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
       - name: Compare package inputs with the latest release
         id: release
-        shell: bash
-        run: |
-          LAST_RELEASE_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n 1)
-          if [ -z "$LAST_RELEASE_TAG" ]; then
-            echo "required=true" >> "$GITHUB_OUTPUT"
-            echo "No stable release tag exists; package publication is required."
-            exit 0
-          fi
-
-          if git diff --quiet "$LAST_RELEASE_TAG" HEAD -- \
-            packages/kern/src \
-            packages/kern/package.json \
-            packages/kern/README.md \
-            packages/kern/CHANGELOG.md \
-            packages/kern/SEMVER.md \
-            packages/kern/SUPPORT.md \
-            packages/kern/LICENSE \
-            packages/kern/tsconfig.json \
-            packages/kern/tsconfig.build.json \
-            tooling/scripts/kern/build.ts; then
-            echo "required=false" >> "$GITHUB_OUTPUT"
-            echo "No publishable package inputs changed since $LAST_RELEASE_TAG; skipping release."
-          else
-            echo "required=true" >> "$GITHUB_OUTPUT"
-            echo "Publishable package inputs changed since $LAST_RELEASE_TAG; release is required."
-          fi
+        run: bun tooling/scripts/kern/release-contract.ts --github-output --check-npm
 
   release:
     name: Start release

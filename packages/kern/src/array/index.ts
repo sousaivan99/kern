@@ -111,3 +111,7 @@ export type NonFalsy<T> = T extends FalsyValue ? never : T
  */
 export const withoutFalsy = <T>(values: readonly T[]): Array<NonFalsy<T>> =>
   values.filter(Boolean) as Array<NonFalsy<T>>
+
+/** Removes only `null` and `undefined` while preserving input order. */
+export const withoutNullish = <T>(values: readonly T[]): Array<NonNullable<T>> =>
+  values.filter((value): value is NonNullable<T> => value !== null && value !== undefined)
