@@ -5,6 +5,8 @@ All notable changes to `@sousaivan/kern` are recorded here. Kern follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-24
+
 ### Added
 
 - Added immutable `array(schema).min()`, `.max()`, and `.length()` validation constraints with
@@ -83,6 +85,7 @@ All notable changes to `@sousaivan/kern` are recorded here. Kern follows
 - CI coverage for TypeScript 5 and current TypeScript, Node 22/24/26, Bun 1.3/current, current Deno,
   Chromium, supported timezones, package contents, bundle budgets, and dependency auditing.
 
-[Unreleased]: https://github.com/sousaivan99/kern/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/sousaivan99/kern/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/sousaivan99/kern/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/sousaivan99/kern/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/sousaivan99/kern/releases/tag/v1.0.0
