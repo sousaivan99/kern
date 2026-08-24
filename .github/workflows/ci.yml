@@ -282,4 +282,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_SHA: ${{ github.sha }}
-        run: gh workflow run release.yml --ref prod --field release_sha="$RELEASE_SHA"
+        run: >-
+          gh workflow run release.yml
+          --repo "$GITHUB_REPOSITORY"
+          --ref prod
+          --field release_sha="$RELEASE_SHA"
