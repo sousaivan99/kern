@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "measurement": {
     "bunVersion": "1.3.14",
     "compression": "gzip, level 9",
@@ -7,127 +7,93 @@
     "minified": true,
     "target": "browser"
   },
-  "entrypoints": [
+  "packages": [
     {
-      "gzipBytes": 4845,
-      "rawBytes": 14585,
+      "gzipBytes": 4849,
+      "rawBytes": 14597,
       "budgetBytes": 5120,
       "id": "validation",
-      "import": "@sousaivan/kern/validation"
+      "import": "@lithekit/validation"
     },
     {
       "gzipBytes": 3182,
       "rawBytes": 7495,
       "budgetBytes": 3200,
       "id": "money",
-      "import": "@sousaivan/kern/money"
+      "import": "@lithekit/money"
     },
     {
       "gzipBytes": 2026,
       "rawBytes": 4825,
       "budgetBytes": 2048,
       "id": "date",
-      "import": "@sousaivan/kern/date"
+      "import": "@lithekit/date"
     },
     {
       "gzipBytes": 1269,
       "rawBytes": 2637,
       "budgetBytes": 1500,
       "id": "number",
-      "import": "@sousaivan/kern/number"
-    },
-    {
-      "gzipBytes": 560,
-      "rawBytes": 935,
-      "budgetBytes": 1500,
-      "id": "array",
-      "import": "@sousaivan/kern/array"
+      "import": "@lithekit/number"
     },
     {
       "gzipBytes": 913,
       "rawBytes": 1884,
       "budgetBytes": 2048,
       "id": "string",
-      "import": "@sousaivan/kern/string"
+      "import": "@lithekit/string"
+    },
+    {
+      "gzipBytes": 560,
+      "rawBytes": 935,
+      "budgetBytes": 1500,
+      "id": "array",
+      "import": "@lithekit/array"
     },
     {
       "gzipBytes": 749,
       "rawBytes": 1680,
       "budgetBytes": 2048,
       "id": "object",
-      "import": "@sousaivan/kern/object"
+      "import": "@lithekit/object"
     },
     {
       "gzipBytes": 970,
       "rawBytes": 2019,
       "budgetBytes": 2500,
       "id": "async",
-      "import": "@sousaivan/kern/async"
+      "import": "@lithekit/async"
+    },
+    {
+      "gzipBytes": 6491,
+      "rawBytes": 17723,
+      "budgetBytes": 8192,
+      "id": "form",
+      "import": "@lithekit/form"
+    },
+    {
+      "gzipBytes": 7101,
+      "rawBytes": 19378,
+      "budgetBytes": 10240,
+      "id": "form-vue",
+      "import": "@lithekit/form-vue"
+    },
+    {
+      "gzipBytes": 7139,
+      "rawBytes": 19425,
+      "budgetBytes": 10240,
+      "id": "form-react",
+      "import": "@lithekit/form-react"
     }
   ],
-  "featureFixtures": [
+  "fixtures": [
     {
-      "id": "array-bounds",
-      "label": "Array schema bounds",
-      "afterFixture": "tooling/size-fixtures/expansion/array-bounds-after.ts",
-      "afterGzipBytes": 2158,
-      "beforeFixture": "tooling/size-fixtures/expansion/array-bounds-before.ts",
-      "beforeGzipBytes": 2163,
-      "deltaGzipBytes": -5
-    },
-    {
-      "id": "without-nullish",
-      "label": "withoutNullish",
-      "afterFixture": "tooling/size-fixtures/expansion/without-nullish-after.ts",
-      "afterGzipBytes": 92,
-      "beforeFixture": "tooling/size-fixtures/expansion/without-nullish-before.ts",
-      "beforeGzipBytes": 85,
-      "deltaGzipBytes": 7
-    },
-    {
-      "id": "unknown",
-      "label": "Required unknown field",
-      "afterFixture": "tooling/size-fixtures/expansion/unknown.ts",
-      "afterGzipBytes": 2918
-    }
-  ],
-  "rootEntrypoint": {
-    "gzipBytes": 12004,
-    "rawBytes": 34477,
-    "budgetBytes": 16384,
-    "id": "index",
-    "import": "@sousaivan/kern"
-  },
-  "examples": [
-    {
-      "id": "kern",
-      "label": "Kern",
-      "package": "@sousaivan/kern",
-      "version": "1.1.0",
-      "gzipBytes": 3610,
-      "rawBytes": 9996,
-      "fixture": "tooling/size-fixtures/validation/kern.ts",
-      "source": "import { object, string } from \"@sousaivan/kern/validation\"\n\nexport const User = object({\n  name: string().min(2),\n  email: string().email(),\n})\n"
-    },
-    {
-      "id": "zod",
-      "label": "Zod",
-      "package": "zod",
-      "version": "4.4.3",
-      "gzipBytes": 18548,
-      "rawBytes": 66974,
-      "fixture": "tooling/size-fixtures/validation/zod.ts",
-      "source": "import * as z from \"zod\"\n\nexport const User = z.object({\n  name: z.string().min(2),\n  email: z.email(),\n})\n"
-    },
-    {
-      "id": "valibot",
-      "label": "Valibot",
-      "package": "valibot",
-      "version": "1.4.2",
-      "gzipBytes": 1433,
-      "rawBytes": 3529,
-      "fixture": "tooling/size-fixtures/validation/valibot.ts",
-      "source": "import * as v from \"valibot\"\n\nexport const User = v.object({\n  name: v.pipe(v.string(), v.minLength(2)),\n  email: v.pipe(v.string(), v.email()),\n})\n"
+      "id": "form-validation",
+      "label": "Form with Lithekit Validation",
+      "budgetBytes": 16384,
+      "fixture": "tooling/size-fixtures/form/validation.ts",
+      "gzipBytes": 10180,
+      "rawBytes": 29238
     }
   ]
 }

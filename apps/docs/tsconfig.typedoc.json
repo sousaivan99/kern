@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@lithekit/array": ["packages/array/src/index.ts"],
+      "@lithekit/async": ["packages/async/src/index.ts"],
+      "@lithekit/date": ["packages/date/src/index.ts"],
+      "@lithekit/form": ["packages/form/src/index.ts"],
+      "@lithekit/form-react": ["packages/form-react/src/index.ts"],
+      "@lithekit/form-vue": ["packages/form-vue/src/index.ts"],
+      "@lithekit/money": ["packages/money/src/index.ts"],
+      "@lithekit/number": ["packages/number/src/index.ts"],
+      "@lithekit/object": ["packages/object/src/index.ts"],
+      "@lithekit/string": ["packages/string/src/index.ts"],
+      "@lithekit/validation": ["packages/validation/src/index.ts"]
+    }
+  },
+  "include": ["../../packages/*/src/**/*.ts"],
+  "exclude": ["../../packages/*/tests", "../../packages/*/dist"]
+}

@@ -1,9 +1,9 @@
 ---
 title: Performance internals
-description: How Kern reduces hot-path work while preserving validation, prototype, money, Intl, and type-safety contracts.
+description: How Lithekit reduces hot-path work while preserving validation, prototype, money, Intl, and type-safety contracts.
 ---
 
-Kern is fast because common successful operations do less work, not because public behavior is
+Lithekit is fast because common successful operations do less work, not because public behavior is
 removed. The implementation keeps diagnostic, security, exactness, and compatibility paths for the
 cases that need them.
 
@@ -23,10 +23,10 @@ An optimization is acceptable only when it preserves all of these boundaries:
 - prototype-pollution resistance and dangerous property names;
 - exact minor-unit money arithmetic and configured rounding;
 - current default-time-zone behavior;
-- public array observability where Kern delegates to native operations;
+- public array observability where Lithekit delegates to native operations;
 - zero runtime dependencies, tree-shaking, and entrypoint gzip budgets.
 
-This is why Kern has fast and diagnostic paths rather than one benchmark-specific implementation.
+This is why Lithekit has fast and diagnostic paths rather than one benchmark-specific implementation.
 
 ## Validation: construction once, minimal success work
 
@@ -37,7 +37,7 @@ validators are derived from that snapshot and reused. Parsing does not repeatedl
 caller's shape or rebuild field metadata, and later mutation of the caller's object cannot change an
 existing schema.
 
-Composition remains immutable: `pick`, `omit`, `partial`, and `extend` create new schemas. Kern does
+Composition remains immutable: `pick`, `omit`, `partial`, and `extend` create new schemas. Lithekit does
 not need a per-parse shape identity check to support undocumented live mutation.
 
 ### 2. Internal validators return data or one sentinel
@@ -63,7 +63,7 @@ The three-field `safeParse()` path validates all three fields without allocating
 context on success. If any field fails, it creates the context and runs the diagnostic field
 validators needed to produce the normal aggregated issues.
 
-This is still Kern's ordinary interpreter. It does not generate source code, use `eval`, require a
+This is still Lithekit's ordinary interpreter. It does not generate source code, use `eval`, require a
 build plugin, or change the public schema value.
 
 ### 4. Successful paths and diagnostic paths share semantics
@@ -73,7 +73,7 @@ nullable, and default modifiers compose those validators without creating a succ
 User-provided refinements and transforms retain the diagnostic validator because callbacks may fail
 or throw and must preserve operation order.
 
-If a fast validation fails, Kern uses the full validator to construct the same issue information a
+If a fast validation fails, Lithekit uses the full validator to construct the same issue information a
 consumer expects. A throwing input getter is converted to `validation_exception`, including its
 nested property path, rather than escaping or being read repeatedly for diagnostics.
 
@@ -91,21 +91,21 @@ alternative or later issues.
 
 The generic object path writes into `Object.create(null)`. A null-prototype object has no inherited
 setter for `__proto__` or for a property injected into `Object.prototype`. Only after every field
-succeeds does Kern restore `Object.prototype` once with `Object.setPrototypeOf`.
+succeeds does Lithekit restore `Object.prototype` once with `Object.setPrototypeOf`.
 
 `record()` uses the same construction boundary for arbitrary keys. It validates and writes own
 properties while the output has no prototype, then restores the ordinary prototype once after the
 entire record succeeds. This protects names such as `__proto__` and names backed by hostile
 inherited setters without paying for one descriptor definition per accepted entry.
 
-The tiny fixed-field paths use object literals with computed own properties. Kern never performs
+The tiny fixed-field paths use object literals with computed own properties. Lithekit never performs
 plain assignment into an output that already inherits potentially hostile setters. This safety
 boundary is part of the measured work.
 
 ## `Intl`: cache expensive native constructors conservatively
 
 Constructing `Intl.NumberFormat`, `Intl.DateTimeFormat`, and locale-specific money parsing metadata
-is much more expensive than calling an existing formatter. Kern uses separate lazy caches for
+is much more expensive than calling an existing formatter. Lithekit uses separate lazy caches for
 number, relative-time, explicit-time-zone date, money-format, and money-parse configurations.
 
 Each cache has these rules:
@@ -140,14 +140,14 @@ the common equal-share benchmark path and avoids creating thousands of `bigint` 
 remainder records.
 
 If division has a remainder, the total exceeds the safe integer range, or proportional ranking is
-needed, Kern uses the exact `bigint` implementation. It distributes remaining units by descending
+needed, Lithekit uses the exact `bigint` implementation. It distributes remaining units by descending
 remainder with stable input-order ties, then checks every result when converting back to numbers.
 Negative and zero-weight allocations keep the same contract in both paths.
 
 ### Exact multiplication with a numeric fast path
 
 Default `multiplyMoney()` calls first calculate the product as a number. When the product is safely
-bounded and clearly separated from a half-unit rounding boundary, Kern can apply half-away-from-zero
+bounded and clearly separated from a half-unit rounding boundary, Lithekit can apply half-away-from-zero
 rounding directly. Products near a boundary, large products, non-finite factors, and every explicit
 rounding configuration use the original decimal-to-`bigint` path.
 
@@ -188,7 +188,7 @@ every accepted code unit is exactly one grapheme, so no behavior is lost. Other 
 grapheme clusters and will not split joined emoji, regional indicators, CRLF, or combining
 sequences.
 
-Normalization and grapheme correctness remain intentional costs. Kern does not replace them with an
+Normalization and grapheme correctness remain intentional costs. Lithekit does not replace them with an
 ASCII-only benchmark path.
 
 ## Arrays and objects: optimize inside observable contracts
@@ -215,7 +215,7 @@ different function is not an optimization of the existing API.
 `pick` and `omit` now construct their output with a null prototype. Ordinary writable, enumerable,
 configurable data descriptors can then use direct own assignment without consulting a polluted
 `Object.prototype`. Accessors and non-default descriptors still use `Object.defineProperty`. After
-a successful copy, Kern restores `Object.prototype` once when the source used it. This removes a
+a successful copy, Lithekit restores `Object.prototype` once when the source used it. This removes a
 second lookup from `pick` and most per-property descriptor-definition calls without weakening the
 hostile-setter boundary.
 
@@ -239,18 +239,18 @@ DST transitions, month ends, and years below 100.
 
 Date comparisons reuse the timestamp produced by input validation instead of calling `getTime()`
 again. `addYears()` validates the requested year/month range, converts it to months, and then uses
-the same single calendar-arithmetic path as `addMonths()`. Kern caches a successfully validated
+the same single calendar-arithmetic path as `addMonths()`. Lithekit caches a successfully validated
 Temporal namespace directly, while every public operation remains inside its exception boundary
 for incomplete or hostile implementations.
 
 Relative-time unit metadata is created once at module initialization, and uncached date formatting
 shares one cold formatter path. Date calls without an explicit `timeZone` still construct a fresh
-formatter so a changed system timezone cannot be hidden by Kern's cache.
+formatter so a changed system timezone cannot be hidden by Lithekit's cache.
 
 ## Async controls: scalar cached state
 
 `once()` stores its idle, running, returned, and thrown states as one scalar plus the cached result
-or error. Repeated successful calls no longer inspect a freshly shaped state object. Kern still does
+or error. Repeated successful calls no longer inspect a freshly shaped state object. Lithekit still does
 more than the smallest competitor implementation: it detects recursive invocation and permanently
 caches a thrown error as documented. Retry and debounce already measured at parity or ahead, so
 their cancellation and failure behavior was left intact.
@@ -265,7 +265,7 @@ The fast validators, failure sentinel, path stack, and caches are private implem
 Public `Schema<Output, Input, Presence>`, `InferInput`, `InferOutput`, modifier inference, array
 type-guard overloads, and money/string option types remain the source of consumer types.
 
-Kern does not ship benchmark competitors or runtime dependencies. Every public entrypoint remains
+Lithekit does not ship benchmark competitors or runtime dependencies. Every public entrypoint remains
 independently bundleable, and runtime changes are checked against gzip budgets. The current measured
 gzip sizes are 4,536 bytes for validation, 3,182 for money, 1,983 for date, 749 for object, 970 for
 async, 1,269 for number, 903 for string, and 11,634 for the root export. These figures include the
@@ -280,11 +280,11 @@ Measurement and compatibility review also prevent unnecessary complexity:
 - Batched object property descriptors made measured `pick` and `omit` cases slower, so descriptor
   copying stayed simple.
 - Copy-then-delete object output, null-prototype omission maps, and alternate `once()` state layouts
-  were also slower. Kern retained the existing descriptor and cached-success paths.
+  were also slower. Lithekit retained the existing descriptor and cached-success paths.
 - An additional `deepFreeze` shortcut did not improve beyond the measured noise band, so it was
   removed.
 - Eagerly caching another validation-field array reduced a small amount of source but produced
-  unstable construction/JIT measurements, so Kern retained the simpler field snapshot.
+  unstable construction/JIT measurements, so Lithekit retained the simpler field snapshot.
 - Assigning fields directly into a normal `{}` output was rejected because inherited setters can
   observe or replace the write.
 - Caching date formatters without an explicit timezone was rejected because the system default can
@@ -297,12 +297,12 @@ semantics are not.
 
 ## Read and reproduce
 
-- [Validation schema boundary](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/validation/schema.ts)
-- [Collection validators and safe output construction](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/validation/collections/index.ts)
-- [`Intl` normalization and bounded caches](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/intl.ts)
-- [Exact money allocation](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/money/arithmetic.ts)
-- [String hot paths](https://github.com/sousaivan99/kern/blob/develop/packages/kern/src/string/index.ts)
-- [Benchmark methodology and report command](https://github.com/sousaivan99/kern/blob/develop/tooling/benchmarks/README.md)
+- [Validation schema boundary](https://github.com/sousaivan99/lithekit/blob/develop/packages/validation/src/schema.ts)
+- [Collection validators and safe output construction](https://github.com/sousaivan99/lithekit/blob/develop/packages/validation/src/collections/index.ts)
+- [`Intl` normalization and bounded caches](https://github.com/sousaivan99/lithekit/blob/develop/packages/number/src/intl.ts)
+- [Exact money allocation](https://github.com/sousaivan99/lithekit/blob/develop/packages/money/src/arithmetic.ts)
+- [String hot paths](https://github.com/sousaivan99/lithekit/blob/develop/packages/string/src/index.ts)
+- [Benchmark methodology and report command](https://github.com/sousaivan99/lithekit/blob/develop/tooling/benchmarks/README.md)
 
 Use the stable scenario IDs from the measurement pages with `bun run benchmark:report`. The report
 rejects source, runtime, fixture, or run-order mismatches before calculating a median of run medians.

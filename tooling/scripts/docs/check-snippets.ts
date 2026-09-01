@@ -12,8 +12,8 @@ interface Snippet {
 
 const repositoryRoot = resolve(import.meta.dir, "../../..")
 const contentRoot = join(repositoryRoot, "apps", "docs", "src", "content", "docs")
-const packageConfig = join(repositoryRoot, "packages", "kern", "tsconfig.json")
-const temporaryDirectory = await mkdtemp(join(tmpdir(), "kern-doc-snippets-"))
+const packageConfig = join(repositoryRoot, "tsconfig.base.json")
+const temporaryDirectory = await mkdtemp(join(tmpdir(), "lithekit-doc-snippets-"))
 
 const extractSnippets = (source: string, file: string): Snippet[] => {
   const lines = source.split(/\r?\n/u)
@@ -75,7 +75,25 @@ try {
         extends: packageConfig,
         compilerOptions: {
           noEmit: true,
-          typeRoots: [join(repositoryRoot, "packages", "kern", "node_modules", "@types")],
+          paths: Object.fromEntries(
+            [
+              "array",
+              "async",
+              "date",
+              "form",
+              "form-react",
+              "form-vue",
+              "money",
+              "number",
+              "object",
+              "string",
+              "validation",
+            ].map((id) => [
+              `@lithekit/${id}`,
+              [join(repositoryRoot, "packages", id, "src", "index.ts")],
+            ]),
+          ),
+          typeRoots: [join(repositoryRoot, "tooling", "node_modules", "@types")],
         },
         files: generatedFiles,
       },
@@ -85,12 +103,20 @@ try {
   )
 
   const compilers = [
-    { label: "current TypeScript", command: [process.execPath, "x", "tsc", "--project", config] },
+    {
+      label: "current TypeScript",
+      command: [
+        "node",
+        join(repositoryRoot, "tooling", "node_modules", "typescript", "bin", "tsc"),
+        "--project",
+        config,
+      ],
+    },
     {
       label: "TypeScript 5.0",
       command: [
         "node",
-        join(repositoryRoot, "packages", "kern", "node_modules", "typescript-5", "bin", "tsc"),
+        join(repositoryRoot, "tooling", "node_modules", "typescript-5", "bin", "tsc"),
         "--project",
         config,
       ],

@@ -1,32 +1,32 @@
 ---
 title: Development
-description: Set up the Kern workspace and understand every focused and full verification command.
+description: Set up the Lithekit workspace and understand every focused and full verification command.
 ---
 
-This page is for contributors working on Kern itself. Applications that only consume Kern should
+This page is for contributors working on Lithekit itself. Applications that only consume Lithekit should
 start with [Installation](../../getting-started/installation/).
 
 ## Repository layout
 
 ```text
-apps/docs/       Documentation site and visual/accessibility checks
-packages/kern/   Published @sousaivan/kern source, tests, and package metadata
-tooling/         Build, benchmark, compatibility, and repository scripts
+apps/docs/         Documentation site and visual/accessibility checks
+packages/<name>/   One independently published @lithekit package
+tooling/           Manifest-driven build, release, benchmark, and verification scripts
 ```
 
-Runtime source belongs under `packages/kern/src/<module>/`. Documentation guides follow the same
-module boundaries under `apps/docs/src/content/docs/modules/`.
+Runtime source belongs under `packages/<name>/src/`. Documentation routes and package contracts are
+declared in `tooling/config/packages.json`.
 
 ## Install the workspace
 
-Kern uses Bun workspaces:
+Lithekit uses Bun workspaces:
 
 ```bash
 bun install
 ```
 
 The install includes development-only tools such as TypeScript, Biome, Astro, and the browser used
-by compatibility/accessibility tests. None are runtime dependencies of `@sousaivan/kern`.
+by compatibility/accessibility tests. They are not dependencies of the domain packages.
 
 ## Day-to-day commands
 
@@ -64,7 +64,7 @@ Guide pages should explain:
 
 1. what the API solves;
 2. the simplest correct example;
-3. every Kern-specific option and default;
+3. every Lithekit-specific option and default;
 4. return values and TypeScript inference;
 5. thrown errors and expected failures;
 6. mutation, locale, timezone, unit, and security boundaries;
@@ -115,6 +115,6 @@ For an accepted public change:
 7. add a benchmark only when work scales with input or is performance-sensitive;
 8. run the applicable focused checks and `bun run check`.
 
-Kern 1.x is stable. Review runtime and TypeScript changes against the package's semantic-versioning
+Lithekit 1.x is stable. Review runtime and TypeScript changes against the package's semantic-versioning
 policy, update the changelog for consumer-visible behavior, and use a major version for breaking
 changes. Deprecate a public API in a prior minor release when practical.

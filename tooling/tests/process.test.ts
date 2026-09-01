@@ -74,9 +74,9 @@ describe("development subprocess capture", () => {
         capturedResult(
           [
             "routine output",
-            "@kern/docs build: [WARN] plugin diagnostic",
-            "@kern/docs build: (!) Generated chunk is large. Consider:",
-            "@sousaivan/kern test:browser: @kern/docs build: - splitting the entrypoint",
+            "@lithekit/docs build: [WARN] plugin diagnostic",
+            "@lithekit/docs build: (!) Generated chunk is large. Consider:",
+            "@lithekit/form test:browser: @lithekit/docs build: - splitting the entrypoint",
             "more routine output",
           ].join("\n"),
         ),

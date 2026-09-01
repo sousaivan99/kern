@@ -6,21 +6,21 @@ sidebar:
   label: Money overview
 ---
 
-Kern represents money as an integer count of **minor units**. A minor unit is the smallest unit your
+Lithekit represents money as an integer count of **minor units**. A minor unit is the smallest unit your
 application has chosen to store, such as cents for many currencies.
 
 ```ts
 const priceMinor = 1_099 // commonly €10.99 or $10.99
 ```
 
-Do not pass a major-unit decimal such as `10.99` to a money helper. Kern rejects it because it is
+Do not pass a major-unit decimal such as `10.99` to a money helper. Lithekit rejects it because it is
 not an integer.
 
 ## Start here: write the amount in the smallest unit
 
 For a currency with two decimal places, move the decimal point two places and store the integer:
 
-| Display amount | Minor-unit value passed to Kern |
+| Display amount | Minor-unit value passed to Lithekit |
 | ---: | ---: |
 | €0.01 | `1` |
 | €1.00 | `100` |
@@ -30,7 +30,7 @@ For a currency with two decimal places, move the decimal point two places and st
 Then calculate with money helpers and format only for display:
 
 ```ts
-import { addMoney, formatMoney } from "@sousaivan/kern/money"
+import { addMoney, formatMoney } from "@lithekit/money"
 
 const coffee = 350
 const cake = 499
@@ -47,7 +47,7 @@ addMoney(coffee, 4.99)
 The number `849` does not contain the currency. Your application must keep `"EUR"` beside it and
 must never combine amounts from different currencies.
 
-Run the example to see both parts: Kern prints the valid total first, then stops on `4.99` with the
+Run the example to see both parts: Lithekit prints the valid total first, then stops on `4.99` with the
 exact error message. Write `499` for €4.99 when the application stores cents.
 
 ## Why minor units?
@@ -59,7 +59,7 @@ console.log(0.1 + 0.2) // 0.30000000000000004
 console.log(10 + 20) // 30 exact minor units
 ```
 
-Kern uses safe integers at the public boundary and exact `bigint` quotient/remainder arithmetic
+Lithekit uses safe integers at the public boundary and exact `bigint` quotient/remainder arithmetic
 inside calculations that require rounding.
 
 ## A complete purchase example
@@ -71,7 +71,7 @@ import {
   formatMoney,
   multiplyMoney,
   sumMoney,
-} from "@sousaivan/kern/money"
+} from "@lithekit/money"
 
 const lineTotal = multiplyMoney(1_499, 3)
 const subtotal = sumMoney([lineTotal, 499])
@@ -85,7 +85,7 @@ console.log(shares)
 ## Shared rules
 
 - Amounts are positive, negative, or zero safe integers.
-- Kern never silently accepts `NaN`, infinities, fractions, or unsafe integers as amounts.
+- Lithekit never silently accepts `NaN`, infinities, fractions, or unsafe integers as amounts.
 - Addition, subtraction, summation, multiplication, percentages, and allocation check their result.
 - A result outside `Number.MIN_SAFE_INTEGER..Number.MAX_SAFE_INTEGER` throws `RangeError`.
 - The default rounding mode is `halfExpand`: nearest value, with exact ties away from zero.
@@ -103,7 +103,7 @@ Convert at the integration boundary and test those mappings.
 
 ## Scope boundary
 
-Kern provides deterministic calculation primitives. It is not:
+Lithekit provides deterministic calculation primitives. It is not:
 
 - an FX engine or live exchange-rate provider;
 - a canonical/provider-specific currency table;
@@ -112,14 +112,14 @@ Kern provides deterministic calculation primitives. It is not:
 - an audit trail, reconciliation service, or compliance system;
 - a source of jurisdiction-specific legal rounding policy.
 
-Your domain layer owns those rules. Kern gives it small exact operations to build on.
+Your domain layer owns those rules. Lithekit gives it small exact operations to build on.
 
 ## Common beginner mistakes
 
 - Do not pass `10.99`; pass integer minor units such as `1099` for a two-decimal currency.
 - Do not assume every currency has two minor digits. JPY commonly uses zero and KWD commonly uses
   three according to native currency metadata.
-- Do not add USD and EUR merely because both values are numbers. Kern cannot detect their currency.
+- Do not add USD and EUR merely because both values are numbers. Lithekit cannot detect their currency.
 - Percentage inputs use percentage points: pass `15` for 15%, not `0.15`.
 - `formatMoney()` returns display text. Keep the integer amount for later calculations.
 - `parseMoney()` is strict and locale-specific. A German-formatted EUR value should be parsed with
@@ -130,10 +130,10 @@ Your domain layer owns those rules. Kern gives it small exact operations to buil
 
 ### Keep currency in the domain type
 
-Kern deliberately keeps arithmetic functions tiny, so a domain model should keep the unit metadata:
+Lithekit deliberately keeps arithmetic functions tiny, so a domain model should keep the unit metadata:
 
 ```ts
-import { addMoney } from "@sousaivan/kern/money"
+import { addMoney } from "@lithekit/money"
 
 interface Money {
   readonly currency: "EUR" | "USD"

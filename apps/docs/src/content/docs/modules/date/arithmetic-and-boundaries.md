@@ -11,7 +11,7 @@ fixed-duration arithmetic.
 ## `addDays(date, amount)`
 
 ```ts
-import { addDays } from "@sousaivan/kern/date"
+import { addDays } from "@lithekit/date"
 
 const release = new Date(2026, 7, 13, 10, 30)
 const followUp = addDays(release, 7)
@@ -29,7 +29,7 @@ local time on another calendar day.”
 ## `subtractDays(date, amount)`
 
 ```ts
-import { subtractDays } from "@sousaivan/kern/date"
+import { subtractDays } from "@lithekit/date"
 
 const release = new Date(2026, 7, 13, 10, 30)
 const reminder = subtractDays(release, 2)
@@ -46,7 +46,7 @@ DST rules as `addDays()`.
 ## `addMonths(date, amount)`
 
 ```ts
-import { addMonths } from "@sousaivan/kern/date"
+import { addMonths } from "@lithekit/date"
 
 const january31 = new Date(2024, 0, 31, 10)
 
@@ -56,7 +56,7 @@ addMonths(january31, Number.POSITIVE_INFINITY)
 // RangeError: Date amounts must be safe integers
 ```
 
-Months have different lengths. Kern first moves to the destination month, then clamps the day to
+Months have different lengths. Lithekit first moves to the destination month, then clamps the day to
 that month's final valid day. For example, January 31 plus one month becomes February 28 or 29,
 not a date in March.
 
@@ -66,7 +66,7 @@ subtracting a month from February 29 produces January 29.
 ## `subtractMonths(date, amount)`
 
 ```ts
-import { subtractMonths } from "@sousaivan/kern/date"
+import { subtractMonths } from "@lithekit/date"
 
 const january31 = new Date(2024, 0, 31, 10)
 
@@ -82,7 +82,7 @@ clamping as `addMonths()`.
 ## `addYears(date, amount)`
 
 ```ts
-import { addYears } from "@sousaivan/kern/date"
+import { addYears } from "@lithekit/date"
 
 const leapDay = new Date(2024, 1, 29, 12)
 
@@ -98,7 +98,7 @@ year.
 ## `subtractYears(date, amount)`
 
 ```ts
-import { subtractYears } from "@sousaivan/kern/date"
+import { subtractYears } from "@lithekit/date"
 
 const leapDay = new Date(2024, 1, 29, 12)
 
@@ -114,7 +114,7 @@ wall-clock time exists.
 ## `startOfDay(date)`
 
 ```ts
-import { startOfDay } from "@sousaivan/kern/date"
+import { startOfDay } from "@lithekit/date"
 
 const value = new Date(2026, 7, 13, 14, 30, 15)
 
@@ -129,7 +129,7 @@ startOfDay(new Date(Number.NaN))
 ## `endOfDay(date)`
 
 ```ts
-import { endOfDay } from "@sousaivan/kern/date"
+import { endOfDay } from "@lithekit/date"
 
 const value = new Date(2026, 7, 13, 14, 30, 15)
 
@@ -152,7 +152,7 @@ an inclusive end can be harder to reason about than using an exclusive start-of-
 
 If arithmetic or a day boundary would fall outside the native `Date` range, every helper throws
 `RangeError("Date result is outside the supported range")` instead of returning an invalid date.
-The behavior is the same whether Kern uses the runtime's Temporal implementation or its native
+The behavior is the same whether Lithekit uses the runtime's Temporal implementation or its native
 `Date` fallback.
 
 Passing a negative amount reverses direction, so `addDays(date, -2)` is equivalent to
@@ -161,7 +161,7 @@ Passing a negative amount reverses direction, so `addDays(date, -2)` is equivale
 None of these functions changes the supplied date:
 
 ```ts
-import { addDays } from "@sousaivan/kern/date"
+import { addDays } from "@lithekit/date"
 
 const original = new Date(2026, 0, 1)
 const changed = addDays(original, 1)

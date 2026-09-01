@@ -7,7 +7,7 @@ await runWorkflow({
   cwd: repositoryRoot,
   name: "test suites",
   steps: [
-    { command: [process.execPath, "--filter", "@sousaivan/kern", "test"], name: "Kern" },
-    { command: [process.execPath, "--filter", "@kern/tooling", "test"], name: "Tooling" },
+    { command: [process.execPath, "test", "packages"], name: "Lithekit packages" },
+    { command: [process.execPath, "--filter", "@lithekit/tooling", "test"], name: "Tooling" },
   ],
 })

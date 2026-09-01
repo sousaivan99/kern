@@ -1,5 +1,5 @@
 {
-  "name": "@kern/docs",
+  "name": "@lithekit/docs",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,7 +15,17 @@
   "dependencies": {
     "@astrojs/starlight": "^0.41.7",
     "@astrojs/starlight-tailwind": "^5.0.0",
-    "@sousaivan/kern": "workspace:*",
+    "@lithekit/array": "workspace:*",
+    "@lithekit/async": "workspace:*",
+    "@lithekit/date": "workspace:*",
+    "@lithekit/form": "workspace:*",
+    "@lithekit/form-react": "workspace:*",
+    "@lithekit/form-vue": "workspace:*",
+    "@lithekit/money": "workspace:*",
+    "@lithekit/number": "workspace:*",
+    "@lithekit/object": "workspace:*",
+    "@lithekit/string": "workspace:*",
+    "@lithekit/validation": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.2.1",
     "lucide-astro": "^0.556.0",

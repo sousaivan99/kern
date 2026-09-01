@@ -1,15 +1,15 @@
 ---
 title: Nuxt
-description: Learn each Kern module through a small Nuxt component or server-route example.
+description: Learn each Lithekit module through a small Nuxt component or server-route example.
 ---
 
-Install Kern in the Nuxt application:
+Install Lithekit in the Nuxt application:
 
 ```bash
-npm install @sousaivan/kern
+npm install @lithekit/array @lithekit/async @lithekit/date @lithekit/money @lithekit/number @lithekit/object @lithekit/string @lithekit/validation
 ```
 
-Kern needs no Nuxt module and no `nuxt.config.ts` entry. Each section below is independent. Start
+Lithekit needs no Nuxt module and no `nuxt.config.ts` entry. Each section below is independent. Start
 with one small component or server boundary instead of combining every module in one page.
 
 ## Validation: check the browser and server
@@ -21,7 +21,7 @@ A caller can skip or alter browser code.
 ```vue
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Contact = object({
   email: string().trim().email(),
@@ -53,7 +53,7 @@ an ordinary validation failure:
 
 <!-- framework-test: nuxt/server/api/contact.post.ts -->
 ```ts framework-only
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Contact = object({
   name: string().trim().min(2),
@@ -86,7 +86,7 @@ and hydration produce the same currency text.
 <!-- framework-test: nuxt/app/components/examples/MoneyExample.vue -->
 ```vue
 <script setup lang="ts">
-import { formatMoney, sumMoney } from "@sousaivan/kern/money"
+import { formatMoney, sumMoney } from "@lithekit/money"
 
 const pricesMinor = [1099, 250, 450]
 const totalMinor = sumMoney(pricesMinor)
@@ -108,7 +108,7 @@ instead of inheriting the Nuxt server's host timezone.
 <!-- framework-test: nuxt/app/components/examples/DateExample.vue -->
 ```vue
 <script setup lang="ts">
-import { addDays, formatDate } from "@sousaivan/kern/date"
+import { addDays, formatDate } from "@lithekit/date"
 
 const orderedAt = new Date("2026-08-16T12:00:00Z")
 const deliveryAt = addDays(orderedAt, 2)
@@ -136,7 +136,7 @@ then localize the value for display.
 <!-- framework-test: nuxt/app/components/examples/NumberExample.vue -->
 ```vue
 <script setup lang="ts">
-import { formatPercentage, percentageOfTotal } from "@sousaivan/kern/number"
+import { formatPercentage, percentageOfTotal } from "@lithekit/number"
 
 const completed = 3
 const total = 4
@@ -159,7 +159,7 @@ original product name for display.
 <!-- framework-test: nuxt/app/components/examples/StringExample.vue -->
 ```vue
 <script setup lang="ts">
-import { slugify } from "@sousaivan/kern/string"
+import { slugify } from "@lithekit/string"
 
 const product = { id: "course-1", name: "Crème Brûlée Course" }
 const slug = slugify(product.name)
@@ -182,7 +182,7 @@ operation. `uniqueBy()` keeps the first record for each ID.
 <!-- framework-test: nuxt/app/components/examples/ArrayExample.vue -->
 ```vue
 <script setup lang="ts">
-import { uniqueBy } from "@sousaivan/kern/array"
+import { uniqueBy } from "@lithekit/array"
 
 const inventory = [
   { id: "coffee", name: "Coffee" },
@@ -212,7 +212,7 @@ keeps internal data out of the value passed to a page or component.
 <!-- framework-test: nuxt/app/components/examples/ObjectExample.vue -->
 ```vue
 <script setup lang="ts">
-import { pick } from "@sousaivan/kern/object"
+import { pick } from "@lithekit/object"
 
 const account = {
   id: "user-1",
@@ -238,7 +238,7 @@ simulated temporary failure and then updates a ref.
 ```vue
 <script setup lang="ts">
 import { ref } from "vue"
-import { retry } from "@sousaivan/kern/async"
+import { retry } from "@lithekit/async"
 
 const status = ref("Not loaded")
 
@@ -269,5 +269,5 @@ npx nuxt typecheck
 npx nuxt build
 ```
 
-Kern's framework suite type-checks every mini-component, builds the Nuxt server, verifies the
+Lithekit's framework suite type-checks every mini-component, builds the Nuxt server, verifies the
 validation page through SSR, and sends valid and invalid requests to the server example.

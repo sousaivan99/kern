@@ -8,7 +8,7 @@ sidebar:
 ## Validate a date
 
 ```ts
-import { isValidDate } from "@sousaivan/kern/date"
+import { isValidDate } from "@lithekit/date"
 
 console.log("Valid date:", isValidDate(new Date())) // true
 console.log("Invalid date:", isValidDate(new Date(Number.NaN))) // false
@@ -21,7 +21,7 @@ console.log("String is not a Date:", isValidDate("2026-08-13")) // false
 ## `isBefore(left, right)`
 
 ```ts
-import { isBefore } from "@sousaivan/kern/date"
+import { isBefore } from "@lithekit/date"
 
 const left = new Date("2026-08-13T14:30:00Z")
 const right = new Date("2026-08-13T15:30:00Z")
@@ -38,7 +38,7 @@ return `false`.
 ## `isAfter(left, right)`
 
 ```ts
-import { isAfter } from "@sousaivan/kern/date"
+import { isAfter } from "@lithekit/date"
 
 const release = new Date("2026-08-13T14:30:00Z")
 const deployment = new Date("2026-08-13T15:30:00Z")
@@ -55,7 +55,7 @@ isAfter(new Date(Number.NaN), release)
 ## `isSameInstant(left, right)`
 
 ```ts
-import { isSameInstant } from "@sousaivan/kern/date"
+import { isSameInstant } from "@lithekit/date"
 
 const left = new Date("2026-08-13T14:30:00Z")
 const right = new Date(left.getTime())
@@ -72,7 +72,7 @@ change an instant. They validate both dates and throw `RangeError` for an invali
 ## `differenceInCalendarDays(left, right)`
 
 ```ts
-import { differenceInCalendarDays } from "@sousaivan/kern/date"
+import { differenceInCalendarDays } from "@lithekit/date"
 
 const now = new Date(2026, 7, 13, 23, 30)
 const next = new Date(2026, 7, 14, 0, 15)
@@ -89,7 +89,7 @@ ignores time-of-day and daylight-saving duration. Swapping the arguments changes
 ## `isSameDay(left, right)`
 
 ```ts
-import { isSameDay } from "@sousaivan/kern/date"
+import { isSameDay } from "@lithekit/date"
 
 const morning = new Date(2026, 7, 13, 9)
 const evening = new Date(2026, 7, 13, 21)
@@ -105,7 +105,7 @@ isSameDay(morning, new Date(Number.NaN))
 ## `isToday(date, now?)`
 
 ```ts
-import { isToday } from "@sousaivan/kern/date"
+import { isToday } from "@lithekit/date"
 
 const now = new Date(2026, 7, 13, 12)
 console.log("Success:", isToday(new Date(2026, 7, 13, 8), now)) // true
@@ -117,7 +117,7 @@ isToday(new Date(Number.NaN), now)
 ## `isTomorrow(date, now?)`
 
 ```ts
-import { isTomorrow } from "@sousaivan/kern/date"
+import { isTomorrow } from "@lithekit/date"
 
 const now = new Date(2026, 7, 13, 12)
 console.log("Success:", isTomorrow(new Date(2026, 7, 14, 8), now)) // true
@@ -129,7 +129,7 @@ isTomorrow(new Date(Number.NaN), now)
 ## `isYesterday(date, now?)`
 
 ```ts
-import { isYesterday } from "@sousaivan/kern/date"
+import { isYesterday } from "@lithekit/date"
 
 const now = new Date(2026, 7, 13, 12)
 console.log("Success:", isYesterday(new Date(2026, 7, 12, 20), now)) // true
@@ -145,7 +145,7 @@ the same instant.
 ## `formatDate(date, options?)`
 
 ```ts
-import { formatDate } from "@sousaivan/kern/date"
+import { formatDate } from "@lithekit/date"
 
 const release = new Date("2026-08-13T14:30:00Z")
 
@@ -160,7 +160,7 @@ With no formatting fields, `formatDate()` defaults to numeric day, short month, 
 ## `formatDateTime(date, options?)`
 
 ```ts
-import { formatDateTime } from "@sousaivan/kern/date"
+import { formatDateTime } from "@lithekit/date"
 
 const release = new Date("2026-08-13T14:30:00Z")
 
@@ -198,7 +198,7 @@ must be reproducible across machines.
 ## Format relative time
 
 ```ts
-import { formatRelativeTime } from "@sousaivan/kern/date"
+import { formatRelativeTime } from "@lithekit/date"
 
 const base = new Date("2026-08-13T12:00:00Z")
 const later = new Date("2026-08-15T12:00:00Z")
@@ -210,7 +210,7 @@ formatRelativeTime(new Date(Number.NaN), base, { locale: "en" })
 // RangeError: Expected a valid Date
 ```
 
-The signature is `formatRelativeTime(date, baseDate = new Date(), options = {})`. Kern chooses the
+The signature is `formatRelativeTime(date, baseDate = new Date(), options = {})`. Lithekit chooses the
 largest suitable unit from year down to second, rounds to a whole unit, and delegates wording to
 `Intl.RelativeTimeFormat`.
 
@@ -230,7 +230,7 @@ Gregorian durations and is approximate; do not use the result for billing or exa
 ## Return a UTC ISO date
 
 ```ts
-import { toUTCISODate } from "@sousaivan/kern/date"
+import { toUTCISODate } from "@lithekit/date"
 
 console.log(toUTCISODate(new Date("2026-08-13T23:30:00-05:00"))) // "2026-08-14"
 

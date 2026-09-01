@@ -35,28 +35,30 @@ const examples = [
 ] as const
 ---
 
-<section class="kern-home not-content" aria-labelledby="_top">
-  <div class="kern-home-intro">
-    <h1 id="_top" data-page-title>Kern</h1>
-    <p class="kern-home-tagline">
+<section class="lithekit-home not-content" aria-labelledby="_top">
+  <div class="lithekit-home-intro">
+    <h1 id="_top" data-page-title>Lithekit</h1>
+    <p class="lithekit-home-tagline">
       Small, dependency-free TypeScript primitives for everyday application code.
     </p>
-    <p class="kern-home-modules">Validation · Money · Dates · Async · Data</p>
-    <p class="kern-support-line">Zero runtime dependencies · Tree-shakeable · Standard Schema</p>
+    <p class="lithekit-home-modules">Validation · Money · Dates · Forms · Data</p>
+    <p class="lithekit-support-line">
+      Zero runtime dependencies · Tree-shakeable · Standard Schema
+    </p>
 
-    <nav class="kern-primary-links" aria-label="Kern documentation">
+    <nav class="lithekit-primary-links" aria-label="Lithekit documentation">
       {links.map((link, index) => (
-        <a class:list={{ "kern-primary-link": index === 0 }} href={link.href}>
+        <a class:list={{ "lithekit-primary-link": index === 0 }} href={link.href}>
           {link.label}
           {index === 0 && <ArrowRight aria-hidden="true" size={15} />}
         </a>
       ))}
     </nav>
 
-    <fieldset class="kern-install-command" aria-label="Install Kern with Bun">
+    <fieldset class="lithekit-install-command" aria-label="Install Lithekit Validation with Bun">
       <div>
         <Terminal aria-hidden="true" size={14} />
-        <code>bun add @sousaivan/kern</code>
+        <code>bun add @lithekit/validation</code>
       </div>
       <button type="button" data-copy-install aria-label="Copy installation command">
         <Copy aria-hidden="true" size={14} />
@@ -66,9 +68,9 @@ const examples = [
     </fieldset>
   </div>
 
-  <section class="kern-home-examples" aria-label="Three Kern examples">
+  <section class="lithekit-home-examples" aria-label="Three Lithekit examples">
     {examples.map((example) => (
-      <article class="kern-home-example">
+      <article class="lithekit-home-example">
         <header>
           <h2>{example.label}</h2>
           <a href={example.href} aria-label={`Read the ${example.label} guide`}>
@@ -89,7 +91,7 @@ document.querySelectorAll<HTMLButtonElement>("[data-copy-install]").forEach((but
     if (!label || !status) return
 
     try {
-      await navigator.clipboard.writeText("bun add @sousaivan/kern")
+      await navigator.clipboard.writeText("bun add @lithekit/validation")
       label.textContent = "Copied"
       status.textContent = "Installation command copied."
     } catch {
@@ -106,51 +108,51 @@ document.querySelectorAll<HTMLButtonElement>("[data-copy-install]").forEach((but
 </script>
 
 <style>
-.kern-home {
+.lithekit-home {
   padding: clamp(4rem, 8vw, 7.5rem) 0 clamp(3rem, 7vw, 6rem);
 }
 
-.kern-home-intro {
+.lithekit-home-intro {
   max-width: 57rem;
 }
 
 h1 {
   margin: 0;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font-size: clamp(3.5rem, 8vw, 7rem);
   font-weight: 690;
   letter-spacing: -0.065em;
   line-height: 0.95;
 }
 
-.kern-home-tagline {
+.lithekit-home-tagline {
   max-width: 42rem;
   margin: 1.5rem 0 0;
-  color: var(--kern-color-text-body);
+  color: var(--lithekit-color-text-body);
   font-size: clamp(1.15rem, 2vw, 1.45rem);
   line-height: 1.55;
   text-wrap: balance;
 }
 
-.kern-home-modules,
-.kern-support-line {
+.lithekit-home-modules,
+.lithekit-support-line {
   margin: 0;
   font-family: var(--__sl-font-mono);
   font-size: 0.78rem;
   line-height: 1.7;
 }
 
-.kern-home-modules {
+.lithekit-home-modules {
   margin-top: 1.45rem;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
 }
 
-.kern-support-line {
+.lithekit-support-line {
   margin-top: 0.3rem;
-  color: var(--kern-color-text-muted);
+  color: var(--lithekit-color-text-muted);
 }
 
-.kern-primary-links {
+.lithekit-primary-links {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -158,20 +160,20 @@ h1 {
   margin-top: 1.65rem;
 }
 
-.kern-primary-links a {
-  color: var(--kern-color-text-body);
+.lithekit-primary-links a {
+  color: var(--lithekit-color-text-body);
   font-size: 0.875rem;
   font-weight: 620;
   text-decoration: none;
 }
 
-.kern-primary-links a:not(.kern-primary-link):hover {
-  color: var(--kern-color-text-strong);
+.lithekit-primary-links a:not(.lithekit-primary-link):hover {
+  color: var(--lithekit-color-text-strong);
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
 
-.kern-primary-links .kern-primary-link {
+.lithekit-primary-links .lithekit-primary-link {
   display: inline-flex;
   min-height: 2.45rem;
   align-items: center;
@@ -182,7 +184,7 @@ h1 {
   color: var(--sl-color-black);
 }
 
-.kern-install-command {
+.lithekit-install-command {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -196,26 +198,26 @@ h1 {
   padding: 0.32rem 0.38rem 0.32rem 0.8rem;
 }
 
-.kern-install-command > div {
+.lithekit-install-command > div {
   display: flex;
   min-width: 0;
   align-items: center;
   gap: 0.65rem;
-  color: var(--kern-color-text-muted);
+  color: var(--lithekit-color-text-muted);
   font-family: var(--__sl-font-mono);
   font-size: 0.8125rem;
 }
 
-.kern-install-command code {
+.lithekit-install-command code {
   overflow: hidden;
   padding: 0;
   background: transparent;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.kern-install-command button {
+.lithekit-install-command button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -224,30 +226,30 @@ h1 {
   border-left: 1px solid var(--sl-color-hairline-light);
   background: transparent;
   padding: 0 0.55rem 0 0.7rem;
-  color: var(--kern-color-text-muted);
+  color: var(--lithekit-color-text-muted);
   font: inherit;
   font-size: 0.8125rem;
   cursor: pointer;
 }
 
-.kern-install-command button:hover {
-  color: var(--kern-color-text-strong);
+.lithekit-install-command button:hover {
+  color: var(--lithekit-color-text-strong);
 }
 
-.kern-home-examples {
+.lithekit-home-examples {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-top: clamp(3.5rem, 7vw, 6rem);
 }
 
-.kern-home-example {
+.lithekit-home-example {
   min-width: 0;
   border: 1px solid var(--sl-color-hairline-light);
   background: var(--sl-color-bg);
 }
 
-.kern-home-example header {
+.lithekit-home-example header {
   display: flex;
   min-height: 3rem;
   align-items: center;
@@ -258,24 +260,24 @@ h1 {
   padding: 0.65rem 0.85rem;
 }
 
-.kern-home-example h2 {
+.lithekit-home-example h2 {
   margin: 0;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font-size: 0.82rem;
   font-weight: 650;
 }
 
-.kern-home-example a {
+.lithekit-home-example a {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--kern-color-interactive);
+  color: var(--lithekit-color-interactive);
   font-size: 0.75rem;
   font-weight: 620;
   text-decoration: none;
 }
 
-.kern-home-example pre {
+.lithekit-home-example pre {
   overflow: auto;
   min-height: 9.5rem;
   margin: 0;
@@ -283,33 +285,33 @@ h1 {
   border-radius: 0;
   background: transparent;
   padding: 1.15rem;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font-size: clamp(0.75rem, 0.9vw, 0.84rem);
   line-height: 1.7;
 }
 
-.kern-home-example code {
+.lithekit-home-example code {
   padding: 0;
   background: transparent;
   color: inherit;
 }
 
 @media (max-width: 62rem) {
-  .kern-home-examples {
+  .lithekit-home-examples {
     grid-template-columns: 1fr;
   }
 
-  .kern-home-example pre {
+  .lithekit-home-example pre {
     min-height: 0;
   }
 }
 
 @media (max-width: 32rem) {
-  .kern-home {
+  .lithekit-home {
     padding-top: 3rem;
   }
 
-  .kern-primary-links {
+  .lithekit-primary-links {
     align-items: flex-start;
     flex-direction: column;
   }

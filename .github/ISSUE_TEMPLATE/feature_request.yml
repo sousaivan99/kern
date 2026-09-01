@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Kern deliberately keeps its API small and prefers native JavaScript and Web APIs. The most useful proposal explains the repeated problem first; the exact API can be designed afterward.
+        Lithekit deliberately keeps its API small and prefers native JavaScript and Web APIs. The most useful proposal explains the repeated problem first; the exact API can be designed afterward.
 
   - type: checkboxes
     id: checks
@@ -32,6 +32,9 @@ body:
         - Array
         - Object
         - Async
+        - Form
+        - Vue adapter
+        - React adapter
         - Package or tooling
         - Documentation
         - New module
@@ -42,7 +45,7 @@ body:
   - type: textarea
     id: problem
     attributes:
-      label: What problem should Kern solve?
+      label: What problem should Lithekit solve?
       description: Describe what users repeatedly need to do, who encounters it, and why it is error-prone or cumbersome today.
       placeholder: When building…, developers repeatedly have to…
     validations:
@@ -52,7 +55,7 @@ body:
     id: current_solution
     attributes:
       label: How is this solved today?
-      description: Show the native JavaScript, existing Kern code, or third-party package currently required. Explain what is missing.
+      description: Show the native JavaScript, existing Lithekit code, or third-party package currently required. Explain what is missing.
       render: typescript
     validations:
       required: true
@@ -60,7 +63,7 @@ body:
   - type: textarea
     id: proposed_api
     attributes:
-      label: Possible Kern API
+      label: Possible Lithekit API
       description: Optional. Show the simplest call site you would like to write; this does not need to be the final design.
       render: typescript
 
@@ -77,4 +80,3 @@ body:
     attributes:
       label: Behavior and tradeoffs
       description: Mention important units, mutation rules, errors, locale/timezone behavior, performance, bundle size, or edge cases. Use “not sure” if you need help deciding.
-

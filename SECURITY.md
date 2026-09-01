@@ -2,9 +2,8 @@
 
 ## Supported versions
 
-Kern 1.x is actively supported. Critical security fixes are provided for the latest release and,
-after a future major release, for the previous major during the six-month support window documented
-in [`packages/kern/SUPPORT.md`](./packages/kern/SUPPORT.md).
+Each Lithekit package's 1.x line is actively supported. Critical fixes are provided according to the
+`SUPPORT.md` stored in that package directory.
 
 ## Reporting a vulnerability
 
@@ -12,12 +11,12 @@ Please do not disclose a suspected vulnerability in a public issue, pull request
 other public channel.
 
 Use GitHub's
-[private vulnerability reporting form](https://github.com/sousaivan99/kern/security/advisories/new).
+[private vulnerability reporting form](https://github.com/sousaivan99/lithekit/security/advisories/new).
 GitHub requires you to sign in before opening the form.
 
 Include as much of the following as you can:
 
-- the affected Kern version, module, and API;
+- the affected Lithekit version, module, and API;
 - a minimal reproduction or proof of concept;
 - the impact and who could be affected;
 - the runtime, operating system, and other relevant environment details;

@@ -3,8 +3,14 @@
   "compilerOptions": {
     "types": ["bun"],
     "paths": {
-      "@sousaivan/kern": ["../packages/kern/src/index.ts"],
-      "@sousaivan/kern/*": ["../packages/kern/src/*/index.ts"]
+      "@lithekit/array": ["../packages/array/src/index.ts"],
+      "@lithekit/async": ["../packages/async/src/index.ts"],
+      "@lithekit/date": ["../packages/date/src/index.ts"],
+      "@lithekit/money": ["../packages/money/src/index.ts"],
+      "@lithekit/number": ["../packages/number/src/index.ts"],
+      "@lithekit/object": ["../packages/object/src/index.ts"],
+      "@lithekit/string": ["../packages/string/src/index.ts"],
+      "@lithekit/validation": ["../packages/validation/src/index.ts"]
     }
   },
   "include": ["benchmarks", "scripts", "tests"]

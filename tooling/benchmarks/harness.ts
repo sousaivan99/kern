@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from "node:fs"
 import { cpus } from "node:os"
 import { dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import packageMetadata from "../../packages/kern/package.json"
+import packageMetadata from "../../packages/validation/package.json"
 import { type TableColumn, terminal } from "../scripts/shared/console.js"
 import { type ComparisonScore, scoreComparison } from "./score.js"
 
@@ -97,8 +97,8 @@ const quickConfiguration = {
 
 let sink: unknown
 
-const repositoryRoot = process.env.KERN_BENCHMARK_ROOT
-  ? resolve(process.env.KERN_BENCHMARK_ROOT)
+const repositoryRoot = process.env.LITHEKIT_BENCHMARK_ROOT
+  ? resolve(process.env.LITHEKIT_BENCHMARK_ROOT)
   : resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 
 const hash = (value: string | Uint8Array): string =>
@@ -175,7 +175,7 @@ const scenarioId = (benchmark: BenchmarkDefinition): string =>
     .join(":")
 
 const resultId = (benchmark: BenchmarkDefinition): string =>
-  `${scenarioId(benchmark)}:${slug(benchmark.library ?? "Kern")}`
+  `${scenarioId(benchmark)}:${slug(benchmark.library ?? "Lithekit")}`
 
 const percentile = (sortedValues: readonly number[], percentage: number): number => {
   const index = Math.max(0, Math.ceil(sortedValues.length * percentage) - 1)
@@ -299,7 +299,7 @@ const benchmarkResult = (
   const medianMilliseconds = percentile(samples, 0.5)
   const nanosecondsPerOperation = (medianMilliseconds * 1_000_000) / iterations
   const itemsPerOperation = benchmark.itemsPerOperation
-  const library = benchmark.library ?? "Kern"
+  const library = benchmark.library ?? "Lithekit"
   const libraryVersion = benchmark.libraryVersion ?? packageMetadata.version
   const statistics: BenchmarkStatistics = {
     iterations,
@@ -547,8 +547,8 @@ export const runBenchmarks = async (benchmarks: readonly BenchmarkDefinition[]):
         (scenarioRank.get(scenarioId(left)) ?? 0) - (scenarioRank.get(scenarioId(right)) ?? 0)
       if (scenarioDifference !== 0) return scenarioDifference
       return (
-        (rank.get(left.library ?? "Kern") ?? rank.size) -
-        (rank.get(right.library ?? "Kern") ?? rank.size)
+        (rank.get(left.library ?? "Lithekit") ?? rank.size) -
+        (rank.get(right.library ?? "Lithekit") ?? rank.size)
       )
     })
   }
@@ -595,7 +595,7 @@ export const runBenchmarks = async (benchmarks: readonly BenchmarkDefinition[]):
   if (configuration.json)
     console.log(JSON.stringify({ comparisonScores: scores, metadata, results }, null, 2))
   else {
-    terminal.heading("Kern benchmarks")
+    terminal.heading("Lithekit benchmarks")
     terminal.detail(
       "runtime",
       `${metadata.runtime} · ${metadata.platform} ${metadata.architecture}`,

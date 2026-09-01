@@ -1,6 +1,6 @@
-# Kern roadmap
+# Lithekit roadmap
 
-Kern grows by solving common correctness problems with small, durable APIs. Items are directional,
+Lithekit grows by solving common correctness problems with small, durable APIs. Items are directional,
 not promises; size, native-platform progress, maintenance cost, and user evidence decide admission.
 
 ## Now
@@ -21,4 +21,4 @@ not promises; size, native-platform progress, maintenance cost, and user evidenc
   demand and acceptable size/correctness tradeoffs.
 - Consider a new module only when its ownership is narrow and multiple durable helpers justify it.
 
-Kern is not planning Lodash, Zod, or date-fns feature parity, an FX engine, or a timezone database.
+Lithekit is not planning Lodash, Zod, or date-fns feature parity, an FX engine, or a timezone database.

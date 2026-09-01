@@ -1,11 +1,11 @@
 ---
 title: Validation benchmarks
-description: Run equivalent validation workloads against Kern, Zod, and Valibot with recorded methodology.
+description: Run equivalent validation workloads against Lithekit, Zod, and Valibot with recorded methodology.
 ---
 
 import BenchmarkEnvironments from "../../../components/BenchmarkEnvironments.astro";
 
-The validation comparison records absolute timings for Kern, Zod, and Valibot. It does not assign
+The validation comparison records absolute timings for Lithekit, Zod, and Valibot. It does not assign
 an overall library ranking or print “times faster” claims. Results are meaningful only when repeated
 on the same runtime, hardware, power mode, and operating-system load.
 
@@ -30,11 +30,11 @@ Use JSON when keeping results for review:
 ```bash
 mkdir -p .benchmarks/validation
 
-bun run benchmark:validation -- --json --library-order=Kern,Zod,Valibot \
+bun run benchmark:validation -- --json --library-order=Lithekit,Zod,Valibot \
   > .benchmarks/validation/run-1.json
-bun run benchmark:validation -- --json --library-order=Zod,Valibot,Kern \
+bun run benchmark:validation -- --json --library-order=Zod,Valibot,Lithekit \
   > .benchmarks/validation/run-2.json
-bun run benchmark:validation -- --json --library-order=Valibot,Kern,Zod \
+bun run benchmark:validation -- --json --library-order=Valibot,Lithekit,Zod \
   > .benchmarks/validation/run-3.json
 ```
 
@@ -52,35 +52,35 @@ runs, mismatched result IDs, or artifacts with different runtime, CPU, lockfile,
 Git-diff, or untracked-file fingerprints. Use `--scenario=<stable ID>` one or more times to select
 specific rows.
 
-`bun run benchmark:validation:kern` runs Kern's additional scaling and composition cases.
+`bun run benchmark:validation:lithekit` runs Lithekit's additional scaling and composition cases.
 `bun run benchmark:quick` is a short fixture check used by the release gate; do not use quick mode
 for performance conclusions.
 
-Capture the Kern-only scaling snapshot independently because it does not have a library order:
+Capture the Lithekit-only scaling snapshot independently because it does not have a library order:
 
 ```bash
-mkdir -p .benchmarks/reduction-release/validation-kern
+mkdir -p .benchmarks/reduction-release/validation-lithekit
 
-bun run benchmark:validation:kern -- --json \
-  > .benchmarks/reduction-release/validation-kern/run-1.json
-bun run benchmark:validation:kern -- --json \
-  > .benchmarks/reduction-release/validation-kern/run-2.json
-bun run benchmark:validation:kern -- --json \
-  > .benchmarks/reduction-release/validation-kern/run-3.json
+bun run benchmark:validation:lithekit -- --json \
+  > .benchmarks/reduction-release/validation-lithekit/run-1.json
+bun run benchmark:validation:lithekit -- --json \
+  > .benchmarks/reduction-release/validation-lithekit/run-2.json
+bun run benchmark:validation:lithekit -- --json \
+  > .benchmarks/reduction-release/validation-lithekit/run-3.json
 
 bun run benchmark:report -- \
-  .benchmarks/reduction-release/validation-kern/run-1.json \
-  .benchmarks/reduction-release/validation-kern/run-2.json \
-  .benchmarks/reduction-release/validation-kern/run-3.json
+  .benchmarks/reduction-release/validation-lithekit/run-1.json \
+  .benchmarks/reduction-release/validation-lithekit/run-2.json \
+  .benchmarks/reduction-release/validation-lithekit/run-3.json
 ```
 
 ## Interpreter optimization result
 
-Both snapshots compare Kern 1.0.0, Zod 4.4.3, and Valibot 1.4.2 through the public APIs represented
+Both snapshots compare Lithekit 1.0.0, Zod 4.4.3, and Valibot 1.4.2 through the public APIs represented
 by each stable scenario ID. Every row is the median of three rotated full runs. The CPU column keeps
 the two measurement environments explicit on narrow screens and when copying a row.
 
-| Successful headline | CPU | Kern | Zod | Valibot | Kern advantage over fastest competitor |
+| Successful headline | CPU | Lithekit | Zod | Valibot | Lithekit advantage over fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | `parse()` three-field object | 5600X · A | 45.3 ns | 196.7 ns | 117.3 ns | 61.4% lower · 2.59× throughput |
 |  | 7950X · B | 31.9 ns | 150.3 ns | 91.6 ns | 65.2% lower · 2.87× throughput |
@@ -103,17 +103,17 @@ The stable scenario IDs, in row-group order, are
 `validation-compare:wide-object:parse-valid-25-field-object:25`, and
 `validation-compare:array-success:parse-1000-item-valid-array:1000`.
 
-The phase gate required Kern latency to be at most 90% of the lowest competitor latency. All five
+The phase gate required Lithekit latency to be at most 90% of the lowest competitor latency. All five
 headline API workloads passed in both environments; Standard Schema was a no-regression guard and
 is shown because it is a public interoperability path.
 
-Throughput multiples are the inverse of latency: fastest competitor latency divided by Kern
+Throughput multiples are the inverse of latency: fastest competitor latency divided by Lithekit
 latency. They describe operations per unit time for the same workload, not a separate benchmark.
 
 Failure behavior is measured separately because successful parsing and issue construction do
 different work:
 
-| Failure workload | CPU | Kern | Zod | Valibot | Interpretation |
+| Failure workload | CPU | Lithekit | Zod | Valibot | Interpretation |
 | --- | --- | ---: | ---: | ---: | --- |
 | Aggregate 300 issues from 100 invalid users | 5600X · A | 31.33 µs | 446.76 µs | 115.19 µs | 72.8% lower · 3.68× vs Valibot |
 |  | 7950X · B | 21.90 µs | 356.97 µs | 81.11 µs | 73.0% lower · 3.70× vs Valibot |
@@ -121,13 +121,13 @@ different work:
 |  | 7950X · B | 113.8 ns | Unsupported | 306.5 ns | 62.9% lower · 2.69× vs Valibot |
 
 Zod is marked unsupported for early abort because it has no equivalent parse-level option. It is
-not assigned a synthetic implementation or excluded only from Kern's timing.
+not assigned a synthetic implementation or excluded only from Lithekit's timing.
 
 ## Record scaling snapshot
 
 `record()` now builds successful output in a null-prototype object, writes own data properties
 without consulting inherited setters, and restores `Object.prototype` once after validation. The
-same path safely preserves an own `__proto__` key. These Kern-only results include field validation
+same path safely preserves an own `__proto__` key. These Lithekit-only results include field validation
 and public `safeParse()` result construction:
 
 | Entries | CPU | Median latency | Normalized latency |
@@ -139,8 +139,8 @@ and public `safeParse()` result construction:
 | 100,000 | 5600X · A | 16.92 ms | 169 ns/entry |
 |  | 7950X · B | 11.30 ms | 113 ns/entry |
 
-The stable IDs are `validation-kern:record-success:1000`,
-`validation-kern:record-success:10000`, and `validation-kern:record-success:100000`.
+The stable IDs are `validation-lithekit:record-success:1000`,
+`validation-lithekit:record-success:10000`, and `validation-lithekit:record-success:100000`.
 
 This is a scaling measurement, not a cross-library ranking. The input is a plain object containing
 numeric values, the value schema is `number().integer()`, and every output is verified before
@@ -175,7 +175,7 @@ Snapshot B repeated the scaling suite from a clean tree on the Ryzen 9 7950X:
 
 All three B runs share the clean-tree fingerprints listed under snapshot provenance below.
 
-A separate single Node 24.16 guard run recorded Kern at 102.6 ns for three-field `parse()`, 116.2 ns
+A separate single Node 24.16 guard run recorded Lithekit at 102.6 ns for three-field `parse()`, 116.2 ns
 for three-field `safeParse()`, 665.7 ns for depth-three parsing, 1.53 µs for 25 fields, and 425.2 µs
 for the 1,000-user array. Its raw JSON SHA-256 is
 `51fc71e8d21e1111e38ced38ede31c6509d11561bcf78ee33f3cd20417c7915f`. One fixed-order run is not
@@ -194,9 +194,9 @@ The original machine reported Linux x64, the `powersave` governor, and CPU snaps
 
 | Run | Library order | UTC timestamp | Raw JSON SHA-256 |
 | --- | --- | --- | --- |
-| 1 | Kern → Zod → Valibot | 2026-08-16 16:05:32 | `2b6465dcad9589741c8274cd4489eb381d4014552e0f36c4a6ed17db3c61add9` |
-| 2 | Zod → Valibot → Kern | 2026-08-16 16:06:16 | `9e853fe752ac26a4e48f4937771723922c65a55c144162b4f7ae1141189a12ce` |
-| 3 | Valibot → Kern → Zod | 2026-08-16 16:06:58 | `0eb7b2a7e164e5d7f6d0987b6e25061c71b9be5c857aeb669782fcc353b52e8e` |
+| 1 | Lithekit → Zod → Valibot | 2026-08-16 16:05:32 | `2b6465dcad9589741c8274cd4489eb381d4014552e0f36c4a6ed17db3c61add9` |
+| 2 | Zod → Valibot → Lithekit | 2026-08-16 16:06:16 | `9e853fe752ac26a4e48f4937771723922c65a55c144162b4f7ae1141189a12ce` |
+| 3 | Valibot → Lithekit → Zod | 2026-08-16 16:06:58 | `0eb7b2a7e164e5d7f6d0987b6e25061c71b9be5c857aeb669782fcc353b52e8e` |
 
 The three artifacts share these fingerprints:
 
@@ -212,9 +212,9 @@ The three artifacts share these fingerprints:
 
 | Run | Library order | UTC timestamp | CPU frequency snapshot | Raw JSON SHA-256 |
 | --- | --- | --- | ---: | --- |
-| 1 | Kern → Zod → Valibot | 2026-08-17 06:50:28 | 4,049 MHz | `a27097d147a2a655bcf5099936c0b69411e340d4c3099e2883431e4ace8dd819` |
-| 2 | Zod → Valibot → Kern | 2026-08-17 06:51:12 | 4,377 MHz | `a131f5a545235f8569c7c43fa2994e343728f8a30e19d2b6b03d67c30c56822e` |
-| 3 | Valibot → Kern → Zod | 2026-08-17 06:51:57 | 5,471 MHz | `ccf66a23b36ae57dd784026acfe7dadb2970d784ca015513dcc05d9d60a5d9f0` |
+| 1 | Lithekit → Zod → Valibot | 2026-08-17 06:50:28 | 4,049 MHz | `a27097d147a2a655bcf5099936c0b69411e340d4c3099e2883431e4ace8dd819` |
+| 2 | Zod → Valibot → Lithekit | 2026-08-17 06:51:12 | 4,377 MHz | `a131f5a545235f8569c7c43fa2994e343728f8a30e19d2b6b03d67c30c56822e` |
+| 3 | Valibot → Lithekit → Zod | 2026-08-17 06:51:57 | 5,471 MHz | `ccf66a23b36ae57dd784026acfe7dadb2970d784ca015513dcc05d9d60a5d9f0` |
 
 The recheck reported Linux x64, the `powersave` governor, and a clean working tree:
 
@@ -241,7 +241,7 @@ support a percentage claim about CPUs or revisions.
 The suite contains 29 scenarios: 86 timed cases and one unsupported Zod early-abort case. Every
 supported row runs one untimed verification before measurement. The schemas, inputs, adapters, and
 verification are inspectable in the
-[validation comparison source](https://github.com/sousaivan99/kern/blob/develop/tooling/benchmarks/validation-compare.bench.ts).
+[validation comparison source](https://github.com/sousaivan99/lithekit/blob/develop/tooling/benchmarks/validation-compare.bench.ts).
 
 | Area | Operations | Workloads |
 | --- | --- | --- |
@@ -274,7 +274,7 @@ point:
 - Medians within 10% of the fastest are treated as a near-tie and split the point equally.
 - The summary also shows clear wins, near-ties, slower cases, and library coverage.
 - A scenario is excluded for every library when any library cannot run it. Zod's unsupported
-  early-abort case therefore gives no points to Kern or Valibot.
+  early-abort case therefore gives no points to Lithekit or Valibot.
 
 JSON output includes `comparisonScores`, including the exact `clearWinScenarios` and
 `tiedFastestScenarios` behind each count. The score weights every scenario equally; it is a compact
@@ -295,6 +295,6 @@ and should not be used for conclusions.
 - Small differences can be noise. Prefer medians from multiple full runs and keep the JSON reports
   when making a performance claim.
 - Rotate library execution order across three runs and compare the median of their medians. The
-  accepted order is Kern/Zod/Valibot, Zod/Valibot/Kern, then Valibot/Kern/Zod.
+  accepted order is Lithekit/Zod/Valibot, Zod/Valibot/Lithekit, then Valibot/Lithekit/Zod.
 - Successful parsing, sparse failures, dense issue construction, and early abort answer different
   questions. Use the score to locate patterns, then inspect the scenarios that match the application.

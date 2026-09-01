@@ -10,7 +10,7 @@ sidebar:
 `safeParse()` returns a discriminated union. Check `success` before accessing `data` or `issues`:
 
 ```ts
-import { array, number, object, string } from "@sousaivan/kern/validation"
+import { array, number, object, string } from "@lithekit/validation"
 
 const Users = array(object({ email: string().email(), age: number().min(18) }))
 const success = Users.safeParse([{ email: "ada@example.com", age: 36 }])
@@ -31,7 +31,7 @@ There is no `.errors` property. Failures use `.issues` consistently on safe resu
 ## Every issue field
 
 ```ts
-import type { ValueKind } from "@sousaivan/kern/validation"
+import type { ValueKind } from "@lithekit/validation"
 
 interface ValidationIssue {
   readonly path: readonly (string | number)[]
@@ -83,7 +83,7 @@ Validation aggregates all reachable issues by default. Nested arrays, objects, t
 share the same limit.
 
 ```ts
-import { array, object, string } from "@sousaivan/kern/validation"
+import { array, object, string } from "@lithekit/validation"
 
 const Users = array(object({ name: string().min(2), email: string().email() }))
 const input = [
@@ -116,7 +116,7 @@ unknown input keys follow their enumeration order.
 ## Thrown parsing with `ValidationError`
 
 ```ts
-import { object, string, ValidationError } from "@sousaivan/kern/validation"
+import { object, string, ValidationError } from "@lithekit/validation"
 
 const User = object({ email: string().email() })
 
@@ -147,7 +147,7 @@ The general schema type is `Schema<Output, Input = Output, Presence = "required"
 Most functions should use return-value inference directly:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const User = object({ name: string().trim() })
 const user = User.parse({ name: " Ada " })
@@ -162,7 +162,7 @@ console.log(greet(user))
 When a reusable named type is genuinely useful, use the inference aliases:
 
 ```ts
-import { type Infer, type InferInput, type InferOutput, object, string } from "@sousaivan/kern/validation"
+import { type Infer, type InferInput, type InferOutput, object, string } from "@lithekit/validation"
 
 const Account = object({
   name: string().trim(),
@@ -186,10 +186,10 @@ input to number output. `Infer<S>` is exactly the convenient output alias.
 
 ## Advanced: Standard Schema V1
 
-Every Kern schema implements synchronous Standard Schema V1 through the `~standard` property:
+Every Lithekit schema implements synchronous Standard Schema V1 through the `~standard` property:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const User = object({ email: string().email() })
 const standard = User["~standard"]
@@ -203,18 +203,18 @@ const failure = standard.validate(
 )
 
 console.log(standard.version) // 1
-console.log(standard.vendor) // "kern"
+console.log(standard.vendor) // "lithekit"
 console.log("Success:", success)
 console.log("Failure:", failure)
 ```
 
 The validator returns `{ value }` on success or `{ issues }` on failure. It is synchronous, uses
-Kern's parsed/transformed output, and passes Kern issue paths through unchanged. Standard
+Lithekit's parsed/transformed output, and passes Lithekit issue paths through unchanged. Standard
 Schema-aware form, RPC, and validation tools can consume it without an adapter or external runtime
 dependency.
 
 Standard Schema permits a library-specific options bag and permits validators to return a promise.
-Kern accepts the current V1 options argument for compatibility, ignores `libraryOptions`, and always
+Lithekit accepts the current V1 options argument for compatibility, ignores `libraryOptions`, and always
 returns its result synchronously. Consumer code written for any Standard Schema implementation must
 still allow either a direct result or a promise.
 
@@ -222,7 +222,7 @@ The exported `StandardSchemaV1<Input, Output>` interface includes the official n
 issue, path, options, types, and inference members. Most applications should pass the schema itself
 to a Standard Schema-aware tool instead of calling these lower-level types directly.
 
-Direct `~standard.validate()` uses Kern's default issue aggregation and does not expose Kern-specific
+Direct `~standard.validate()` uses Lithekit's default issue aggregation and does not expose Lithekit-specific
 `abortEarly`/`maxIssues` controls. Call `safeParse()` directly when you need those controls.
 
 ## Exported validation types
@@ -233,7 +233,7 @@ Most applications need only `Infer`, `InferInput`, `InferOutput`, `ValidationIss
 | Type | Purpose |
 | --- | --- |
 | `Schema<Output, Input, Presence>` | Public contract implemented by every schema. |
-| `AnySchema` | Any Kern schema regardless of its input/output. |
+| `AnySchema` | Any Lithekit schema regardless of its input/output. |
 | `StringSchema` | A string schema with `.trim()`, length, format, regex, prefix, and suffix methods. |
 | `NumberSchema` | A number schema with range, sign, integer, and finite-number methods. |
 | `Infer<S>` | Convenient alias for a schema's output. |
@@ -253,7 +253,7 @@ Most applications need only `Infer`, `InferInput`, `InferOutput`, `ValidationIss
 | `ObjectSchema<Shape, Policy>` | Object schema plus composition/policy methods. |
 | `ObjectInput<Shape>` | Input inferred from an object shape. |
 | `ObjectOutput<Shape>` | Output inferred from an object shape. |
-| `StandardSchemaV1<Input, Output>` | Kern's synchronous Standard Schema surface. |
+| `StandardSchemaV1<Input, Output>` | Lithekit's synchronous Standard Schema surface. |
 
 Prefer inference over manually spelling these generics. They are most useful when authoring a
 reusable function that accepts schemas rather than when defining ordinary application data.

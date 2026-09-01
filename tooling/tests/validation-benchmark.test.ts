@@ -13,14 +13,14 @@ describe("validation comparison benchmark", () => {
 
     for (const benchmark of validationComparisonBenchmarks) {
       const libraries = scenarios.get(benchmark.name) ?? []
-      libraries.push(benchmark.library ?? "Kern")
+      libraries.push(benchmark.library ?? "Lithekit")
       scenarios.set(benchmark.name, libraries)
     }
 
     expect(validationComparisonBenchmarks).toHaveLength(87)
     expect(scenarios.size).toBe(29)
     for (const libraries of scenarios.values()) {
-      expect(libraries).toEqual(["Kern", "Zod", "Valibot"])
+      expect(libraries).toEqual(["Lithekit", "Zod", "Valibot"])
     }
   })
 

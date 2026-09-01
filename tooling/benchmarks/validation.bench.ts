@@ -1,4 +1,4 @@
-import { array, number, object, record, string } from "../../packages/kern/src/validation/index.js"
+import { array, number, object, record, string } from "../../packages/validation/src/index.js"
 import { type BenchmarkCase, invariant } from "./harness.js"
 
 const sizes = [1_000, 10_000, 100_000] as const
@@ -42,7 +42,7 @@ const largeArrayBenchmarks = sizes.flatMap((size): BenchmarkCase[] => {
       name: "array success",
       run: () => integerArraySchema.safeParse(valid),
       size,
-      suite: "validation-kern",
+      suite: "validation-lithekit",
       unit: "items",
       verify: verifySuccess,
     },
@@ -51,7 +51,7 @@ const largeArrayBenchmarks = sizes.flatMap((size): BenchmarkCase[] => {
       name: "array one failure at end",
       run: () => integerArraySchema.safeParse(finalFailure),
       size,
-      suite: "validation-kern",
+      suite: "validation-lithekit",
       unit: "items",
       verify: (result) => verifyFailureCount(result, 1),
     },
@@ -65,7 +65,7 @@ const constrainedArrayBenchmarks = sizes.map((size): BenchmarkCase => {
     name: "constrained array success",
     run: () => constrainedIntegerArraySchema.safeParse(valid),
     size,
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     unit: "items",
     verify: verifySuccess,
   }
@@ -79,7 +79,7 @@ const wideInputBenchmarks = sizes.map((size): BenchmarkCase => {
     name: "object 2-field schema, wide input",
     run: () => simpleSchema.safeParse(input),
     size,
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     unit: "input keys",
     verify: (result) => {
       verifySuccess(result)
@@ -107,7 +107,7 @@ const wideSchemaBenchmarks = [100, 1_000, 10_000].map((size): BenchmarkCase => {
     name: "object wide schema success",
     run: () => schema.safeParse(input),
     size,
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     unit: "schema fields",
     verify: verifySuccess,
   }
@@ -122,7 +122,7 @@ const recordBenchmarks = sizes.map((size): BenchmarkCase => {
     name: "record success",
     run: () => schema.safeParse(input),
     size,
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     unit: "entries",
     verify: verifySuccess,
   }
@@ -135,7 +135,7 @@ const allFailureBenchmarks = [1_000, 10_000].map((size): BenchmarkCase => {
     name: "array all items fail",
     run: () => integerArraySchema.safeParse(input),
     size,
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     unit: "issues",
     verify: (result) => verifyFailureCount(result, size),
   }
@@ -145,7 +145,7 @@ export const validationBenchmarks: readonly BenchmarkCase[] = [
   {
     name: "simple object parse",
     run: () => simpleSchema.parse({ name: "Ada", age: 36 }),
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     verify: (result) => {
       invariant(typeof result === "object" && result !== null, "parse must return an object")
       invariant("name" in result && result.name === "Ada", "parse must retain validated data")
@@ -157,31 +157,31 @@ export const validationBenchmarks: readonly BenchmarkCase[] = [
       nestedSchema.safeParse({
         user: { name: "Ada", contacts: [{ email: "ada@example.com" }] },
       }),
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     verify: verifySuccess,
   },
   {
     name: "safeParse success",
     run: () => simpleSchema.safeParse({ name: "Ada", age: 36 }),
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     verify: verifySuccess,
   },
   {
     name: "safeParse two failures",
     run: () => simpleSchema.safeParse({ name: "A", age: 12 }),
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     verify: (result) => verifyFailureCount(result, 2),
   },
   {
     name: "composed strict object success",
     run: () => composedSchema.safeParse({ name: "Ada", age: 36, active: 1 }),
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     verify: verifySuccess,
   },
   {
     name: "passthrough object success",
     run: () => passthroughSchema.safeParse({ name: "Ada", age: 36, traceId: "abc" }),
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     verify: (result) => {
       verifySuccess(result)
       if (!(typeof result === "object" && result !== null && "data" in result)) return
@@ -198,14 +198,14 @@ export const validationBenchmarks: readonly BenchmarkCase[] = [
     name: "bounded aggregate failure",
     run: () => integerArraySchema.safeParse(boundedFailureInput, { maxIssues: 10 }),
     size: 1_000,
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     unit: "items",
     verify: (result) => verifyFailureCount(result, 10),
   },
   {
     name: "Standard Schema validation",
     run: () => simpleSchema["~standard"].validate({ name: "Ada", age: 36 }),
-    suite: "validation-kern",
+    suite: "validation-lithekit",
     verify: (result) => {
       invariant(
         typeof result === "object" && result !== null && "value" in result,

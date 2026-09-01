@@ -2,12 +2,13 @@
 
 ## Project overview
 
-Kern is a zero-runtime-dependency, TypeScript-first, framework-agnostic, ESM-first, tree-shakeable, Bun-based utility toolkit. It provides small primitives commonly replaced by dependencies such as Zod, Lodash, date-fns, and money utility libraries.
+Lithekit is a TypeScript-first ecosystem of independently installable, ESM-first, tree-shakeable packages. Domain packages have zero runtime dependencies; Form adapters depend only on Form core and declare their framework as a peer.
 
 > Bundle size is a feature of this project, not an afterthought.
 
-The permanent npm package name is `@sousaivan/kern`; the repository name is `kern`.
-Kern 1.x is the stable public API line and follows `packages/kern/SEMVER.md`.
+Published packages use the `@lithekit/*` scope and are declared in `tooling/config/packages.json`.
+There is no root `@lithekit` or `@lithekit/core` package. Packages version independently except
+`form`, `form-vue`, and `form-react`, which form one synchronized release group.
 
 ## Core principles
 
@@ -58,18 +59,18 @@ Long-running development commands must remain visibly active without flooding th
 `tooling/scripts/shared/process.ts` when subprocess output should be
 collapsed on success and expanded on failure. Test and build commands should report their current
 work and real progress. `@clack/prompts` is a development-only console dependency and must never be
-imported by `packages/kern/src/` or included in published runtime entrypoints.
+imported by published runtime source or included in published runtime entrypoints.
 
 ## Repository structure
 
 ```text
-apps/docs/       Astro/Starlight/Tailwind documentation application
-packages/kern/   Publishable @sousaivan/kern source, tests, and package metadata
-tooling/         Repository scripts, benchmarks, and tooling tests
+apps/docs/         Astro/Starlight/Tailwind documentation application
+packages/<id>/     One publishable @lithekit package with source, tests, and metadata
+tooling/           Manifest-driven scripts, benchmarks, fixtures, and tooling tests
 ```
 
-Runtime source is under `packages/kern/src/`, with one directory per public module. Documentation
-source lives in `apps/docs/src/content/docs/` and follows the same module boundaries.
+Runtime source is under `packages/<id>/src/`. Documentation source lives in
+`apps/docs/src/content/docs/` and follows the package boundaries.
 
 ### validation
 
@@ -79,7 +80,7 @@ Owns runtime schemas, parsing, safe parsing, structured validation errors, refin
 
 Owns minor-unit-first monetary helpers. Use exact integer/`bigint` arithmetic for finance rounding
 and allocation, rely on `Intl.NumberFormat` for formatting, and keep currency units unambiguous.
-Kern is not an FX engine, provider currency table, ledger, or compliance system.
+Lithekit is not an FX engine, provider currency table, ledger, or compliance system.
 
 ### date
 
@@ -106,17 +107,23 @@ Owns safe object operations. Never add arbitrary object-path writes that are pro
 
 Owns small Promise, timing, and control-flow helpers. Support `AbortSignal` where it materially improves an API.
 
+### form
+
+Owns the framework-neutral, native-control form controller and Standard Schema integration. It must
+not depend on Validation. `form-vue` and `form-react` are separate adapters and must never resolve
+or install the other framework.
+
 ## Imports and exports
 
 Prefer consumer subpath imports:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
-import { formatMoney } from "@sousaivan/kern/money"
-import { addDays } from "@sousaivan/kern/date"
+import { object, string } from "@lithekit/validation"
+import { formatMoney } from "@lithekit/money"
+import { addDays } from "@lithekit/date"
 ```
 
-Do not encourage `import * as Kern from "@sousaivan/kern"` without a specific reason. Consider how every export affects tree-shaking.
+Do not introduce or document a root aggregate import. Consider how every export affects tree-shaking.
 
 When adding a public helper:
 
@@ -263,8 +270,8 @@ If not, do not add it.
 
 Once released, do not break an API casually. Before changing public behavior, inspect tests, README examples, and package exports, and consider semver impact. Do not rename or remove public APIs as incidental cleanup.
 
-Kern 1.x APIs are stable. Follow `packages/kern/SEMVER.md` for every public runtime or type change,
-and document consumer-visible changes in `packages/kern/CHANGELOG.md`.
+Lithekit 1.x APIs are stable. Follow the owning package's `SEMVER.md` for every public runtime or
+type change and document consumer-visible changes in its `CHANGELOG.md`.
 
 ## Documentation
 

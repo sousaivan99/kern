@@ -1,0 +1,63 @@
+{
+  "name": "@lithekit/validation",
+  "version": "1.0.0",
+  "description": "Small, inferred Standard Schema validation for TypeScript.",
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sousaivan99/lithekit.git",
+    "directory": "packages/validation"
+  },
+  "homepage": "https://sousaivan99.github.io/lithekit/modules/validation/",
+  "bugs": {
+    "url": "https://github.com/sousaivan99/lithekit/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "SEMVER.md",
+    "SUPPORT.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bun ../../tooling/scripts/packages/build.ts --package=validation",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "typecheck:minimum": "node ../../tooling/node_modules/typescript-5/bin/tsc --noEmit",
+    "size": "bun ../../tooling/scripts/packages/size.ts --package=validation",
+    "package:check": "bun ../../tooling/scripts/packages/package-check.ts --package=validation",
+    "pack:dry": "bun pm pack --dry-run",
+    "prepublishOnly": "bun run build && bun run test && bun run typecheck"
+  },
+  "engines": {
+    "node": ">=22",
+    "bun": ">=1.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "typescript",
+    "validation",
+    "schema",
+    "standard-schema",
+    "zero-dependency"
+  ],
+  "devDependencies": {
+    "@standard-schema/spec": "1.1.0",
+    "@types/bun": "^1.2.22",
+    "typescript": "^7.0.2",
+    "typescript-5": "npm:typescript@5.0.4"
+  }
+}

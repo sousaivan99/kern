@@ -11,11 +11,11 @@ collector and preserve the exact path to each failure.
 ## Arrays
 
 ```ts
-import { array, string } from "@sousaivan/kern/validation"
+import { array, string } from "@lithekit/validation"
 
 const Tags = array(string().trim().min(1)).min(1).max(5)
 
-console.log("Success:", Tags.safeParse([" typescript ", "kern"]))
+console.log("Success:", Tags.safeParse([" typescript ", "lithekit"]))
 console.log("Failure:", Tags.safeParse(["valid", ""])) // issue path: [1]
 ```
 
@@ -25,12 +25,12 @@ Sparse positions are read as `undefined` and validated normally. Array constrain
 immutably and execute in chain order:
 
 ```ts
-import { array, string } from "@sousaivan/kern/validation"
+import { array, string } from "@lithekit/validation"
 
 const NonEmptyTags = array(string()).min(1, "Add at least one tag")
 const Pair = array(string()).length(2)
 
-console.log("Success:", NonEmptyTags.safeParse(["kern"]))
+console.log("Success:", NonEmptyTags.safeParse(["lithekit"]))
 console.log("Failure:", NonEmptyTags.safeParse([]))
 ```
 
@@ -43,7 +43,7 @@ issue capacity remains, so callers can fix both size and item failures in one pa
 ## Tuples
 
 ```ts
-import { number, string, tuple } from "@sousaivan/kern/validation"
+import { number, string, tuple } from "@lithekit/validation"
 
 const Coordinate = tuple([number().finite(), number().finite()] as const)
 const Entry = tuple([string(), number().integer()] as const)
@@ -64,7 +64,7 @@ numeric index path.
 ## Object shapes
 
 ```ts
-import { number, object, string } from "@sousaivan/kern/validation"
+import { number, object, string } from "@lithekit/validation"
 
 const User = object({
   id: number().integer(),
@@ -95,7 +95,7 @@ processed afterward when the selected policy needs them. This makes issue order 
 ## Unknown-key policies
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const User = object({ name: string() })
 const input = { name: "Ada", traceId: "abc" }
@@ -122,7 +122,7 @@ The field shape is also snapshotted when `object(shape)` is called. Mutating the
 shape object later does not alter the schema; create a new schema explicitly when fields must change.
 
 ```ts
-import { boolean, number, object, string } from "@sousaivan/kern/validation"
+import { boolean, number, object, string } from "@lithekit/validation"
 
 const User = object({
   id: number().integer(),
@@ -160,7 +160,7 @@ new definition. Composition preserves `.strip()`, `.strict()`, or `.passthrough(
 `partial()` wraps the complete original field from the outside:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Settings = object({ theme: string().default("system") })
 const SettingsPatch = Settings.partial()
@@ -180,7 +180,7 @@ shape first, then apply a general transform.
 ## Records
 
 ```ts
-import { number, record } from "@sousaivan/kern/validation"
+import { number, record } from "@lithekit/validation"
 
 const Scores = record(number().integer().min(0))
 
@@ -195,7 +195,7 @@ object. Use `object({...})` instead when keys are known and have different schem
 ## Unions
 
 ```ts
-import { literal, object, string, union } from "@sousaivan/kern/validation"
+import { literal, object, string, union } from "@lithekit/validation"
 
 const Contact = union([
   object({ type: literal("email"), value: string().email() }),
@@ -208,19 +208,19 @@ console.log("Failure:", Contact.safeParse({ type: "email", value: "not-an-email"
 
 `union(schemas)` requires at least two alternatives. Alternatives are tested independently in
 input order. The first successful alternative supplies the output. Issues from failed alternatives
-are discarded; if every alternative fails, Kern emits one `invalid_union` issue at the union path.
+are discarded; if every alternative fails, Lithekit emits one `invalid_union` issue at the union path.
 
 This keeps ordinary failures compact. If a UI must explain every branch, model a discriminating
 field with an outer object or validate alternatives separately.
 
 ## Advanced: hostile property access
 
-Object and record schemas read own properties during validation. If a getter throws, Kern catches
+Object and record schemas read own properties during validation. If a getter throws, Lithekit catches
 it and produces `validation_exception` at the exact property path. It never stores the thrown error
 or rejected raw value in the issue.
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const input = Object.defineProperty({}, "name", {
   enumerable: true,

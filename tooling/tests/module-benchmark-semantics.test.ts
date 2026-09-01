@@ -3,10 +3,10 @@ import currency from "currency.js"
 import * as dinero from "dinero.js"
 import * as es from "es-toolkit"
 import * as lodash from "lodash-es"
-import * as kernArray from "../../packages/kern/src/array/index.js"
-import * as kernMoney from "../../packages/kern/src/money/index.js"
-import * as kernNumber from "../../packages/kern/src/number/index.js"
-import * as kernObject from "../../packages/kern/src/object/index.js"
+import * as kernArray from "../../packages/array/src/index.js"
+import * as kernMoney from "../../packages/money/src/index.js"
+import * as kernNumber from "../../packages/number/src/index.js"
+import * as kernObject from "../../packages/object/src/index.js"
 
 describe("module benchmark semantic intersections", () => {
   test("array and plain-object adapters return equal observable values", () => {

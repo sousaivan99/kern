@@ -5,7 +5,7 @@ const root = resolve(import.meta.dir, "../..")
 const run = (...arguments_: string[]): readonly string[] => [process.execPath, "run", ...arguments_]
 const script = (...path: string[]): readonly string[] => [process.execPath, ...path]
 
-const afterBuild = ["kern-build"] as const
+const afterBuild = ["packages-build"] as const
 const steps: readonly WorkflowStep[] = [
   { command: run("lint"), id: "lint", name: "Lint", warningOutput: "full" },
   { command: run("typecheck"), id: "typecheck", name: "TypeScript current" },
@@ -13,17 +13,17 @@ const steps: readonly WorkflowStep[] = [
   { command: run("test:coverage"), id: "coverage", name: "Tests and coverage" },
   { command: run("test:fuzz"), id: "fuzz", name: "Seeded property and fuzz tests" },
   {
-    command: [process.execPath, "--filter", "@kern/tooling", "test"],
+    command: [process.execPath, "--filter", "@lithekit/tooling", "test"],
     id: "tooling-tests",
     name: "Tooling tests",
   },
   { command: run("audit"), id: "audit", name: "Dependency audit" },
-  { command: run("build:kern"), id: "kern-build", name: "Package build" },
+  { command: run("build:packages"), id: "packages-build", name: "Package builds" },
   {
-    command: script("tooling/scripts/kern/module-check.ts", "--built"),
+    command: script("tooling/scripts/packages/manifest-check.ts", "--built"),
     dependsOn: afterBuild,
-    id: "modules",
-    name: "Module manifest",
+    id: "packages",
+    name: "Package manifest",
   },
   {
     command: run("size:check"),
@@ -44,13 +44,13 @@ const steps: readonly WorkflowStep[] = [
     name: "Timezone matrix",
   },
   {
-    command: script("tooling/scripts/kern/compat-check.ts", "--reuse-build"),
+    command: script("tooling/scripts/packages/compat-check.ts", "--reuse-build"),
     dependsOn: afterBuild,
     id: "compatibility",
     name: "Runtime compatibility",
   },
   {
-    command: script("tooling/scripts/kern/browser-check.ts", "--reuse-build"),
+    command: script("tooling/scripts/packages/browser-check.ts", "--reuse-build"),
     dependsOn: afterBuild,
     id: "browser",
     name: "Browser compatibility",
@@ -62,14 +62,14 @@ const steps: readonly WorkflowStep[] = [
     name: "Framework tutorials",
   },
   {
-    command: script("tooling/scripts/kern/package-check.ts", "--reuse-build"),
+    command: script("tooling/scripts/packages/package-check.ts", "--reuse-build"),
     dependsOn: afterBuild,
     id: "package",
     name: "Packed package",
   },
   {
     command: script("tooling/scripts/docs/check.ts", "--reuse-typecheck"),
-    dependsOn: ["kern-build", "typecheck"],
+    dependsOn: ["packages-build", "typecheck"],
     id: "docs",
     name: "Documentation",
   },

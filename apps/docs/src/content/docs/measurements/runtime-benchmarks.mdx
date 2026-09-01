@@ -1,11 +1,11 @@
 ---
 title: Runtime benchmarks
-description: Reproduce Kern-only array, string, money, object, and Intl scaling measurements.
+description: Reproduce Lithekit-only array, string, money, object, and Intl scaling measurements.
 ---
 
 import BenchmarkEnvironments from "../../../components/BenchmarkEnvironments.astro";
 
-This suite measures Kern's non-validation modules across small and scaling workloads. It records
+This suite measures Lithekit's non-validation modules across small and scaling workloads. It records
 absolute latency rather than assigning an overall score. It also does not compare unrelated helper
 libraries: matching a function name is not evidence that two helpers preserve the same semantics.
 
@@ -36,7 +36,7 @@ bun run benchmark:report -- \
 The report command calculates the median of the three run medians. Add `--json` for exact numbers,
 run medians, input SHA-256 hashes, and environment metadata. The fixtures and result verification
 are inspectable in the
-[primitive benchmark source](https://github.com/sousaivan99/kern/blob/develop/tooling/benchmarks/primitives.bench.ts).
+[primitive benchmark source](https://github.com/sousaivan99/lithekit/blob/develop/tooling/benchmarks/primitives.bench.ts).
 
 ## Recorded snapshots
 

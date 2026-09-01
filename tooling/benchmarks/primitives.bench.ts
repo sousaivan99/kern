@@ -6,18 +6,18 @@ import {
   uniqueBy,
   withoutFalsy,
   withoutNullish,
-} from "../../packages/kern/src/array/index.js"
-import { formatDate } from "../../packages/kern/src/date/index.js"
+} from "../../packages/array/src/index.js"
+import { formatDate } from "../../packages/date/src/index.js"
 import {
   allocateMoney,
   formatMoney,
   parseMoney,
   roundMoney,
   sumMoney,
-} from "../../packages/kern/src/money/index.js"
-import { formatNumber } from "../../packages/kern/src/number/index.js"
-import { deepFreeze, hasOwn, hasOwnPath, omit, pick } from "../../packages/kern/src/object/index.js"
-import { camelCase, slugify, truncate } from "../../packages/kern/src/string/index.js"
+} from "../../packages/money/src/index.js"
+import { formatNumber } from "../../packages/number/src/index.js"
+import { deepFreeze, hasOwn, hasOwnPath, omit, pick } from "../../packages/object/src/index.js"
+import { camelCase, slugify, truncate } from "../../packages/string/src/index.js"
 import { type BenchmarkCase, invariant } from "./harness.js"
 
 const sizes = [1_000, 10_000, 100_000] as const

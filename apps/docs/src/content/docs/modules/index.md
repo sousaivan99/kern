@@ -1,11 +1,11 @@
 ---
 title: All helpers
-description: A complete map of every public Kern function and the guide that explains it.
+description: A complete map of every public Lithekit function and the guide that explains it.
 sidebar:
   order: 1
 ---
 
-This page is the quickest way to find a Kern function when you know what you want to do but do not
+This page is the quickest way to find a Lithekit function when you know what you want to do but do not
 yet know which module owns it. Every public runtime helper is listed below. The linked guides give
 copyable examples, parameter rules, return behavior, errors, and important edge cases.
 
@@ -22,17 +22,16 @@ API reference.
 
 ## How imports work
 
-Prefer the smallest module subpath:
+Install and import the package that owns the helper:
 
 ```ts
-import { chunk } from "@sousaivan/kern/array"
-import { addDays } from "@sousaivan/kern/date"
-import { formatMoney } from "@sousaivan/kern/money"
+import { chunk } from "@lithekit/array"
+import { addDays } from "@lithekit/date"
+import { formatMoney } from "@lithekit/money"
 ```
 
-The root package, `@sousaivan/kern`, re-exports the same helpers for convenience and adds no unique
-function of its own. Subpath imports make ownership obvious and help bundlers include only what an
-application uses.
+There is no root aggregate package. This keeps installation boundaries aligned with runtime and
+bundle boundaries: consumers download only the domains and framework adapter they select.
 
 ## Validation
 

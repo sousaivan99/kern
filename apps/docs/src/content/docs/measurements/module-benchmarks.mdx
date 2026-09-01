@@ -1,15 +1,15 @@
 ---
 title: Module comparison benchmarks
-description: Reproduce fair per-operation comparisons for Kern array, object, string, number, date, money, and async modules.
+description: Reproduce fair per-operation comparisons for Lithekit array, object, string, number, date, money, and async modules.
 ---
 
 import BenchmarkEnvironments from "../../../components/BenchmarkEnvironments.astro";
 
-This page compares Kern's non-validation modules with libraries that expose closely related public
-operations. It reports every selected workload, including cases Kern does not win. Lower latency is
+This page compares Lithekit's non-validation modules with libraries that expose closely related public
+operations. It reports every selected workload, including cases Lithekit does not win. Lower latency is
 better. The aggregate benchmark score is diagnostic only and is not used for an overall ranking.
 
-The comparison adds development-only packages under `tooling/`. Kern still has zero runtime
+The comparison adds development-only packages under `tooling/`. Lithekit still has zero runtime
 dependencies, and these competitors do not enter any published bundle.
 
 <BenchmarkEnvironments />
@@ -23,27 +23,27 @@ machine-sensitive.
 
 | Workload | 5600X · A | 7950X · B | Cross-machine reading |
 | --- | ---: | ---: | --- |
-| `uniqueBy`, 10,000 objects | 12.3% lower | 15.7% lower | Replicated Kern lead |
+| `uniqueBy`, 10,000 objects | 12.3% lower | 15.7% lower | Replicated Lithekit lead |
 | `partition`, 10,000 values | 16.5% lower | 3.3% lower | Lead becomes a near-tie |
-| Pick 100 of 1,000 properties | 1.44× latency | 1.41× latency | Replicated Kern gap; descriptors preserved |
-| Omit 100 of 1,000 properties | 1.48× latency | 1.51× latency | Replicated Kern gap; descriptors preserved |
+| Pick 100 of 1,000 properties | 1.44× latency | 1.41× latency | Replicated Lithekit gap; descriptors preserved |
+| Omit 100 of 1,000 properties | 1.48× latency | 1.51× latency | Replicated Lithekit gap; descriptors preserved |
 | Truncate printable ASCII | 1.04× latency | 9.5% lower | Machine-sensitive near boundary |
-| Add minor-unit money values | 96.9% lower | 96.6% lower | Replicated Kern lead |
-| Multiply money by 1.15 | 75.3% lower | 76.4% lower | Replicated Kern lead |
-| Allocate across eight ratios | 50.0% lower | 50.5% lower | Replicated Kern lead |
-| Difference in calendar days | 74.7% lower | 72.9% lower | Replicated Kern lead |
-| Add one clamped calendar month | 46.9% lower | 49.4% lower | Replicated Kern lead |
-| Cached `once` result | 1.42× latency | 1.43× latency | Replicated Kern gap; stronger contract |
-| Retry until the third attempt | 58.7% lower | 54.0% lower | Replicated Kern lead |
+| Add minor-unit money values | 96.9% lower | 96.6% lower | Replicated Lithekit lead |
+| Multiply money by 1.15 | 75.3% lower | 76.4% lower | Replicated Lithekit lead |
+| Allocate across eight ratios | 50.0% lower | 50.5% lower | Replicated Lithekit lead |
+| Difference in calendar days | 74.7% lower | 72.9% lower | Replicated Lithekit lead |
+| Add one clamped calendar month | 46.9% lower | 49.4% lower | Replicated Lithekit lead |
+| Cached `once` result | 1.42× latency | 1.43× latency | Replicated Lithekit gap; stronger contract |
+| Retry until the third attempt | 58.7% lower | 54.0% lower | Replicated Lithekit lead |
 
 “Lower” is always relative to the fastest competitor on that machine. A result inside 10% of the
 fastest latency is treated as a near-tie in the diagnostic score. The detailed rows below retain
-every workload, including the cases Kern does not win.
+every workload, including the cases Lithekit does not win.
 
 The competitor packages remain development-only. The package size gate passed after adding the
 benchmark and documentation infrastructure:
 
-| Kern entrypoint | Minified + gzip | Budget |
+| Lithekit entrypoint | Minified + gzip | Budget |
 | --- | ---: | ---: |
 | Validation | 4,536 B | 5,120 B |
 | Money | 3,182 B | 3,200 B |
@@ -59,7 +59,7 @@ reproduction commands behind this summary.
 
 ## Competitors
 
-| Kern module | Compared libraries | Why these operations were selected |
+| Lithekit module | Compared libraries | Why these operations were selected |
 | --- | --- | --- |
 | Array, object, string, number | [es-toolkit](https://es-toolkit.dev/) 1.50.0 and [Lodash](https://lodash.com/docs/) 4.18.1 | Both publish matching collection, object-copy, case-conversion, truncation, and numeric helpers. |
 | Date | [date-fns](https://date-fns.org/) 4.4.0 and [Day.js](https://day.js.org/en/) 1.11.22 | Both provide immutable calendar arithmetic and boundary operations. |
@@ -79,15 +79,15 @@ every three-library scenario even though different modules use different competi
 mkdir -p .benchmarks/string-number-release/modules
 
 bun run benchmark:modules -- --json \
-  --library-order=Kern,es-toolkit,Lodash,date-fns,Day.js,Dinero.js,currency.js,p-retry \
+  --library-order=Lithekit,es-toolkit,Lodash,date-fns,Day.js,Dinero.js,currency.js,p-retry \
   > .benchmarks/string-number-release/modules/run-1.json
 
 bun run benchmark:modules -- --json \
-  --library-order=es-toolkit,Lodash,date-fns,Day.js,Dinero.js,currency.js,p-retry,Kern \
+  --library-order=es-toolkit,Lodash,date-fns,Day.js,Dinero.js,currency.js,p-retry,Lithekit \
   > .benchmarks/string-number-release/modules/run-2.json
 
 bun run benchmark:modules -- --json \
-  --library-order=Lodash,Day.js,currency.js,p-retry,Kern,es-toolkit,date-fns,Dinero.js \
+  --library-order=Lodash,Day.js,currency.js,p-retry,Lithekit,es-toolkit,date-fns,Dinero.js \
   > .benchmarks/string-number-release/modules/run-3.json
 
 bun run benchmark:report -- \
@@ -105,13 +105,13 @@ inside the timed operation.
 ## Recorded results
 
 These are medians of three run medians recorded on 2026-08-16 and 2026-08-17 with Bun 1.3.14 and
-Linux x64. “Throughput” is the inverse of latency: competitor latency divided by Kern latency. When
-Kern is slower, the last column reports Kern's latency multiple instead. Compare values within one
+Linux x64. “Throughput” is the inverse of latency: competitor latency divided by Lithekit latency. When
+Lithekit is slower, the last column reports Lithekit's latency multiple instead. Compare values within one
 CPU row; use the paired row to see whether the relative result replicated.
 
 ### Array
 
-| Workload | CPU | Kern | es-toolkit | Lodash | Kern result vs fastest competitor |
+| Workload | CPU | Lithekit | es-toolkit | Lodash | Lithekit result vs fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | `unique`, 10,000 values | 5600X · A | 285.29 µs | 264.51 µs | 191.91 µs | 1.49× latency |
 |  | 7950X · B | 184.16 µs | 172.13 µs | 219.74 µs | 1.07× latency · near-tie |
@@ -125,7 +125,7 @@ outside the timed path.
 
 ### Object
 
-| Workload | CPU | Kern | es-toolkit | Lodash | Kern result vs fastest competitor |
+| Workload | CPU | Lithekit | es-toolkit | Lodash | Lithekit result vs fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | Pick 100 from 1,000 keys | 5600X · A | 3.81 µs | 2.64 µs | 11.32 µs | 1.44× latency |
 |  | 7950X · B | 2.94 µs | 2.08 µs | 8.20 µs | 1.41× latency |
@@ -133,13 +133,13 @@ outside the timed path.
 |  | 7950X · B | 62.32 µs | 41.18 µs | 96.23 µs | 1.51× latency |
 
 These rows use ordinary enumerable data properties so all outputs contain the same keys and values.
-They do not represent full contract equivalence: Kern preserves own property descriptors and
+They do not represent full contract equivalence: Lithekit preserves own property descriptors and
 null-prototype sources, which adds work that the faster value-copy path does not perform. Accessors,
 symbols, hostile prototypes, and `deepFreeze` are correctness guards, not competitor rows.
 
 ### String
 
-| Workload | CPU | Kern | es-toolkit | Lodash | Kern result vs fastest competitor |
+| Workload | CPU | Lithekit | es-toolkit | Lodash | Lithekit result vs fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | `camelCase`, realistic ASCII phrase | 5600X · A | 7.86 µs | 8.63 µs | 7.88 µs | tie |
 |  | 7950X · B | 5.91 µs | 6.85 µs | 5.86 µs | tie |
@@ -149,15 +149,15 @@ symbols, hostile prototypes, and `deepFreeze` are correctness guards, not compet
 |  | 7950X · B | 151.0 ns | 198.7 ns | 167.0 ns | 9.5% lower · 1.11× throughput |
 
 The truncation row intentionally uses printable ASCII and passes the same `...` omission, producing
-identical text. Kern proves this subset with a cheap scan and slices directly; Unicode and control
-text still use grapheme segmentation. Kern beats es-toolkit on both machines, while the closest
-Lodash comparison moves from a 4.4% Kern gap on A to a 9.5% Kern lead on B. That near-boundary flip
+identical text. Lithekit proves this subset with a cheap scan and slices directly; Unicode and control
+text still use grapheme segmentation. Lithekit beats es-toolkit on both machines, while the closest
+Lodash comparison moves from a 4.4% Lithekit gap on A to a 9.5% Lithekit lead on B. That near-boundary flip
 is why the page reports both machines instead of presenting a universal ordering. The comparison
 does not claim competitors preserve complex graphemes.
 
 ### Number
 
-| Workload | CPU | Kern | es-toolkit | Lodash | Kern result vs fastest competitor |
+| Workload | CPU | Lithekit | es-toolkit | Lodash | Lithekit result vs fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | Clamp to ordered bounds | 5600X · A | 6.7 ns | 6.7 ns | 9.6 ns | tie |
 |  | 7950X · B | 5.1 ns | 5.4 ns | 7.2 ns | tie |
@@ -167,14 +167,14 @@ does not claim competitors preserve complex graphemes.
 |  | 7950X · B | 4.6 ns | 4.7 ns | 5.2 ns | tie |
 
 All three adapters receive the same rotating finite-number pool and produce equal results for every
-fixture. Kern's common two-decimal path falls back before ambiguous ties and is additionally checked
+fixture. Lithekit's common two-decimal path falls back before ambiguous ties and is additionally checked
 against decimal exponent shifting over 10,000 deterministic values. es-toolkit always applies
 binary scaling. Rounding is a 9.3% near-tie on A and effectively tied on B. The tiny clamp and range
 differences are also ties.
 
 ### Date
 
-| Workload | CPU | Kern | date-fns | Day.js | Kern result vs fastest competitor |
+| Workload | CPU | Lithekit | date-fns | Day.js | Lithekit result vs fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | Add 10 local-calendar days | 5600X · A | 60.1 ns | 56.5 ns | 602.3 ns | 1.06× latency · near-tie |
 |  | 7950X · B | 44.4 ns | 44.5 ns | 418.4 ns | tie |
@@ -186,13 +186,13 @@ differences are also ties.
 |  | 7950X · B | 181.6 ns | 670.6 ns | 778.0 ns | 72.9% lower · 3.69× throughput |
 
 All inputs are valid native `Date` objects created outside timing. Day.js returns its normal wrapper;
-Kern and date-fns return native `Date` objects. Verification compares the resulting epoch value or
-calendar-day count. Formatting is excluded because Kern's `Intl` contract is not equivalent to
+Lithekit and date-fns return native `Date` objects. Verification compares the resulting epoch value or
+calendar-day count. Formatting is excluded because Lithekit's `Intl` contract is not equivalent to
 token-based formatting.
 
 ### Money
 
-| Workload | CPU | Kern | Dinero.js | currency.js | Kern result vs fastest competitor |
+| Workload | CPU | Lithekit | Dinero.js | currency.js | Lithekit result vs fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | Add two minor-unit amounts | 5600X · A | 8.1 ns | 289.0 ns | 265.4 ns | 96.9% lower · 32.77× throughput |
 |  | 7950X · B | 6.5 ns | 209.0 ns | 193.1 ns | 96.6% lower · 29.84× throughput |
@@ -203,17 +203,17 @@ token-based formatting.
 | Allocate equally to eight recipients | 5600X · A | 1.09 µs | 2.18 µs | 2.54 µs | 50.0% lower · 2.00× throughput |
 |  | 7950X · B | 837.9 ns | 1.69 µs | 1.96 µs | 50.5% lower · 2.02× throughput |
 
-Amounts use each library's native public representation. Kern receives safe-integer minor units;
+Amounts use each library's native public representation. Lithekit receives safe-integer minor units;
 Dinero.js and currency.js receive preconstructed immutable money objects. Normal result construction
 remains timed. Multiplication uses half-away-from-zero cent rounding in every adapter. Allocation
 gives every adapter the same 10,003-unit total and eight equal weights, then verifies eight returned
 shares. Currency formatting and parsing remain in the separate
-Kern-only `Intl` matrix because the competitor APIs do not share the same locale and ISO-currency
+Lithekit-only `Intl` matrix because the competitor APIs do not share the same locale and ISO-currency
 contract.
 
 ### Async
 
-| Workload | CPU | Kern | es-toolkit | Other competitor | Kern result vs fastest competitor |
+| Workload | CPU | Lithekit | es-toolkit | Other competitor | Lithekit result vs fastest competitor |
 | --- | --- | ---: | ---: | ---: | ---: |
 | Cached `once` result | 5600X · A | 5.1 ns | 3.6 ns | Lodash: 4.0 ns | 1.42× latency |
 |  | 7950X · B | 4.2 ns | 2.9 ns | Lodash: 2.9 ns | 1.43× latency |
@@ -235,9 +235,9 @@ dominate helper overhead.
 
 | Run | Relative order | UTC timestamp | CPU frequency snapshot | Raw JSON SHA-256 |
 | --- | --- | --- | ---: | --- |
-| 1 | Kern first in every scenario | 2026-08-16 20:51:03 | 3,712 MHz | `46c5c1d365a33833f74984652a76baae750c3abb2a31558125bbf4f0e75dce4a` |
-| 2 | Kern last in every scenario | 2026-08-16 20:51:38 | 3,711 MHz | `6bc03a7099cb1e477cf4aacb15d476d15b66ebbcfd5f0b8c31bf792c9665a610` |
-| 3 | Kern in the middle of every scenario | 2026-08-16 20:52:16 | 3,712 MHz | `ce7c2487e3da61c4c3f76ee284bbfd17558cd0970c4c0bdaf9ace57c7128faff` |
+| 1 | Lithekit first in every scenario | 2026-08-16 20:51:03 | 3,712 MHz | `46c5c1d365a33833f74984652a76baae750c3abb2a31558125bbf4f0e75dce4a` |
+| 2 | Lithekit last in every scenario | 2026-08-16 20:51:38 | 3,711 MHz | `6bc03a7099cb1e477cf4aacb15d476d15b66ebbcfd5f0b8c31bf792c9665a610` |
+| 3 | Lithekit in the middle of every scenario | 2026-08-16 20:52:16 | 3,712 MHz | `ce7c2487e3da61c4c3f76ee284bbfd17558cd0970c4c0bdaf9ace57c7128faff` |
 
 All runs reported the `powersave` governor and shared these fingerprints:
 
@@ -250,17 +250,17 @@ All runs reported the `powersave` governor and shared these fingerprints:
 | Untracked-file manifest | `9533435ad1a2ed7dc70dbdd1615f9ae3b5cd12ca304252d1cedd2aef794c9e37` |
 
 Raw artifacts stay in ignored `.benchmarks/string-number-release/modules/`. The
-[benchmark adapters](https://github.com/sousaivan99/kern/blob/develop/tooling/benchmarks/module-compare.bench.ts)
-and [verification tests](https://github.com/sousaivan99/kern/blob/develop/tooling/tests/module-benchmark.test.ts)
+[benchmark adapters](https://github.com/sousaivan99/lithekit/blob/develop/tooling/benchmarks/module-compare.bench.ts)
+and [verification tests](https://github.com/sousaivan99/lithekit/blob/develop/tooling/tests/module-benchmark.test.ts)
 are tracked and inspectable.
 
 ### Snapshot B · Ryzen 9 7950X
 
 | Run | Relative order | UTC timestamp | CPU frequency snapshot | Raw JSON SHA-256 |
 | --- | --- | --- | ---: | --- |
-| 1 | Kern first in every scenario | 2026-08-17 06:48:29 | 5,489 MHz | `22c24646d6f6f59e490f5c52e0e560628b070e0ea72002a6f3399a264370d81f` |
-| 2 | Kern last in every scenario | 2026-08-17 06:49:03 | 5,447 MHz | `a165b01d4709afeeea20111cc1fc1e070a5c0e29be81783c1b029beb7dd9b04c` |
-| 3 | Kern in the middle of every scenario | 2026-08-17 06:49:37 | 3,372 MHz | `8fd844bec39bfc8c738fdce9f9af0b3ec502819603a2228be9326d5b2e1e9fdc` |
+| 1 | Lithekit first in every scenario | 2026-08-17 06:48:29 | 5,489 MHz | `22c24646d6f6f59e490f5c52e0e560628b070e0ea72002a6f3399a264370d81f` |
+| 2 | Lithekit last in every scenario | 2026-08-17 06:49:03 | 5,447 MHz | `a165b01d4709afeeea20111cc1fc1e070a5c0e29be81783c1b029beb7dd9b04c` |
+| 3 | Lithekit in the middle of every scenario | 2026-08-17 06:49:37 | 3,372 MHz | `8fd844bec39bfc8c738fdce9f9af0b3ec502819603a2228be9326d5b2e1e9fdc` |
 
 All B runs reported the `powersave` governor, used the same source and lockfile fingerprints as A,
 and came from the clean committed tree:
@@ -283,6 +283,6 @@ comparable as replications, while absolute latency remains machine-local.
 - Absolute latency changes with runtime, CPU, power policy, JIT state, and operating-system load.
 - A ratio near 1.00 is a tie, not evidence of a universal lead.
 - Plain-data, ASCII, valid-date, finite-number, and USD fixtures deliberately avoid semantic
-  mismatches. Stronger behavior outside those intersections remains covered by Kern's runtime tests.
+  mismatches. Stronger behavior outside those intersections remains covered by Lithekit's runtime tests.
 - Public result construction is retained, but money libraries expose different abstraction levels.
 - The non-gating score weights every scenario equally and must not support a “fastest library” claim.

@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: Plain-language definitions for the JavaScript, TypeScript, Intl, validation, and Kern terms used in these docs.
+description: Plain-language definitions for the JavaScript, TypeScript, Intl, validation, and Lithekit terms used in these docs.
 sidebar:
   order: 1
 ---
@@ -39,7 +39,7 @@ properties. A property has a key and a value.
 ### `null` and `undefined`
 
 `undefined` usually means a value was not supplied. `null` is commonly an intentional empty value.
-Kern validation treats them separately: `.optional()` accepts `undefined`; `.nullable()` accepts
+Lithekit validation treats them separately: `.optional()` accepts `undefined`; `.nullable()` accepts
 `null`.
 
 ### Return value
@@ -48,7 +48,7 @@ The result produced by a function. `unique([1, 1, 2])` returns `[1, 2]`.
 
 ### Throw, error, `RangeError`, and `TypeError`
 
-To **throw** means stopping normal execution with an error. Kern generally uses `RangeError` when a
+To **throw** means stopping normal execution with an error. Lithekit generally uses `RangeError` when a
 number or option is outside its allowed range, and `TypeError` when a value has an unsupported kind
 or structure. Validation's `safeParse()` represents ordinary invalid input as data instead.
 
@@ -67,11 +67,11 @@ A union whose members can be distinguished by one property. `SafeParseResult` us
 ### Generic type
 
 A reusable type with a placeholder. `Array<T>` means “an array of `T`.” TypeScript normally infers
-Kern's generic types from the supplied values, so callers rarely write them explicitly.
+Lithekit's generic types from the supplied values, so callers rarely write them explicitly.
 
 ### Inference
 
-TypeScript working out a type from code. If a schema transforms a string to a number, Kern lets
+TypeScript working out a type from code. If a schema transforms a string to a number, Lithekit lets
 TypeScript infer that the parsed output is a number.
 
 ### Narrowing and type guard
@@ -89,14 +89,14 @@ at runtime.
 ### `unknown` and `any`
 
 `unknown` means a value has not been checked; TypeScript requires a check before you use it. `any`
-turns off most checking. Kern uses `unknown` at untrusted boundaries.
+turns off most checking. Lithekit uses `unknown` at untrusted boundaries.
 
 ## Data and object safety
 
 ### Own and inherited property
 
 An **own property** belongs directly to an object. An **inherited property** comes from its
-prototype. Kern's safe object helpers deliberately inspect own properties.
+prototype. Lithekit's safe object helpers deliberately inspect own properties.
 
 ### Plain object
 
@@ -111,7 +111,7 @@ or configurable. `pick()` and `omit()` copy descriptors so these characteristics
 ### Prototype and prototype pollution
 
 JavaScript objects may inherit behavior through a **prototype**. **Prototype pollution** is a class
-of security bug where attacker-controlled keys change shared prototypes. Kern rejects dangerous
+of security bug where attacker-controlled keys change shared prototypes. Lithekit rejects dangerous
 path segments and creates dangerous names as safe own data where documented.
 
 ### Null-prototype object
@@ -122,7 +122,7 @@ than calling `result.hasOwnProperty()`.
 
 ### Mutation and immutability
 
-**Mutation** changes an existing value. **Immutable** operations return a new value instead. Kern
+**Mutation** changes an existing value. **Immutable** operations return a new value instead. Lithekit
 avoids mutating caller-owned data unless the helper explicitly says otherwise.
 
 ## Numbers and money
@@ -130,7 +130,7 @@ avoids mutating caller-owned data unless the helper explicitly says otherwise.
 ### Finite number, infinity, and `NaN`
 
 A **finite** number is neither positive/negative infinity nor `NaN`. `NaN` means “not a number,” but
-its JavaScript type is still `number`. Kern documents whether each helper accepts these special
+its JavaScript type is still `number`. Lithekit documents whether each helper accepts these special
 values.
 
 ### Safe integer
@@ -141,7 +141,7 @@ exactness matters.
 
 ### Major and minor currency units
 
-A **major unit** is commonly one dollar/euro/etc. A **minor unit** is commonly one cent. Kern money
+A **major unit** is commonly one dollar/euro/etc. A **minor unit** is commonly one cent. Lithekit money
 helpers receive integer minor units: for a two-decimal currency, `1099` commonly represents 10.99
 major units. Currency/provider rules can differ.
 
@@ -149,7 +149,7 @@ major units. Currency/provider rules can differ.
 
 The **increment** is the step to which a value is rounded, such as 5 minor units. The **mode** says
 which direction to choose, especially at an exact halfway tie. Your application owns the business
-or legal policy; Kern performs the selected calculation.
+or legal policy; Lithekit performs the selected calculation.
 
 ## Text and internationalization
 
@@ -161,7 +161,7 @@ split these sequences.
 
 ### `Intl`
 
-JavaScript's built-in internationalization APIs. Kern delegates number, money, date, and relative
+JavaScript's built-in internationalization APIs. Lithekit delegates number, money, date, and relative
 time display to `Intl`, so results follow the runtime's locale data.
 
 ### Locale
@@ -185,12 +185,12 @@ instant.
 ### DST
 
 Daylight-saving time changes a timezone's offset. A local calendar day can therefore be shorter or
-longer than 24 hours. Kern's calendar helpers preserve calendar meaning instead of assuming a fixed
+longer than 24 hours. Lithekit's calendar helpers preserve calendar meaning instead of assuming a fixed
 duration.
 
 ### Host-local timezone
 
-The default timezone of the browser, server, or runtime executing the code. Kern's calendar
+The default timezone of the browser, server, or runtime executing the code. Lithekit's calendar
 arithmetic uses it. It may differ between a developer laptop and production server.
 
 ### Timezone and UTC
@@ -214,29 +214,29 @@ to a number.
 
 ### Schema
 
-A value describing what runtime input is accepted and what output is produced. Kern schemas expose
+A value describing what runtime input is accepted and what output is produced. Lithekit schemas expose
 `parse()`, `safeParse()`, modifiers, inference, and Standard Schema compatibility.
 
 ### Standard Schema
 
 A shared interface that lets validation-aware tools accept schemas from different libraries.
-Every Kern schema implements Standard Schema V1 through its `~standard` property.
+Every Lithekit schema implements Standard Schema V1 through its `~standard` property.
 
 ## Packaging and execution
 
 ### Dependency
 
-Another package that code needs. Kern has no runtime dependencies; an application only loads the
-Kern code it imports plus native platform APIs.
+Another package that code needs. Lithekit has no runtime dependencies; an application only loads the
+Lithekit code it imports plus native platform APIs.
 
 ### ESM and import
 
-ESM is modern JavaScript's module system. `import { unique } from "@sousaivan/kern/array"` loads a named
-export. Kern does not support CommonJS `require()`.
+ESM is modern JavaScript's module system. `import { unique } from "@lithekit/array"` loads a named
+export. Lithekit does not support CommonJS `require()`.
 
 ### Tree-shaking
 
-A bundler optimization that removes unused exports from an application bundle. Kern's module
+A bundler optimization that removes unused exports from an application bundle. Lithekit's module
 subpaths and side-effect-free functions are designed to support it.
 
 ### Promise, `async`, and `await`
@@ -247,5 +247,5 @@ pauses that function until the promise settles, without blocking the entire Java
 ### Cancellation and `AbortSignal`
 
 An `AbortSignal` communicates that work should stop. Create one with `AbortController`, pass its
-`signal` to supported Kern helpers, and call `controller.abort()` when the work is no longer needed.
+`signal` to supported Lithekit helpers, and call `controller.abort()` when the work is no longer needed.
 

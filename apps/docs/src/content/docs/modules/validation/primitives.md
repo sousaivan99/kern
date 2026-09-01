@@ -13,7 +13,7 @@ Primitive schemas check one runtime value. They never coerce another type into t
 reference. It is useful for a required opaque field that application code will interpret later.
 
 ```ts
-import { object, unknown } from "@sousaivan/kern/validation"
+import { object, unknown } from "@lithekit/validation"
 
 const Envelope = object({ payload: unknown() })
 const payload = { source: "webhook" }
@@ -31,7 +31,7 @@ refinements, transforms, inference, and synchronous Standard Schema interface as
 Start with `string()`, then chain transformations and constraints in the order they should run:
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const Username = string()
   .trim()
@@ -39,7 +39,7 @@ const Username = string()
   .max(32)
   .regex(/^[a-z][a-z0-9-]+$/u)
 
-console.log("Success:", Username.safeParse(" kern-core "))
+console.log("Success:", Username.safeParse(" lithekit-core "))
 console.log("Failure:", Username.safeParse("x"))
 ```
 
@@ -62,17 +62,17 @@ Every optional `message` replaces only the human-readable message; the stable is
 the same.
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 console.log(string().trim().parse("  Ada  ")) // "Ada"
 console.log(string().min(3).safeParse("ab")) // failure: too_small
 console.log(string().max(3).safeParse("abcd")) // failure: too_big
-console.log(string().length(4).parse("kern")) // "kern"
+console.log(string().length(8).parse("lithekit")) // "lithekit"
 console.log(string().email().parse("ada@example.com")) // "ada@example.com"
 console.log(string().url().parse("https://example.com/docs"))
 console.log(string().uuid().parse("123e4567-e89b-42d3-a456-426614174000"))
-console.log(string().regex(/^kern_/u).parse("kern_value")) // "kern_value"
-console.log(string().startsWith("kern_").parse("kern_value")) // "kern_value"
+console.log(string().regex(/^lithekit_/u).parse("lithekit_value")) // "lithekit_value"
+console.log(string().startsWith("lithekit_").parse("lithekit_value")) // "lithekit_value"
 console.log(string().endsWith("_prod").parse("api_prod")) // "api_prod"
 ```
 
@@ -94,7 +94,7 @@ Important string boundaries:
 ## Number schema
 
 ```ts
-import { number } from "@sousaivan/kern/validation"
+import { number } from "@lithekit/validation"
 
 const Port = number().integer().positive().max(65_535).finite()
 const Temperature = number().min(-100).max(100)
@@ -117,7 +117,7 @@ console.log("Temperature failure:", Temperature.safeParse(-200))
 Every number-specific method in isolation:
 
 ```ts
-import { number } from "@sousaivan/kern/validation"
+import { number } from "@lithekit/validation"
 
 console.log(number().min(10).safeParse(10)) // success: boundary is inclusive
 console.log(number().max(10).safeParse(10)) // success: boundary is inclusive
@@ -137,7 +137,7 @@ when a domain value must fit the safe-integer range, or use the money helpers, w
 ## Boolean schema
 
 ```ts
-import { boolean } from "@sousaivan/kern/validation"
+import { boolean } from "@lithekit/validation"
 
 console.log("Success:", boolean().safeParse(true))
 console.log("Failure:", boolean().safeParse("true"))
@@ -149,7 +149,7 @@ numbers, or truthy/falsy values. A type mismatch uses `invalid_type`.
 ## Date schema
 
 ```ts
-import { date } from "@sousaivan/kern/validation"
+import { date } from "@lithekit/validation"
 
 const Timestamp = date()
 const createdAt = new Date("2026-08-13T12:00:00Z")
@@ -165,7 +165,7 @@ strings. An invalid date or different type uses `invalid_type`.
 ## Literal schema
 
 ```ts
-import { literal } from "@sousaivan/kern/validation"
+import { literal } from "@lithekit/validation"
 
 const Ready = literal("ready")
 const Nothing = literal(null)
@@ -182,7 +182,7 @@ can match `NaN`. A mismatch uses `invalid_literal`.
 ## String enumeration
 
 ```ts
-import { enumeration } from "@sousaivan/kern/validation"
+import { enumeration } from "@lithekit/validation"
 
 const Role = enumeration(["member", "admin"] as const)
 

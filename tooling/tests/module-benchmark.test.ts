@@ -7,7 +7,7 @@ describe("module comparison benchmarks", () => {
     for (const benchmark of moduleComparisonBenchmarks) {
       const id = benchmark.id ?? ""
       const libraries = scenarios.get(id) ?? []
-      libraries.push(benchmark.library ?? "Kern")
+      libraries.push(benchmark.library ?? "Lithekit")
       scenarios.set(id, libraries)
     }
     expect(moduleComparisonBenchmarks).toHaveLength(69)
@@ -22,7 +22,7 @@ describe("module comparison benchmarks", () => {
     }
   })
 
-  test("covers every non-validation Kern module", () => {
+  test("covers every non-validation Lithekit module", () => {
     expect(new Set(moduleComparisonBenchmarks.map((benchmark) => benchmark.suite))).toEqual(
       new Set([
         "array-compare",

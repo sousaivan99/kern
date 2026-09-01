@@ -2,9 +2,9 @@ import starlight from "@astrojs/starlight"
 import tailwindcss from "@tailwindcss/vite"
 import { defineConfig } from "astro/config"
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc"
-import moduleManifest from "../../tooling/config/modules.json" with { type: "json" }
+import packageManifest from "../../tooling/config/packages.json" with { type: "json" }
 
-const modules = moduleManifest.modules.map((module) => module.id)
+const packages = packageManifest.packages
 const docsBase = process.env.DOCS_BASE_PATH ?? "/"
 
 export default defineConfig({
@@ -12,7 +12,7 @@ export default defineConfig({
   base: docsBase,
   integrations: [
     starlight({
-      title: "Kern",
+      title: "Lithekit",
       description: "Small, dependency-free TypeScript primitives for everyday application code.",
       favicon: "/favicon.svg",
       customCss: ["./src/styles/global.css"],
@@ -24,9 +24,11 @@ export default defineConfig({
         SiteTitle: "./src/components/SiteTitle.astro",
       },
       editLink: {
-        baseUrl: "https://github.com/sousaivan99/kern/edit/develop/apps/docs/",
+        baseUrl: "https://github.com/sousaivan99/lithekit/edit/develop/apps/docs/",
       },
-      social: [{ icon: "github", label: "GitHub", href: "https://github.com/sousaivan99/kern" }],
+      social: [
+        { icon: "github", label: "GitHub", href: "https://github.com/sousaivan99/lithekit" },
+      ],
       sidebar: [
         {
           label: "Start here",
@@ -36,6 +38,7 @@ export default defineConfig({
             { label: "New to JavaScript?", slug: "getting-started/from-zero" },
             { label: "Quick start", slug: "getting-started/quick-start" },
             { label: "Core ideas", slug: "getting-started/core-ideas" },
+            { label: "Migrate from Kern", slug: "getting-started/migrate-from-kern" },
           ],
         },
         {
@@ -121,6 +124,16 @@ export default defineConfig({
             { label: "Array", slug: "modules/array" },
             { label: "Object", slug: "modules/object" },
             { label: "Async", slug: "modules/async" },
+            {
+              label: "Form",
+              collapsed: true,
+              items: [
+                { label: "Native controller", slug: "modules/form" },
+                { label: "Vue", slug: "modules/form/vue" },
+                { label: "React", slug: "modules/form/react" },
+                { label: "Nuxt", slug: "modules/form/nuxt" },
+              ],
+            },
           ],
         },
         typeDocSidebarGroup,
@@ -131,11 +144,9 @@ export default defineConfig({
       ],
       plugins: [
         starlightTypeDoc({
-          entryPoints: modules.map(
-            (moduleName) => `../../packages/kern/src/${moduleName}/index.ts`,
-          ),
+          entryPoints: packages.map(({ directory }) => `../../${directory}/src/index.ts`),
           output: "reference",
-          tsconfig: "../../packages/kern/tsconfig.build.json",
+          tsconfig: "./tsconfig.typedoc.json",
           sidebar: { label: "API reference", collapsed: true },
           typeDoc: {
             alwaysCreateEntryPointModule: true,

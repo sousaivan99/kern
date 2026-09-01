@@ -202,7 +202,7 @@ try {
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto(new URL("/", server.url).href)
   const heroLinkCenters = await page.evaluate(() =>
-    Array.from(document.querySelectorAll(".kern-primary-links a"), (link) => {
+    Array.from(document.querySelectorAll(".lithekit-primary-links a"), (link) => {
       const rectangle = link.getBoundingClientRect()
       return Math.round(rectangle.top + rectangle.height / 2)
     }),
@@ -223,7 +223,7 @@ try {
       throw new Error(`${example.route} must have one example containing ${example.marker}`)
     }
 
-    const consolePanel = exampleBlock.locator(":scope > .kern-example-console")
+    const consolePanel = exampleBlock.locator(":scope > .lithekit-example-console")
     if ((await consolePanel.count()) !== 1) {
       throw new Error(`${example.route} example must have exactly one inline console`)
     }
@@ -245,8 +245,9 @@ try {
         Array.from(document.querySelectorAll(".expressive-code")).some(
           (block) =>
             block.textContent?.includes(marker) &&
-            block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
-              state,
+            block
+              .querySelector(":scope > .lithekit-example-console")
+              ?.getAttribute("data-state") === state,
         ),
       { marker: example.marker, state: expectedState },
     )
@@ -285,8 +286,9 @@ try {
             ?.dataset.code?.replaceAll("\u007f", "\n") ?? ""
         const hasConsoleLog = source.includes("console.log")
         const consoleCount =
-          example.closest(".expressive-code")?.querySelectorAll(":scope > .kern-example-console")
-            .length ?? 0
+          example
+            .closest(".expressive-code")
+            ?.querySelectorAll(":scope > .lithekit-example-console").length ?? 0
         return { consoleCount, hasConsoleLog }
       })
       return {
@@ -295,9 +297,9 @@ try {
         inlineConsoles: results.reduce((count, result) => count + result.consoleCount, 0),
         invalid: results.filter((result) => result.consoleCount !== (result.hasConsoleLog ? 1 : 0))
           .length,
-        modalCount: document.querySelectorAll(".kern-code-dialog").length,
+        modalCount: document.querySelectorAll(".lithekit-code-dialog").length,
         headerControlCount: document.querySelectorAll(
-          ".kern-code-example-run, .kern-code-example-label",
+          ".lithekit-code-example-run, .lithekit-code-example-label",
         ).length,
       }
     })
@@ -326,7 +328,7 @@ try {
     throw new Error("Validation playground does not run its initial source")
   }
 
-  await playgroundSource.fill(`import { object, string } from "@sousaivan/kern/validation"
+  await playgroundSource.fill(`import { object, string } from "@lithekit/validation"
 const User = object({ name: string().min(2), email: string().email() })
 console.log(User.safeParse({ name: "A", email: "bad" }))`)
   await page.waitForFunction(
@@ -353,7 +355,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   await page.waitForFunction(() =>
     document
       .querySelector("[data-playground-output]")
-      ?.textContent?.includes('Only "@sousaivan/kern/validation" can be imported.'),
+      ?.textContent?.includes('Only "@lithekit/validation" can be imported.'),
   )
 
   await playgroundSource.fill("while (true) {}")
@@ -373,7 +375,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   const safeParseExample = page
     .locator(".expressive-code")
     .filter({ hasText: "const goodResult = Login.safeParse" })
-  const safeParseConsole = safeParseExample.locator(":scope > .kern-example-console")
+  const safeParseConsole = safeParseExample.locator(":scope > .lithekit-example-console")
   await safeParseConsole
     .getByRole("button", { name: "Run example: safeParse or parse?", exact: true })
     .click()
@@ -381,7 +383,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
     Array.from(document.querySelectorAll(".expressive-code")).some(
       (block) =>
         block.textContent?.includes("const goodResult = Login.safeParse") &&
-        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+        block.querySelector(":scope > .lithekit-example-console")?.getAttribute("data-state") ===
           "success",
     ),
   )
@@ -397,7 +399,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   const parseExample = page
     .locator(".expressive-code")
     .filter({ hasText: 'console.log("Error message:", error.message)' })
-  const parseConsole = parseExample.locator(":scope > .kern-example-console")
+  const parseConsole = parseExample.locator(":scope > .lithekit-example-console")
   await parseConsole
     .getByRole("button", { name: "Run example: safeParse or parse?", exact: true })
     .click()
@@ -405,7 +407,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
     Array.from(document.querySelectorAll(".expressive-code")).some(
       (block) =>
         block.textContent?.includes('console.log("Error message:", error.message)') &&
-        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+        block.querySelector(":scope > .lithekit-example-console")?.getAttribute("data-state") ===
           "success",
     ),
   )
@@ -422,7 +424,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   const addMoneyExample = page
     .locator(".expressive-code")
     .filter({ hasText: 'console.log("Success:", addMoney' })
-  const addMoneyConsole = addMoneyExample.locator(":scope > .kern-example-console")
+  const addMoneyConsole = addMoneyExample.locator(":scope > .lithekit-example-console")
   const addMoneyLayoutBefore = {
     documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
     panelHeight: await addMoneyConsole.evaluate((panel) => panel.getBoundingClientRect().height),
@@ -437,7 +439,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
     Array.from(document.querySelectorAll(".expressive-code")).some(
       (block) =>
         block.textContent?.includes('console.log("Success:", addMoney') &&
-        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+        block.querySelector(":scope > .lithekit-example-console")?.getAttribute("data-state") ===
           "error",
     ),
   )
@@ -473,19 +475,19 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   if (/\p{Emoji_Presentation}/u.test(homepageText)) {
     throw new Error("Homepage contains emoji instead of package icons")
   }
-  if ((await page.locator("main h1").innerText()) !== "Kern") {
-    throw new Error("Homepage must use Kern as its heading-one value proposition")
+  if ((await page.locator("main h1").innerText()) !== "Lithekit") {
+    throw new Error("Homepage must use Lithekit as its heading-one value proposition")
   }
   if (
     !homepageText.includes(
       "Small, dependency-free TypeScript primitives for everyday application code.",
     ) ||
-    !homepageText.includes("Validation · Money · Dates · Async · Data") ||
+    !homepageText.includes("Validation · Money · Dates · Forms · Data") ||
     !homepageText.includes("Zero runtime dependencies · Tree-shakeable · Standard Schema")
   ) {
     throw new Error("Homepage value proposition is incomplete")
   }
-  if ((await page.locator(".kern-home-example").count()) !== 3) {
+  if ((await page.locator(".lithekit-home-example").count()) !== 3) {
     throw new Error("Homepage must show exactly three examples")
   }
   for (const target of ["/measurements/package-size/", "/modules/validation/#playground"]) {
@@ -507,7 +509,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   await page.setViewportSize({ width: 1440, height: 900 })
 
   const referenceResponse = await page.goto(
-    new URL("/reference/validation/functions/object/", server.url).href,
+    new URL("/reference/validation/src/functions/object/", server.url).href,
   )
   if (!referenceResponse?.ok())
     throw new Error(`API reference returned ${referenceResponse?.status()}`)
@@ -563,7 +565,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   const mobileChunkExample = page
     .locator(".expressive-code")
     .filter({ hasText: 'console.log("Success:", chunk' })
-  const mobileConsole = mobileChunkExample.locator(":scope > .kern-example-console")
+  const mobileConsole = mobileChunkExample.locator(":scope > .lithekit-example-console")
   const mobileLayoutBefore = {
     documentHeight: await page.evaluate(() => document.documentElement.scrollHeight),
     panelHeight: await mobileConsole.evaluate((panel) => panel.getBoundingClientRect().height),
@@ -575,7 +577,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
     Array.from(document.querySelectorAll(".expressive-code")).some(
       (block) =>
         block.textContent?.includes('console.log("Success:", chunk') &&
-        block.querySelector(":scope > .kern-example-console")?.getAttribute("data-state") ===
+        block.querySelector(":scope > .lithekit-example-console")?.getAttribute("data-state") ===
           "error",
     ),
   )
@@ -702,15 +704,15 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
   }
 
   await page.emulateMedia({ contrast: "more" })
-  const increasedContrast = await page.locator(".kern-support-line").evaluate((element) => ({
+  const increasedContrast = await page.locator(".lithekit-support-line").evaluate((element) => ({
     body: getComputedStyle(document.documentElement)
-      .getPropertyValue("--kern-color-text-body")
+      .getPropertyValue("--lithekit-color-text-body")
       .trim(),
     muted: getComputedStyle(element).color,
   }))
   const resolvedBodyColor = await page.evaluate(() => {
     const probe = document.createElement("span")
-    probe.style.color = "var(--kern-color-text-body)"
+    probe.style.color = "var(--lithekit-color-text-body)"
     document.body.append(probe)
     const color = getComputedStyle(probe).color
     probe.remove()
@@ -724,7 +726,7 @@ console.log(User.safeParse({ name: "A", email: "bad" }))`)
 
   await page.emulateMedia({ contrast: "no-preference", reducedMotion: "reduce" })
   const reducedMotion = await page.evaluate(() => {
-    const primaryLink = document.querySelector(".kern-primary-links a")
+    const primaryLink = document.querySelector(".lithekit-primary-links a")
     if (!primaryLink) throw new Error("Primary documentation link is missing")
 
     return {

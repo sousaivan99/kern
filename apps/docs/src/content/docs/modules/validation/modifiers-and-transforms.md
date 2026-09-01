@@ -21,7 +21,7 @@ schema remains unchanged.
 ## Optional values
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Profile = object({ nickname: string().optional() })
 
@@ -38,7 +38,7 @@ parsed output is `undefined`, the object schema omits the key rather than creati
 Outside an object, the parsed value itself can be `undefined`:
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const OptionalText = string().optional()
 console.log("Missing:", OptionalText.safeParse(undefined))
@@ -49,7 +49,7 @@ console.log("Wrong type:", OptionalText.safeParse(42))
 ## Nullable values
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Profile = object({ middleName: string().nullable() })
 
@@ -64,7 +64,7 @@ console.log("Wrong type:", Profile.safeParse({ middleName: 42 }))
 ## Default values
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Account = object({ role: string().default("member") })
 
@@ -78,7 +78,7 @@ console.log(Account.safeParse({ role: 42 })) // failure
 the input key is optional but the output key is required.
 
 The default cannot itself be `undefined`; attempting that throws `TypeError` while building the
-schema. Kern returns the supplied default value directly—it does not clone objects or arrays—so use
+schema. Lithekit returns the supplied default value directly—it does not clone objects or arrays—so use
 an immutable value when a transformed schema has an object default.
 
 When an entire object schema is made `.partial()`, missing defaulted fields remain absent. This
@@ -87,7 +87,7 @@ makes partial schemas suitable for update payloads.
 ## Add a custom constraint with `refine`
 
 ```ts
-import { number, string } from "@sousaivan/kern/validation"
+import { number, string } from "@lithekit/validation"
 
 const Even = number().refine((value) => value % 2 === 0, "Expected an even number")
 
@@ -114,7 +114,7 @@ successful parsed value.
 A TypeScript type-guard predicate narrows the output:
 
 ```ts
-import { number } from "@sousaivan/kern/validation"
+import { number } from "@lithekit/validation"
 
 type PositiveInteger = number & { readonly __kind: "PositiveInteger" }
 
@@ -131,7 +131,7 @@ The brand in this example is compile-time-only; validation is still defined by t
 ## Convert successful output with `transform`
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const Port = string()
   .trim()
@@ -147,7 +147,7 @@ console.log("Failure:", Port.safeParse("not-a-port"))
 ```
 
 The accepted input remains a string, while the output becomes a number. A transform can return any
-type. Kern does not automatically validate a transformed result; add a refinement or compose logic
+type. Lithekit does not automatically validate a transformed result; add a refinement or compose logic
 inside the callback when needed.
 
 Keep transforms focused and deterministic. They may run during form/RPC integration through
@@ -158,7 +158,7 @@ Standard Schema as well as direct parsing.
 Modifiers wrap the schema in the order you call them. Compare:
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const DefaultThenOptional = string().default("member").optional()
 const OptionalThenDefault = string().optional().default("member")
@@ -180,7 +180,7 @@ If a refinement or transform callback throws, `safeParse()` catches it and retur
 not retained.
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const Explodes = string().transform(() => {
   throw new Error("private callback details")

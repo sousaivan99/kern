@@ -6,14 +6,14 @@ import * as es from "es-toolkit"
 import { truncate as esTruncate } from "es-toolkit/compat"
 import * as lodash from "lodash-es"
 import pRetry from "p-retry"
-import kernMetadata from "../../packages/kern/package.json"
-import * as array from "../../packages/kern/src/array/index.js"
-import * as async from "../../packages/kern/src/async/index.js"
-import * as date from "../../packages/kern/src/date/index.js"
-import * as money from "../../packages/kern/src/money/index.js"
-import * as number from "../../packages/kern/src/number/index.js"
-import * as object from "../../packages/kern/src/object/index.js"
-import * as string from "../../packages/kern/src/string/index.js"
+import * as array from "../../packages/array/src/index.js"
+import * as async from "../../packages/async/src/index.js"
+import * as date from "../../packages/date/src/index.js"
+import * as money from "../../packages/money/src/index.js"
+import * as number from "../../packages/number/src/index.js"
+import * as object from "../../packages/object/src/index.js"
+import * as string from "../../packages/string/src/index.js"
+import kernMetadata from "../../packages/validation/package.json"
 import currencyMetadata from "../node_modules/currency.js/package.json"
 import dateFnsMetadata from "../node_modules/date-fns/package.json"
 import dayjsMetadata from "../node_modules/dayjs/package.json"
@@ -50,7 +50,7 @@ const lib = {
   dayjs: { name: "Day.js", version: dayjsMetadata.version },
   dinero: { name: "Dinero.js", version: dineroMetadata.version },
   es: { name: "es-toolkit", version: esMetadata.version },
-  kern: { name: "Kern", version: kernMetadata.version },
+  kern: { name: "Lithekit", version: kernMetadata.version },
   lodash: { name: "Lodash", version: lodashMetadata.version },
   pRetry: { name: "p-retry", version: pRetryMetadata.version },
 } as const

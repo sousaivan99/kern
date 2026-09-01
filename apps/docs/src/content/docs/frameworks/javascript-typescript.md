@@ -1,12 +1,12 @@
 ---
 title: JavaScript and TypeScript
-description: Learn each Kern module through a small, independent JavaScript or TypeScript example.
+description: Learn each Lithekit module through a small, independent JavaScript or TypeScript example.
 ---
 
-Kern is an ESM package. Install it with your project's package manager:
+Lithekit is an ESM package. Install it with your project's package manager:
 
 ```bash
-npm install @sousaivan/kern
+npm install @lithekit/array @lithekit/async @lithekit/date @lithekit/money @lithekit/number @lithekit/object @lithekit/string @lithekit/validation
 ```
 
 Each section below stands on its own. Start with the module that solves your current problem, copy
@@ -20,7 +20,7 @@ parsed JSON, form submissions, request bodies, and storage data.
 
 <!-- framework-test: vanilla/javascript.mjs -->
 ```js
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Contact = object({
   name: string().trim().min(2),
@@ -44,12 +44,12 @@ before reading `data` or `issues`.
 
 ## Money: add and display prices
 
-Use [`money`](../../modules/money/) for financial amounts. Kern represents money as integer minor
+Use [`money`](../../modules/money/) for financial amounts. Lithekit represents money as integer minor
 units: `1099` commonly means €10.99 or $10.99 when the application stores cents.
 
 <!-- framework-test: vanilla/examples/money.mjs -->
 ```js
-import { formatMoney, sumMoney } from "@sousaivan/kern/money"
+import { formatMoney, sumMoney } from "@lithekit/money"
 
 const pricesMinor = [1099, 250, 450]
 const totalMinor = sumMoney(pricesMinor)
@@ -68,7 +68,7 @@ do not mutate the supplied date.
 
 <!-- framework-test: vanilla/examples/date.mjs -->
 ```js
-import { addDays, formatDate } from "@sousaivan/kern/date"
+import { addDays, formatDate } from "@lithekit/date"
 
 const orderedAt = new Date("2026-08-16T12:00:00Z")
 const dispatchAt = addDays(orderedAt, 2)
@@ -85,7 +85,7 @@ console.log(
 console.log(orderedAt.toISOString()) // the original date is unchanged
 ```
 
-An explicit `timeZone` keeps formatted output predictable across computers. Kern does not parse
+An explicit `timeZone` keeps formatted output predictable across computers. Lithekit does not parse
 ambiguous date strings or provide named-timezone calendar arithmetic.
 
 ## Number: calculate a percentage
@@ -95,7 +95,7 @@ Use the money module instead for financial rounding.
 
 <!-- framework-test: vanilla/examples/number.mjs -->
 ```js
-import { formatPercentage, percentageOfTotal } from "@sousaivan/kern/number"
+import { formatPercentage, percentageOfTotal } from "@lithekit/number"
 
 const completedTasks = 3
 const totalTasks = 4
@@ -115,7 +115,7 @@ lowercase, diacritic-stripped route label.
 
 <!-- framework-test: vanilla/examples/string.mjs -->
 ```js
-import { slugify } from "@sousaivan/kern/string"
+import { slugify } from "@lithekit/string"
 
 const title = "Crème Brûlée Course"
 const slug = slugify(title)
@@ -132,7 +132,7 @@ writing it from scratch. `uniqueBy()` keeps the first item for each selected ide
 
 <!-- framework-test: vanilla/examples/array.mjs -->
 ```js
-import { uniqueBy } from "@sousaivan/kern/array"
+import { uniqueBy } from "@lithekit/array"
 
 const products = [
   { id: "coffee", name: "Coffee" },
@@ -153,7 +153,7 @@ new object containing only the requested own properties.
 
 <!-- framework-test: vanilla/examples/object.mjs -->
 ```js
-import { pick } from "@sousaivan/kern/object"
+import { pick } from "@lithekit/object"
 
 const account = {
   id: "user-1",
@@ -175,7 +175,7 @@ calls an operation again when it throws or rejects.
 
 <!-- framework-test: vanilla/examples/async.mjs -->
 ```js
-import { retry } from "@sousaivan/kern/async"
+import { retry } from "@lithekit/async"
 
 let calls = 0
 const message = await retry(
@@ -196,12 +196,12 @@ deterministic validation failure will not make the input valid.
 
 ## TypeScript: infer a validated type
 
-Kern includes its own type declarations. `Infer` derives a TypeScript type from the same schema
+Lithekit includes its own type declarations. `Infer` derives a TypeScript type from the same schema
 that checks values at runtime.
 
 <!-- framework-test: vanilla/typescript.ts -->
 ```ts
-import { object, string, type Infer } from "@sousaivan/kern/validation"
+import { object, string, type Infer } from "@lithekit/validation"
 
 const Contact = object({
   name: string().trim().min(2),
@@ -234,4 +234,4 @@ use modern ESM and module resolution:
 }
 ```
 
-Kern does not support CommonJS `require()` or legacy `Node10` TypeScript resolution.
+Lithekit does not support CommonJS `require()` or legacy `Node10` TypeScript resolution.

@@ -1,7 +1,7 @@
 import { cpus } from "node:os"
-import { formatDate } from "../../packages/kern/src/date/index.js"
-import { formatMoney, parseMoney } from "../../packages/kern/src/money/index.js"
-import { formatNumber } from "../../packages/kern/src/number/index.js"
+import { formatDate } from "../../packages/date/src/index.js"
+import { formatMoney, parseMoney } from "../../packages/money/src/index.js"
+import { formatNumber } from "../../packages/number/src/index.js"
 
 const locales = Array.from({ length: 128 }, (_, index) => `en-US-x-m${index}`)
 const date = new Date("2025-01-02T12:00:00Z")

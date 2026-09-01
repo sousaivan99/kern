@@ -25,9 +25,9 @@ jobs:
         run: bun install --frozen-lockfile --ignore-scripts
       - name: Run reproducible randomized properties
         env:
-          KERN_FUZZ_CASES: 25000
-          KERN_FUZZ_SEED: ${{ github.run_id }}
+          LITHEKIT_FUZZ_CASES: 25000
+          LITHEKIT_FUZZ_SEED: ${{ github.run_id }}
         run: |
-          echo "KERN_FUZZ_SEED=$KERN_FUZZ_SEED"
-          echo "KERN_FUZZ_CASES=$KERN_FUZZ_CASES per property"
+          echo "LITHEKIT_FUZZ_SEED=$LITHEKIT_FUZZ_SEED"
+          echo "LITHEKIT_FUZZ_CASES=$LITHEKIT_FUZZ_CASES per property"
           bun run test:fuzz

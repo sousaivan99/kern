@@ -1,5 +1,5 @@
 {
-  "name": "@kern/tooling",
+  "name": "@lithekit/tooling",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,12 +14,25 @@
     "benchmark:intl:cold": "bun benchmarks/intl-cold.ts",
     "benchmark:intl:memory": "bun benchmarks/intl-memory.ts",
     "benchmark:modules": "bun benchmarks/modules.ts",
+    "benchmark:form": "bun benchmarks/index.ts --suite form",
+    "benchmark:form:browser": "bun benchmarks/form-browser.ts",
     "benchmark:report": "bun benchmarks/report.ts",
     "benchmark:validation": "bun benchmarks/index.ts --suite validation-compare",
-    "benchmark:validation:kern": "bun benchmarks/index.ts --suite validation-kern",
+    "benchmark:validation:lithekit": "bun benchmarks/index.ts --suite validation-lithekit",
     "benchmark:quick": "bun benchmarks/index.ts --quick"
   },
   "devDependencies": {
+    "@lithekit/array": "workspace:*",
+    "@lithekit/async": "workspace:*",
+    "@lithekit/date": "workspace:*",
+    "@lithekit/form": "workspace:*",
+    "@lithekit/form-react": "workspace:*",
+    "@lithekit/form-vue": "workspace:*",
+    "@lithekit/money": "workspace:*",
+    "@lithekit/number": "workspace:*",
+    "@lithekit/object": "workspace:*",
+    "@lithekit/string": "workspace:*",
+    "@lithekit/validation": "workspace:*",
     "@arethetypeswrong/cli": "^0.18.5",
     "@axe-core/playwright": "^4.13.0",
     "@biomejs/biome": "^2.5.8",

@@ -3,32 +3,28 @@ import report from "../data/package-sizes.json"
 
 const formatBytes = (bytes: number) => `${bytes.toLocaleString("en-US")} B`
 const formatKibibytes = (bytes: number) => `${(bytes / 1024).toFixed(2)} KiB`
-const repositoryUrl = "https://github.com/sousaivan99/kern/blob/develop"
+const repositoryUrl = "https://github.com/sousaivan99/lithekit/blob/develop"
 ---
 
-<div class="kern-size-report not-content">
-  <section aria-labelledby="entrypoint-sizes">
-    <h2 id="entrypoint-sizes">Public entrypoints</h2>
+<div class="size-report not-content">
+  <section aria-labelledby="package-sizes">
+    <h2 id="package-sizes">Independently installable packages</h2>
     <p>
-      Each row bundles the complete public entrypoint. The budget is a release guard, not the
-      measured result.
+      Each row bundles one complete public entrypoint. Framework peers are excluded; Form core is
+      included in each adapter measurement. Budgets are release gates.
     </p>
-    <div
-      class="kern-size-table-scroll"
-      data-size-scroll
-      data-size-label="Scrollable entrypoint size table"
-    >
+    <section class="size-table-scroll" aria-label="Package size table">
       <table>
         <thead>
           <tr>
-            <th scope="col">Import</th>
+            <th scope="col">Install/import</th>
             <th scope="col">Raw</th>
             <th scope="col">gzip</th>
             <th scope="col">Budget</th>
           </tr>
         </thead>
         <tbody>
-          {report.entrypoints.map((entry) => (
+          {report.packages.map((entry) => (
             <tr>
               <th scope="row"><code>{entry.import}</code></th>
               <td>{formatBytes(entry.rawBytes)}</td>
@@ -38,105 +34,41 @@ const repositoryUrl = "https://github.com/sousaivan99/kern/blob/develop"
           ))}
         </tbody>
       </table>
-    </div>
+    </section>
   </section>
 
-  <section aria-labelledby="root-entrypoint-size">
-    <h2 id="root-entrypoint-size">Root entrypoint</h2>
-    <p>
-      <code>{report.rootEntrypoint.import}</code>
-      includes every module export when used as a bundle entry:
-      <strong>{formatKibibytes(report.rootEntrypoint.gzipBytes)}</strong>
-      ({formatBytes(report.rootEntrypoint.gzipBytes)}) gzip. Prefer subpath imports when one module
-      is enough.
-    </p>
-  </section>
-
-  <section aria-labelledby="realistic-validation-size">
-    <h2 id="realistic-validation-size">One realistic validation schema</h2>
-    <p>
-      These fixtures create the same two-field user schema through each library's conventional API.
-      Schema construction and everything retained by the production bundle are included.
-    </p>
-    <div
-      class="kern-size-table-scroll"
-      data-size-scroll
-      data-size-label="Scrollable validation comparison table"
-    >
+  <section aria-labelledby="combined-fixtures">
+    <h2 id="combined-fixtures">Realistic combined fixtures</h2>
+    <p>These measurements catch integration costs that no single package budget can show.</p>
+    <section class="size-table-scroll" aria-label="Combined fixture size table">
       <table>
         <thead>
           <tr>
-            <th scope="col">Library</th>
-            <th scope="col">Version</th>
+            <th scope="col">Fixture</th>
             <th scope="col">Raw</th>
             <th scope="col">gzip</th>
-            <th scope="col">Fixture</th>
-          </tr>
-        </thead>
-        <tbody>
-          {report.examples.map((example) => (
-            <tr>
-              <th scope="row">{example.label}</th>
-              <td><code>{example.version}</code></td>
-              <td>{formatBytes(example.rawBytes)}</td>
-              <td><strong>{formatKibibytes(example.gzipBytes)}</strong> ({formatBytes(example.gzipBytes)})</td>
-              <td><a href={`${repositoryUrl}/${example.fixture}`}>Source</a></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="kern-size-fixtures">
-      {report.examples.map((example) => (
-        <details>
-          <summary>{example.label} fixture</summary>
-          <pre><code>{example.source}</code></pre>
-        </details>
-      ))}
-    </div>
-  </section>
-
-  <section aria-labelledby="feature-fixture-sizes">
-    <h2 id="feature-fixture-sizes">Tree-shaken 1.1 API fixtures</h2>
-    <p>
-      The before columns use the documented pre-1.1 native/refinement expression. A negative delta
-      means the dedicated API retains fewer compressed bytes. <code>unknown()</code> has no exact
-      pre-1.1 equivalent, so only its resulting bundle is shown.
-    </p>
-    <div
-      class="kern-size-table-scroll"
-      data-size-scroll
-      data-size-label="Scrollable feature fixture size table"
-    >
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Fixture</th>
-            <th scope="col">Before gzip</th>
-            <th scope="col">After gzip</th>
-            <th scope="col">Delta</th>
+            <th scope="col">Budget</th>
             <th scope="col">Source</th>
           </tr>
         </thead>
         <tbody>
-          {report.featureFixtures.map((fixture) => (
+          {report.fixtures.map((fixture) => (
             <tr>
               <th scope="row">{fixture.label}</th>
-              <td>{fixture.beforeGzipBytes === undefined ? "not applicable" : formatBytes(fixture.beforeGzipBytes)}</td>
-              <td><strong>{formatBytes(fixture.afterGzipBytes)}</strong></td>
-              <td>{fixture.deltaGzipBytes === undefined ? "not applicable" : `${fixture.deltaGzipBytes >= 0 ? "+" : ""}${formatBytes(fixture.deltaGzipBytes)}`}</td>
-              <td><a href={`${repositoryUrl}/${fixture.afterFixture}`}>After source</a></td>
+              <td>{formatBytes(fixture.rawBytes)}</td>
+              <td><strong>{formatKibibytes(fixture.gzipBytes)}</strong></td>
+              <td>{formatKibibytes(fixture.budgetBytes)}</td>
+              <td><a href={`${repositoryUrl}/${fixture.fixture}`}>Source</a></td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </section>
   </section>
 
   <section aria-labelledby="measurement-environment">
     <h2 id="measurement-environment">Measurement environment</h2>
-    <dl class="kern-size-method">
+    <dl>
       <div>
         <dt>Bun</dt>
         <dd>{report.measurement.bunVersion}</dd>
@@ -161,139 +93,48 @@ const repositoryUrl = "https://github.com/sousaivan99/kern/blob/develop"
   </section>
 </div>
 
-<script>
-for (const region of document.querySelectorAll<HTMLElement>("[data-size-scroll]")) {
-  region.tabIndex = 0
-  region.setAttribute("role", "region")
-  region.setAttribute("aria-label", region.dataset.sizeLabel ?? "Scrollable size table")
-}
-</script>
-
 <style>
-.kern-size-report section + section {
+.size-report section + section {
   margin-top: 3rem;
 }
-
-.kern-size-report h2 {
+.size-report h2 {
   padding-bottom: 0.45rem;
   border-bottom: 1px solid var(--sl-color-hairline);
-  color: var(--kern-color-text-strong);
-  font-size: var(--sl-text-h2);
-  letter-spacing: -0.025em;
 }
-
-.kern-size-report p {
-  color: var(--kern-color-text-body);
-  line-height: 1.72;
-}
-
-.kern-size-table-scroll {
+.size-table-scroll {
   overflow-x: auto;
   margin-top: 1.25rem;
 }
-
-.kern-size-report table {
+table {
   width: 100%;
   min-width: 42rem;
-  border: 1px solid var(--sl-color-hairline-light);
   border-collapse: collapse;
   font-size: 0.82rem;
 }
-
-.kern-size-report th,
-.kern-size-report td {
+th,
+td {
   border-bottom: 1px solid var(--sl-color-hairline);
   padding: 0.7rem 0.8rem;
   text-align: left;
   white-space: nowrap;
 }
-
-.kern-size-report thead th {
+thead th {
   background: var(--sl-color-gray-6);
-  color: var(--kern-color-text-muted);
   font-family: var(--__sl-font-mono);
   font-size: 0.72rem;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-
-.kern-size-report tbody th {
-  color: var(--kern-color-text-strong);
-  font-weight: 620;
-}
-
-.kern-size-report a {
-  color: var(--kern-color-interactive);
-  text-underline-offset: 0.18em;
-}
-
-.kern-size-fixtures {
+dl {
   display: grid;
-  gap: 0.6rem;
-  margin-top: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1rem;
 }
-
-.kern-size-fixtures details {
-  border: 1px solid var(--sl-color-hairline-light);
-  border-radius: 0.3rem;
+dt {
+  color: var(--sl-color-gray-3);
+  font-size: 0.75rem;
 }
-
-.kern-size-fixtures summary {
-  padding: 0.7rem 0.85rem;
-  color: var(--kern-color-text-strong);
-  font-size: 0.82rem;
-  font-weight: 620;
-  cursor: pointer;
-}
-
-.kern-size-fixtures pre {
-  overflow: auto;
-  margin: 0;
-  border: 0;
-  border-top: 1px solid var(--sl-color-hairline);
-  border-radius: 0;
-  padding: 1rem;
-  font-size: 0.78rem;
-}
-
-.kern-size-method {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin-top: 1.25rem;
-  border: 1px solid var(--sl-color-hairline-light);
-}
-
-.kern-size-method div {
-  min-width: 0;
-  padding: 0.8rem;
-}
-
-.kern-size-method div + div {
-  border-left: 1px solid var(--sl-color-hairline);
-}
-
-.kern-size-method dt {
-  color: var(--kern-color-text-muted);
-  font-family: var(--__sl-font-mono);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-}
-
-.kern-size-method dd {
+dd {
   margin: 0.25rem 0 0;
-  color: var(--kern-color-text-strong);
-  font-size: 0.78rem;
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 42rem) {
-  .kern-size-method {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .kern-size-method div + div {
-    border-left: 0;
-    border-top: 1px solid var(--sl-color-hairline);
-  }
+  font-family: var(--__sl-font-mono);
 }
 </style>

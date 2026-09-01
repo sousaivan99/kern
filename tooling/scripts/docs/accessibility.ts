@@ -150,19 +150,19 @@ const palettes = {
 } as const
 
 const palettePairs = [
-  ["--kern-color-text-strong", "--sl-color-bg", 7],
-  ["--kern-color-text-body", "--sl-color-bg", 7],
-  ["--kern-color-text-muted", "--sl-color-bg", 7],
-  ["--kern-color-text-muted", "--sl-color-gray-5", 5],
-  ["--kern-color-text-elevated", "--sl-color-gray-5", 5],
-  ["--kern-color-interactive", "--sl-color-bg-inline-code", 7],
-  ["--kern-color-focus", "--sl-color-bg", 3.5],
-  ["--kern-color-functional-border", "--sl-color-bg", 3.5],
-  ["--kern-color-selection-text", "--kern-color-selection-bg", 4.5],
-  ["--kern-color-syntax-keyword", "--sl-color-bg", 7],
-  ["--kern-color-syntax-string", "--sl-color-bg", 7],
-  ["--kern-color-syntax-function", "--sl-color-bg", 7],
-  ["--kern-color-syntax-number", "--sl-color-bg", 7],
+  ["--lithekit-color-text-strong", "--sl-color-bg", 7],
+  ["--lithekit-color-text-body", "--sl-color-bg", 7],
+  ["--lithekit-color-text-muted", "--sl-color-bg", 7],
+  ["--lithekit-color-text-muted", "--sl-color-gray-5", 5],
+  ["--lithekit-color-text-elevated", "--sl-color-gray-5", 5],
+  ["--lithekit-color-interactive", "--sl-color-bg-inline-code", 7],
+  ["--lithekit-color-focus", "--sl-color-bg", 3.5],
+  ["--lithekit-color-functional-border", "--sl-color-bg", 3.5],
+  ["--lithekit-color-selection-text", "--lithekit-color-selection-bg", 4.5],
+  ["--lithekit-color-syntax-keyword", "--sl-color-bg", 7],
+  ["--lithekit-color-syntax-string", "--sl-color-bg", 7],
+  ["--lithekit-color-syntax-function", "--sl-color-bg", 7],
+  ["--lithekit-color-syntax-number", "--sl-color-bg", 7],
 ] as const
 
 for (const [theme, palette] of Object.entries(palettes) as readonly [

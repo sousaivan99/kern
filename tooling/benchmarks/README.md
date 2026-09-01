@@ -1,8 +1,8 @@
 # Benchmarks
 
-Kern's benchmark suite measures public behavior on the repository's supported Bun baseline. The
-published Kern package remains dependency-free. Comparison libraries are pinned development-only
-inputs under `tooling/`. Kern-specific cases cover collections, exact money allocation,
+Lithekit's benchmark suite measures public behavior on the repository's supported Bun baseline. The
+published Lithekit package remains dependency-free. Comparison libraries are pinned development-only
+inputs under `tooling/`. Lithekit-specific cases cover collections, exact money allocation,
 finance rounding, Unicode grapheme truncation, validation composition, issue aggregation, wide
 schemas, and wide inputs.
 
@@ -19,9 +19,11 @@ bun run benchmark:primitives
 bun run benchmark:intl:cold
 bun run benchmark:intl:memory
 bun run benchmark:modules
+bun run benchmark:form
+bun run benchmark:form:browser
 bun run benchmark:report -- run-1.json run-2.json run-3.json
 bun run benchmark:validation
-bun run benchmark:validation:kern
+bun run benchmark:validation:lithekit
 bun run benchmark:quick
 bun run benchmark -- --json > benchmark-results.json
 ```
@@ -53,8 +55,13 @@ is worth one point. A library gets the point for a clear win; when multiple medi
 fastest median, those libraries split the point and the result is counted as a near-tie. The score
 also reports clear wins, near-ties, slower cases, and scenario coverage. A scenario is excluded from
 every library's score unless all libraries support it, so Zod's unsupported early-abort case cannot
-advantage Kern or Valibot. JSON output includes the score plus the exact clear-win and tied scenario
+advantage Lithekit or Valibot. JSON output includes the score plus the exact clear-win and tied scenario
 names.
+
+The Form browser runner measures the production package in headless Chromium at 10, 100, and 1,000
+native controls. It covers attachment and DOM decoding, field-signal creation, input reconciliation,
+explicit full validation, reset, and issue indexing/publication. It reports timings without universal
+thresholds; compare runs made on the same browser, hardware, and power state.
 
 The score gives every fixture equal weight. It is non-gating: it never affects exit status, patch
 acceptance, phase acceptance, or performance claims. It is a compact description of this suite,
@@ -73,8 +80,8 @@ capped at 2,048 iterations. Cold `Intl` measurements run in isolated processes; 
 forces garbage collection between 128-key churn rounds.
 
 For competitive comparisons, keep three JSON runs and rotate library order with
-`--library-order=Kern,Zod,Valibot`, `--library-order=Zod,Valibot,Kern`, and
-`--library-order=Valibot,Kern,Zod`. Compare the median of the three run medians. JSON metadata records
+`--library-order=Lithekit,Zod,Valibot`, `--library-order=Zod,Valibot,Lithekit`, and
+`--library-order=Valibot,Lithekit,Zod`. Compare the median of the three run medians. JSON metadata records
 the runtime, CPU and power metadata, case order, lockfile and benchmark hashes, Git state, binary diff
 hash, and untracked-file manifest hash.
 

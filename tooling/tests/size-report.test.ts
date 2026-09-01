@@ -1,36 +1,22 @@
 import { describe, expect, test } from "bun:test"
 import { join, resolve } from "node:path"
+import packageManifest from "../config/packages.json"
 
 const repositoryRoot = resolve(import.meta.dir, "../..")
 const reportPath = join(repositoryRoot, "apps", "docs", "src", "data", "package-sizes.json")
 
-interface PackageMetadata {
-  readonly version: string
+interface Measurement {
+  readonly budgetBytes: number
+  readonly gzipBytes: number
+  readonly id: string
+  readonly import?: string
+  readonly rawBytes: number
 }
 
 interface SizeReport {
-  readonly entrypoints: ReadonlyArray<{
-    readonly budgetBytes: number
-    readonly gzipBytes: number
-    readonly id: string
-    readonly rawBytes: number
-  }>
-  readonly examples: ReadonlyArray<{
-    readonly fixture: string
-    readonly gzipBytes: number
-    readonly id: string
-    readonly rawBytes: number
-    readonly source: string
-    readonly version: string
-  }>
-  readonly featureFixtures: ReadonlyArray<{
-    readonly afterFixture: string
-    readonly afterGzipBytes: number
-    readonly beforeFixture?: string
-    readonly beforeGzipBytes?: number
-    readonly deltaGzipBytes?: number
-    readonly id: string
-  }>
+  readonly fixtures: ReadonlyArray<
+    Measurement & { readonly fixture: string; readonly label: string }
+  >
   readonly measurement: {
     readonly bunVersion: string
     readonly compression: string
@@ -38,75 +24,32 @@ interface SizeReport {
     readonly minified: boolean
     readonly target: string
   }
-  readonly rootEntrypoint: { readonly gzipBytes: number; readonly rawBytes: number }
+  readonly packages: readonly Measurement[]
   readonly schemaVersion: number
 }
 
-const readJson = async <T>(path: string): Promise<T> => Bun.file(path).json() as Promise<T>
-
 describe("versioned package-size report", () => {
-  test("records deterministic measurement metadata and positive sizes", async () => {
-    const report = await readJson<SizeReport>(reportPath)
-
-    expect(report.schemaVersion).toBe(1)
+  test("records every manifest package and realistic fixture within its budget", async () => {
+    const report = (await Bun.file(reportPath).json()) as SizeReport
+    expect(report.schemaVersion).toBe(2)
     expect(report.measurement).toEqual({
-      bunVersion: "1.3.14",
+      bunVersion: Bun.version,
       compression: "gzip, level 9",
       format: "esm",
       minified: true,
       target: "browser",
     })
-    expect(report.entrypoints.map((entry) => entry.id)).toEqual([
-      "validation",
-      "money",
-      "date",
-      "number",
-      "array",
-      "string",
-      "object",
-      "async",
-    ])
-    for (const entry of report.entrypoints) {
+    expect(report.packages.map(({ id }) => id)).toEqual(
+      packageManifest.packages.map(({ id }) => id),
+    )
+    for (const entry of [...report.packages, ...report.fixtures]) {
       expect(entry.rawBytes).toBeGreaterThan(0)
       expect(entry.gzipBytes).toBeGreaterThan(0)
       expect(entry.gzipBytes).toBeLessThanOrEqual(entry.budgetBytes)
     }
-    expect(report.rootEntrypoint.rawBytes).toBeGreaterThan(0)
-    expect(report.rootEntrypoint.gzipBytes).toBeGreaterThan(0)
-    expect(report.featureFixtures.map((fixture) => fixture.id)).toEqual([
-      "array-bounds",
-      "without-nullish",
-      "unknown",
-    ])
-    for (const fixture of report.featureFixtures) {
-      expect(fixture.afterGzipBytes).toBeGreaterThan(0)
-      expect(await Bun.file(join(repositoryRoot, fixture.afterFixture)).exists()).toBe(true)
-      if (fixture.beforeFixture) {
-        expect(fixture.beforeGzipBytes).toBeGreaterThan(0)
-        expect(fixture.deltaGzipBytes).toBe(
-          fixture.afterGzipBytes - (fixture.beforeGzipBytes as number),
-        )
-      }
-    }
-  })
-
-  test("keeps package versions and displayed sources synchronized with fixtures", async () => {
-    const report = await readJson<SizeReport>(reportPath)
-    const versionPaths = {
-      kern: join(repositoryRoot, "packages", "kern", "package.json"),
-      valibot: join(repositoryRoot, "tooling", "node_modules", "valibot", "package.json"),
-      zod: join(repositoryRoot, "tooling", "node_modules", "zod", "package.json"),
-    } as const
-
-    for (const example of report.examples) {
-      const metadata = await readJson<PackageMetadata>(
-        versionPaths[example.id as keyof typeof versionPaths],
-      )
-      const fixtureSource = await Bun.file(join(repositoryRoot, example.fixture)).text()
-      expect(example.version).toBe(metadata.version)
-      expect(example.source).toBe(fixtureSource)
-      expect(example.rawBytes).toBeGreaterThan(0)
-      expect(example.gzipBytes).toBeGreaterThan(0)
+    expect(report.fixtures.map(({ id }) => id)).toEqual(["form-validation"])
+    for (const fixture of report.fixtures) {
+      expect(await Bun.file(join(repositoryRoot, fixture.fixture)).exists()).toBe(true)
     }
   })
 })

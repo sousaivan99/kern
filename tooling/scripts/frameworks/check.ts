@@ -5,7 +5,7 @@ import { tmpdir } from "node:os"
 import { dirname, join, resolve, sep } from "node:path"
 import { chromium } from "playwright"
 import { terminal } from "../shared/console.js"
-import { moduleManifest } from "../shared/modules.js"
+import { packageManifest } from "../shared/packages.js"
 import { printCapturedFailure, runCaptured } from "../shared/process.js"
 
 interface TutorialFile {
@@ -14,14 +14,26 @@ interface TutorialFile {
 }
 
 const repositoryRoot = resolve(import.meta.dir, "../../..")
-const packageRoot = join(repositoryRoot, "packages", "kern")
 const docsRoot = join(repositoryRoot, "apps", "docs", "src", "content", "docs", "frameworks")
+const formDocsRoot = join(
+  repositoryRoot,
+  "apps",
+  "docs",
+  "src",
+  "content",
+  "docs",
+  "modules",
+  "form",
+)
 const docsModules = join(repositoryRoot, "apps", "docs", "node_modules")
 const toolingModules = join(repositoryRoot, "tooling", "node_modules")
-const temporaryRoot = await mkdtemp(join(tmpdir(), "kern-frameworks-"))
+const temporaryRoot = await mkdtemp(join(tmpdir(), "lithekit-frameworks-"))
 
 const tutorialPages = ["javascript-typescript.md", "vue.md", "nuxt.md", "react.md"] as const
-const kernSubpaths = moduleManifest.modules.map((module) => module.id)
+const tutorialPackages = packageManifest.packages.filter(({ runtime }) => runtime === "universal")
+const formFixturePackages = packageManifest.packages.filter(({ id }) =>
+  ["form", "form-react", "form-vue"].includes(id),
+)
 const marker =
   /<!-- framework-test: ([a-z]+\/[a-zA-Z0-9._/-]+) -->\r?\n```[^\r\n]*\r?\n([\s\S]*?)\r?\n```/gu
 
@@ -41,20 +53,33 @@ const readTutorialFiles = async (): Promise<readonly TutorialFile[]> => {
   const files: TutorialFile[] = []
   for (const page of tutorialPages) {
     const source = await readFile(join(docsRoot, page), "utf8")
-    const missingSubpaths = kernSubpaths.filter(
-      (subpath) => !source.includes(`from "@sousaivan/kern/${subpath}"`),
+    const missingPackages = tutorialPackages.filter(
+      ({ name }) => !source.includes(`from "${name}"`),
     )
-    if (missingSubpaths.length > 0) {
-      throw new Error(`${page} does not exercise Kern subpaths: ${missingSubpaths.join(", ")}`)
+    if (missingPackages.length > 0) {
+      throw new Error(
+        `${page} does not exercise Lithekit packages: ${missingPackages.map(({ name }) => name).join(", ")}`,
+      )
     }
-    const missingSections = kernSubpaths.filter((subpath) => {
-      const label = `${subpath.charAt(0).toUpperCase()}${subpath.slice(1)}`
+    const missingSections = tutorialPackages.filter(({ id }) => {
+      const label = `${id.charAt(0).toUpperCase()}${id.slice(1)}`
       return !source.includes(`## ${label}:`)
     })
     if (missingSections.length > 0) {
-      throw new Error(`${page} does not teach Kern modules: ${missingSections.join(", ")}`)
+      throw new Error(
+        `${page} does not teach Lithekit packages: ${missingSections.map(({ name }) => name).join(", ")}`,
+      )
     }
     for (const match of source.matchAll(marker)) {
+      const path = match[1]
+      const code = match[2]
+      if (path === undefined || code === undefined) continue
+      files.push({ code: `${code}\n`, path })
+    }
+  }
+  for (const guide of ["react.md", "vue.md", "nuxt.md"]) {
+    const formGuide = await readFile(join(formDocsRoot, guide), "utf8")
+    for (const match of formGuide.matchAll(marker)) {
       const path = match[1]
       const code = match[2]
       if (path === undefined || code === undefined) continue
@@ -64,6 +89,7 @@ const readTutorialFiles = async (): Promise<readonly TutorialFile[]> => {
 
   const expected = [
     "nuxt/app/app.vue",
+    "nuxt/app/components/AccountForm.vue",
     "nuxt/app/components/examples/ArrayExample.vue",
     "nuxt/app/components/examples/AsyncExample.vue",
     "nuxt/app/components/examples/DateExample.vue",
@@ -80,6 +106,7 @@ const readTutorialFiles = async (): Promise<readonly TutorialFile[]> => {
     "react/src/examples/NumberExample.tsx",
     "react/src/examples/ObjectExample.tsx",
     "react/src/examples/StringExample.tsx",
+    "react/src/form/AccountForm.tsx",
     "vanilla/examples/array.mjs",
     "vanilla/examples/async.mjs",
     "vanilla/examples/date.mjs",
@@ -97,6 +124,8 @@ const readTutorialFiles = async (): Promise<readonly TutorialFile[]> => {
     "vue/src/examples/NumberExample.vue",
     "vue/src/examples/ObjectExample.vue",
     "vue/src/examples/StringExample.vue",
+    "vue/src/form/AccountForm.vue",
+    "vue/src/form/EmailField.vue",
   ]
   const actual = files.map((file) => file.path).sort()
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
@@ -209,6 +238,75 @@ const exerciseFrontend = async (name: string, fixture: string): Promise<void> =>
   terminal.success(`Exercise ${name} in Chromium`)
 }
 
+const exerciseNuxtForm = async (fixture: string): Promise<void> => {
+  terminal.info("Exercise hydrated Nuxt Form in Chromium")
+  const port = await reservePort()
+  const server = Bun.spawn(["node", join(fixture, ".output", "server", "index.mjs")], {
+    cwd: fixture,
+    env: {
+      ...process.env,
+      HOST: "127.0.0.1",
+      NODE_ENV: "production",
+      PORT: String(port),
+    },
+    stderr: "pipe",
+    stdout: "ignore",
+  })
+  const stderr = new Response(server.stderr).text()
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage()
+    const browserErrors: string[] = []
+    page.on("console", (message) => {
+      if (message.type() === "error") browserErrors.push(message.text())
+    })
+    page.on("pageerror", (error) => browserErrors.push(error.message))
+    let loaded = false
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      try {
+        const response = await page.goto(`http://127.0.0.1:${port}`)
+        loaded = response?.ok() === true
+        if (loaded) break
+      } catch {
+        await Bun.sleep(50)
+      }
+    }
+    if (!loaded) throw new Error("Nuxt Form server did not become ready")
+    const form = page.locator("[data-nuxt-form]")
+    await form.waitFor()
+    const input = form.locator('input[name="email"]')
+    await input.waitFor()
+    await page.waitForFunction(
+      () =>
+        (document.querySelector('[data-nuxt-form] input[name="email"]') as HTMLInputElement | null)
+          ?.value === "ada@example.com",
+    )
+    await input.fill("invalid")
+    await input.blur()
+    await form.getByText("Invalid email address", { exact: true }).waitFor()
+    await input.fill("grace@example.com")
+    await form.getByText("Save", { exact: true }).click()
+    await form
+      .locator("[data-nuxt-saved]")
+      .getByText("grace@example.com", { exact: true })
+      .waitFor()
+    if (browserErrors.length > 0) {
+      throw new Error(`Nuxt hydration reported browser errors:\n${browserErrors.join("\n")}`)
+    }
+  } catch (error) {
+    server.kill()
+    await server.exited
+    const serverError = (await stderr).trim()
+    if (serverError.length > 0) console.error(serverError)
+    throw error
+  } finally {
+    await browser.close()
+    server.kill()
+    await server.exited
+  }
+  terminal.success("Exercise hydrated Nuxt Form in Chromium")
+}
+
 const strictCompilerOptions = {
   esModuleInterop: true,
   forceConsistentCasingInFileNames: true,
@@ -298,6 +396,10 @@ const configureReact = async (root: string): Promise<void> => {
 }
 
 const configureNuxt = async (root: string): Promise<void> => {
+  const appPath = join(root, "app", "app.vue")
+  const appSource = await readFile(appPath, "utf8")
+  if (!appSource.includes("</main>")) throw new Error("Nuxt tutorial app has no main element")
+  await writeFile(appPath, appSource.replace("</main>", "  <AccountForm />\n</main>"))
   await write(
     root,
     "tsconfig.json",
@@ -357,7 +459,12 @@ const request = async (path, init) => {
 try {
   const page = await request("/")
   const html = await page.text()
-  if (!page.ok || !html.includes("Nuxt contact form") || !html.includes("Ready: ada@example.com")) {
+  if (
+    !page.ok ||
+    !html.includes("Nuxt contact form") ||
+    !html.includes("Ready: ada@example.com") ||
+    !html.includes("data-nuxt-form")
+  ) {
     throw new Error(\`Unexpected Nuxt SSR response (\${page.status}): \${html}\`)
   }
 
@@ -389,15 +496,26 @@ try {
 }
 
 try {
-  await run("Build Kern", [process.execPath, "run", "build"], packageRoot)
-  await run(
-    "Pack Kern",
-    [process.execPath, "pm", "pack", "--destination", temporaryRoot, "--ignore-scripts"],
-    packageRoot,
-  )
-  const tarballName = (await readdir(temporaryRoot)).find((name) => name.endsWith(".tgz"))
-  if (tarballName === undefined) throw new Error("Framework checks could not find the Kern tarball")
-  const tarball = join(temporaryRoot, tarballName)
+  await run("Build Lithekit packages", [process.execPath, "run", "build:packages"], repositoryRoot)
+  const tarballs: string[] = []
+  const packedTarballs = new Map<string, string>()
+  for (const definition of [...tutorialPackages, ...formFixturePackages]) {
+    const packageRoot = join(repositoryRoot, definition.directory)
+    const before = new Set(await readdir(temporaryRoot))
+    await run(
+      `Pack ${definition.name}`,
+      [process.execPath, "pm", "pack", "--destination", temporaryRoot, "--ignore-scripts"],
+      packageRoot,
+    )
+    const tarballName = (await readdir(temporaryRoot)).find(
+      (name) => name.endsWith(".tgz") && !before.has(name),
+    )
+    if (!tarballName)
+      throw new Error(`Framework checks could not find the ${definition.name} tarball`)
+    const tarball = join(temporaryRoot, tarballName)
+    packedTarballs.set(definition.id, tarball)
+    if (tutorialPackages.some(({ id }) => id === definition.id)) tarballs.push(tarball)
+  }
 
   const tutorialFiles = await readTutorialFiles()
   const fixtures = ["vanilla", "vue", "react", "nuxt"] as const
@@ -407,14 +525,14 @@ try {
     await write(
       fixture,
       "package.json",
-      json({ name: `kern-${fixtureName}-tutorial`, private: true, type: "module" }),
+      json({ name: `lithekit-${fixtureName}-tutorial`, private: true, type: "module" }),
     )
     for (const file of tutorialFiles.filter(({ path }) => path.startsWith(`${fixtureName}/`))) {
       await write(fixture, file.path.slice(fixtureName.length + 1), file.code)
     }
     await run(
-      `Install packed Kern for ${fixtureName}`,
-      [process.execPath, "add", tarball, "--exact", "--ignore-scripts"],
+      `Install packed Lithekit packages for ${fixtureName}`,
+      [process.execPath, "add", ...tarballs, "--exact", "--ignore-scripts"],
       fixture,
     )
   }
@@ -473,6 +591,30 @@ try {
       installedDependency("vue-tsc"),
     ]),
   )
+
+  const installFormFixture = async (
+    name: string,
+    fixture: string,
+    adapter: "form-react" | "form-vue",
+  ): Promise<void> => {
+    const manifestPath = join(fixture, "package.json")
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      dependencies?: Record<string, string>
+      overrides?: Record<string, string>
+    }
+    const packedForm = `file:${packedTarballs.get("form") as string}`
+    manifest.dependencies = {
+      ...manifest.dependencies,
+      "@lithekit/form": packedForm,
+      [`@lithekit/${adapter}`]: `file:${packedTarballs.get(adapter) as string}`,
+    }
+    manifest.overrides = { ...manifest.overrides, "@lithekit/form": packedForm }
+    await writeFile(manifestPath, json(manifest))
+    await run(`Install packed Form packages for ${name}`, [process.execPath, "install"], fixture)
+  }
+  await installFormFixture("Vue", vue, "form-vue")
+  await installFormFixture("React", react, "form-react")
+  await installFormFixture("Nuxt", nuxt, "form-vue")
 
   await configureVanilla(vanilla)
   await configureVue(vue)
@@ -555,8 +697,9 @@ try {
   await run("Type-check Nuxt tutorial", [node, nuxtCli, "typecheck"], nuxt)
   await run("Build Nuxt server", [node, nuxtCli, "build"], nuxt)
   await run("Exercise Nuxt SSR and API", [node, "verify.mjs"], nuxt)
+  await exerciseNuxtForm(nuxt)
 
-  terminal.success("All framework tutorials passed with the packed Kern package")
+  terminal.success("All framework tutorials passed with independently packed Lithekit packages")
 } finally {
   await rm(temporaryRoot, { force: true, recursive: true })
 }

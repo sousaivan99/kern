@@ -1,23 +1,23 @@
 ---
 title: New to JavaScript or TypeScript?
-description: Learn the small amount of JavaScript and TypeScript vocabulary needed to use Kern.
+description: Learn the small amount of JavaScript and TypeScript vocabulary needed to use Lithekit.
 sidebar:
   order: 2
 ---
 
 This page is for you if terms such as “function,” “argument,” “return value,” “object,” or
-“promise” are still new. You do not need to memorize everything before using Kern. Read the first
+“promise” are still new. You do not need to memorize everything before using Lithekit. Read the first
 program, learn how to read one helper call, and return to the later sections when a guide uses an
 unfamiliar idea.
 
-If Kern is not installed yet, follow [Installation](./installation/) first and then return here.
+If Lithekit is not installed yet, follow [Installation](./installation/) first and then return here.
 
 ## Your first complete program
 
 Create a file named `example.ts`:
 
 ```ts
-import { unique } from "@sousaivan/kern/array"
+import { unique } from "@lithekit/array"
 
 const names = ["Ada", "Grace", "Ada"]
 const distinctNames = unique(names)
@@ -40,12 +40,12 @@ complete application instead of pretending that they can run by themselves.
 
 Read it from top to bottom:
 
-1. `import` makes Kern's `unique` function available in this file.
+1. `import` makes Lithekit's `unique` function available in this file.
 2. `const names = ...` creates a variable containing an array. An array is an ordered list.
 3. `unique(names)` **calls** the function and passes `names` as its **argument**.
 4. The function **returns** a new array, which is stored in `distinctNames`.
 5. `console.log()` prints values so you can inspect them.
-6. The original `names` array did not change. Kern calls this non-mutating behavior.
+6. The original `names` array did not change. Lithekit calls this non-mutating behavior.
 
 Run the file with Bun:
 
@@ -73,7 +73,7 @@ It means:
 You call it with real values:
 
 ```ts
-import { chunk } from "@sousaivan/kern/array"
+import { chunk } from "@lithekit/array"
 
 const pages = chunk(["a", "b", "c", "d", "e"], 2)
 console.log(pages) // [["a", "b"], ["c", "d"], ["e"]]
@@ -96,15 +96,15 @@ const user = { name: "Ada", active: true } // object: named properties
 const createdAt = new Date() // Date: one instant in time
 ```
 
-Kern does not silently convert one kind into another. For example, a validation `number()` schema
+Lithekit does not silently convert one kind into another. For example, a validation `number()` schema
 accepts `42` but rejects the string `"42"`.
 
 ## Objects and options
 
-An object groups named values. Many Kern functions accept an optional final **options object**:
+An object groups named values. Many Lithekit functions accept an optional final **options object**:
 
 ```ts
-import { formatNumber } from "@sousaivan/kern/number"
+import { formatNumber } from "@lithekit/number"
 
 const options = {
   locale: "en-US",
@@ -118,7 +118,7 @@ console.log(text) // commonly "1,234.57"
 You may write the object directly inside the call:
 
 ```ts
-import { formatNumber } from "@sousaivan/kern/number"
+import { formatNumber } from "@lithekit/number"
 
 formatNumber(1234.567, { locale: "en-US", maximumFractionDigits: 2 })
 ```
@@ -128,12 +128,12 @@ out uses the documented defaults.
 
 ## Callbacks, predicates, and selectors
 
-A **callback** is a function you give to another function. Kern calls it later or once per value.
+A **callback** is a function you give to another function. Lithekit calls it later or once per value.
 
 An arrow function such as `(number) => number > 0` is a short way to write a callback:
 
 ```ts
-import { partition } from "@sousaivan/kern/array"
+import { partition } from "@lithekit/array"
 
 const [positive, remaining] = partition(
   [-2, 0, 3, 7],
@@ -148,7 +148,7 @@ The callback in this example is a **predicate** because it answers `true` or `fa
 **selector** returns a key used to identify or group a value:
 
 ```ts
-import { groupBy } from "@sousaivan/kern/array"
+import { groupBy } from "@lithekit/array"
 
 const words = ["cat", "apple", "car"]
 const byFirstLetter = groupBy(words, (word) => word[0] ?? "")
@@ -158,10 +158,10 @@ console.log(byFirstLetter.c) // ["cat", "car"]
 
 ## Synchronous and asynchronous code
 
-Most Kern functions return their answer immediately. They are **synchronous**:
+Most Lithekit functions return their answer immediately. They are **synchronous**:
 
 ```ts
-import { addMoney } from "@sousaivan/kern/money"
+import { addMoney } from "@lithekit/money"
 
 const total = addMoney(100, 50) // total is available immediately
 ```
@@ -170,7 +170,7 @@ Time, network, and other delayed work is **asynchronous**. An asynchronous funct
 `Promise`, which represents a value that may arrive later. Use `await` to wait for it:
 
 ```ts
-import { sleep } from "@sousaivan/kern/async"
+import { sleep } from "@lithekit/async"
 
 async function showMessage(): Promise<void> {
   console.log("Waiting...")
@@ -189,7 +189,7 @@ Some failures are normal user input. Validation offers `safeParse()` so you can 
 an exception:
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const Email = string().email()
 const result = Email.safeParse("not an email")
@@ -205,7 +205,7 @@ Invalid programmer configuration throws an error. Use `try`/`catch` only when yo
 meaningfully recover:
 
 ```ts
-import { chunk } from "@sousaivan/kern/array"
+import { chunk } from "@lithekit/array"
 
 try {
   chunk([1, 2, 3], 0)
@@ -222,7 +222,7 @@ TypeScript checks your code while you develop. Its types do not remain in the ru
 That means data from JSON, a request, storage, or a form must still be checked at runtime.
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const User = object({ name: string().min(1) })
 const input: unknown = JSON.parse('{"name":"Ada"}')
@@ -236,11 +236,11 @@ turns off useful TypeScript checks.
 
 ## Mutation and new values
 
-To **mutate** a value means to change the existing value. Kern normally returns a new array, object,
+To **mutate** a value means to change the existing value. Lithekit normally returns a new array, object,
 or `Date` instead:
 
 ```ts
-import { addDays } from "@sousaivan/kern/date"
+import { addDays } from "@lithekit/date"
 
 const original = new Date(2026, 0, 1)
 const tomorrow = addDays(original, 1)
@@ -257,7 +257,7 @@ purpose.
 
 Many bugs come from passing a value in the wrong unit:
 
-| Area | Unit used by Kern | Example |
+| Area | Unit used by Lithekit | Example |
 | --- | --- | --- |
 | Async delays | Milliseconds | `sleep(1000)` waits about one second. |
 | Money | Integer minor units | For two-decimal EUR, `1099` commonly means €10.99. |
@@ -282,6 +282,6 @@ the same.
 
 1. Finish [Installation](./installation/).
 2. Follow the [Quick start](./quick-start/) once without changing it.
-3. Read [Core ideas](./core-ideas/) for Kern's shared rules.
+3. Read [Core ideas](./core-ideas/) for Lithekit's shared rules.
 4. Use [All helpers](../../modules/) to find one function for your current problem.
 5. Open the [Glossary](../../concepts/glossary/) whenever a term is unfamiliar.

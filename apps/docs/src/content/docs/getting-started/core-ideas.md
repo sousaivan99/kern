@@ -1,21 +1,21 @@
 ---
 title: Core ideas
-description: Six simple concepts that make every Kern module predictable.
+description: Six simple concepts that make every Lithekit module predictable.
 sidebar:
   order: 3
 ---
 
-You do not need advanced TypeScript knowledge to use Kern. These six ideas explain most of the
+You do not need advanced TypeScript knowledge to use Lithekit. These six ideas explain most of the
 library.
 
 ## 1. Import from the module you need
 
 ```ts
-import { unique } from "@sousaivan/kern/array"
-import { formatMoney } from "@sousaivan/kern/money"
+import { unique } from "@lithekit/array"
+import { formatMoney } from "@lithekit/money"
 ```
 
-Kern groups helpers by responsibility. A money helper will not secretly validate an application
+Lithekit groups helpers by responsibility. A money helper will not secretly validate an application
 model, and a date helper will not silently perform timezone conversion.
 
 ## 2. Untrusted input starts as `unknown`
@@ -23,7 +23,7 @@ model, and a date helper will not silently perform timezone conversion.
 `unknown` means “TypeScript does not know what this is yet.” Validate it before using it:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Message = object({ text: string().min(1) })
 const input: unknown = JSON.parse('{"text":"hello"}')
@@ -36,11 +36,11 @@ This is safer than `as Message`, which only silences TypeScript and performs no 
 
 ## 3. Functions do not mutate your input
 
-Unless an API explicitly says otherwise, Kern returns a new value:
+Unless an API explicitly says otherwise, Lithekit returns a new value:
 
 ```ts
-import { addDays } from "@sousaivan/kern/date"
-import { unique } from "@sousaivan/kern/array"
+import { addDays } from "@lithekit/date"
+import { unique } from "@lithekit/array"
 
 const originalDate = new Date(2026, 0, 1)
 const laterDate = addDays(originalDate, 3)
@@ -70,7 +70,7 @@ These defaults make simple code safe, while named options expose advanced behavi
 A validation failure is normal data:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Message = object({ text: string().min(1) })
 const result = Message.safeParse({ text: "" })
@@ -87,7 +87,7 @@ page lists these cases.
 The common path should stay short:
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const Name = string().trim().min(2)
 ```
@@ -95,7 +95,7 @@ const Name = string().trim().min(2)
 Add customization only when the application needs it:
 
 ```ts
-import { string } from "@sousaivan/kern/validation"
+import { string } from "@lithekit/validation"
 
 const Name = string()
   .trim()

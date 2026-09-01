@@ -1,7 +1,7 @@
 import * as v from "valibot"
 import * as z from "zod"
-import kernMetadata from "../../packages/kern/package.json"
-import { array, number, object, string } from "../../packages/kern/src/validation/index.js"
+import kernMetadata from "../../packages/validation/package.json"
+import { array, number, object, string } from "../../packages/validation/src/index.js"
 import valibotMetadata from "../node_modules/valibot/package.json"
 import zodMetadata from "../node_modules/zod/package.json"
 import { type BenchmarkCase, type BenchmarkDefinition, invariant } from "./harness.js"
@@ -218,12 +218,18 @@ const verifyVariedObject = (result: unknown): void => {
   invariant(Object.keys(result).length === 3, "varied parse must retain three fields")
 }
 
-const verifyKernIssues = (result: unknown, expected: number): void => {
-  invariant(typeof result === "object" && result !== null, "Kern safeParse must return a result")
-  invariant("success" in result && result.success === false, "Kern validation must fail")
-  invariant("issues" in result && Array.isArray(result.issues), "Kern failure must contain issues")
+const verifyLithekitIssues = (result: unknown, expected: number): void => {
+  invariant(
+    typeof result === "object" && result !== null,
+    "Lithekit safeParse must return a result",
+  )
+  invariant("success" in result && result.success === false, "Lithekit validation must fail")
+  invariant(
+    "issues" in result && Array.isArray(result.issues),
+    "Lithekit failure must contain issues",
+  )
   if ("issues" in result && Array.isArray(result.issues)) {
-    invariant(result.issues.length === expected, `Kern must return ${expected} issue(s)`)
+    invariant(result.issues.length === expected, `Lithekit must return ${expected} issue(s)`)
   }
 }
 
@@ -248,7 +254,7 @@ const verifyValibotIssues = (result: unknown, expected: number): void => {
 interface ValidationAdapter {
   readonly abortEarly?: (input: unknown) => unknown
   readonly constructUser: () => unknown
-  readonly library: "Kern" | "Valibot" | "Zod"
+  readonly library: "Lithekit" | "Valibot" | "Zod"
   readonly parseDefaults: () => unknown
   readonly parseLabel: (input: unknown) => unknown
   readonly parseNested: (input: unknown) => unknown
@@ -278,7 +284,7 @@ const adapters: readonly ValidationAdapter[] = [
         email: string().email(),
         age: number().integer().min(18),
       }),
-    library: "Kern",
+    library: "Lithekit",
     parseDefaults: () => kernDefaults.parse(defaultInput),
     parseLabel: (input) => kernLabel.parse(input),
     parseNested: (input) => kernNested.parse(input),
@@ -298,7 +304,7 @@ const adapters: readonly ValidationAdapter[] = [
     safeParseUsers: (input) => kernUsers.safeParse(input),
     safeParseWide: (input) => kernWide.safeParse(input),
     standardUser: (input) => kernUser["~standard"].validate(input),
-    verifyIssues: verifyKernIssues,
+    verifyIssues: verifyLithekitIssues,
     version: kernVersion,
   },
   {

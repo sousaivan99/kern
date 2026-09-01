@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "stripInternal": true,
+    "types": ["react"],
+    "paths": { "@lithekit/form": ["../form/dist/index.d.ts"] }
+  },
+  "include": ["src"],
+  "exclude": ["tests"]
+}

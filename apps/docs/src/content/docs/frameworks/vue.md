@@ -1,12 +1,12 @@
 ---
 title: Vue
-description: Learn each Kern module through a small, independent Vue component.
+description: Learn each Lithekit module through a small, independent Vue component.
 ---
 
-Install Kern in an existing Vue 3 project:
+Install Lithekit in an existing Vue 3 project:
 
 ```bash
-npm install @sousaivan/kern
+npm install @lithekit/array @lithekit/async @lithekit/date @lithekit/money @lithekit/number @lithekit/object @lithekit/string @lithekit/validation
 ```
 
 No Vue plugin or `app.use()` call is required. Each section below is a separate single-file
@@ -21,7 +21,7 @@ because an invalid value is normal while someone edits a form.
 ```vue
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Contact = object({
   email: string().trim().email(),
@@ -59,7 +59,7 @@ total first and format it only for the template.
 <!-- framework-test: vue/src/examples/MoneyExample.vue -->
 ```vue
 <script setup lang="ts">
-import { formatMoney, sumMoney } from "@sousaivan/kern/money"
+import { formatMoney, sumMoney } from "@lithekit/money"
 
 const pricesMinor = [1099, 250, 450]
 const totalMinor = sumMoney(pricesMinor)
@@ -82,7 +82,7 @@ and leaves `orderedAt` unchanged.
 <!-- framework-test: vue/src/examples/DateExample.vue -->
 ```vue
 <script setup lang="ts">
-import { addDays, formatDate } from "@sousaivan/kern/date"
+import { addDays, formatDate } from "@lithekit/date"
 
 const orderedAt = new Date("2026-08-16T12:00:00Z")
 const deliveryAt = addDays(orderedAt, 2)
@@ -110,7 +110,7 @@ numbers before creating localized display text.
 <!-- framework-test: vue/src/examples/NumberExample.vue -->
 ```vue
 <script setup lang="ts">
-import { formatPercentage, percentageOfTotal } from "@sousaivan/kern/number"
+import { formatPercentage, percentageOfTotal } from "@lithekit/number"
 
 const completed = 3
 const total = 4
@@ -133,7 +133,7 @@ keep the original name for display.
 <!-- framework-test: vue/src/examples/StringExample.vue -->
 ```vue
 <script setup lang="ts">
-import { slugify } from "@sousaivan/kern/string"
+import { slugify } from "@lithekit/string"
 
 const product = { id: "course-1", name: "Crème Brûlée Course" }
 const slug = slugify(product.name)
@@ -154,7 +154,7 @@ Use [`array`](../../modules/array/) before `v-for` when a collection needs a sem
 <!-- framework-test: vue/src/examples/ArrayExample.vue -->
 ```vue
 <script setup lang="ts">
-import { uniqueBy } from "@sousaivan/kern/array"
+import { uniqueBy } from "@lithekit/array"
 
 const inventory = [
   { id: "coffee", name: "Coffee" },
@@ -184,7 +184,7 @@ template never receives the internal note.
 <!-- framework-test: vue/src/examples/ObjectExample.vue -->
 ```vue
 <script setup lang="ts">
-import { pick } from "@sousaivan/kern/object"
+import { pick } from "@lithekit/object"
 
 const account = {
   id: "user-1",
@@ -210,7 +210,7 @@ to Vue's component lifecycle.
 ```vue
 <script setup lang="ts">
 import { onUnmounted, ref } from "vue"
-import { debounce } from "@sousaivan/kern/async"
+import { debounce } from "@lithekit/async"
 
 const query = ref("")
 const settledQuery = ref("")
@@ -248,5 +248,5 @@ npx vue-tsc --noEmit
 npm run build
 ```
 
-Kern's framework suite type-checks every mini-component against the packed package. It also builds
+Lithekit's framework suite type-checks every mini-component against the packed package. It also builds
 client and SSR bundles and exercises the validation example in Chromium.

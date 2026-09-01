@@ -1,15 +1,15 @@
 ---
 title: React
-description: Learn each Kern module through a small, independent React component.
+description: Learn each Lithekit module through a small, independent React component.
 ---
 
-Install Kern in an existing React application:
+Install Lithekit in an existing React application:
 
 ```bash
-npm install @sousaivan/kern
+npm install @lithekit/array @lithekit/async @lithekit/date @lithekit/money @lithekit/number @lithekit/object @lithekit/string @lithekit/validation
 ```
 
-Kern does not need a provider, hook, or React adapter. Each section below is a separate example, so
+Lithekit does not need a provider, hook, or React adapter. Each section below is a separate example, so
 you can study and copy one module at a time. The examples use direct subpath imports to keep module
 ownership and tree-shaking clear.
 
@@ -22,7 +22,7 @@ issue message.
 <!-- framework-test: react/src/App.tsx -->
 ```tsx
 import { useState } from "react"
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Contact = object({
   email: string().trim().email(),
@@ -63,7 +63,7 @@ three prices and formats the result only when it reaches the UI.
 
 <!-- framework-test: react/src/examples/MoneyExample.tsx -->
 ```tsx
-import { formatMoney, sumMoney } from "@sousaivan/kern/money"
+import { formatMoney, sumMoney } from "@lithekit/money"
 
 const pricesMinor = [1099, 250, 450]
 
@@ -85,7 +85,7 @@ without mutating the original order date.
 
 <!-- framework-test: react/src/examples/DateExample.tsx -->
 ```tsx
-import { addDays, formatDate } from "@sousaivan/kern/date"
+import { addDays, formatDate } from "@lithekit/date"
 
 const orderedAt = new Date("2026-08-16T12:00:00Z")
 
@@ -113,7 +113,7 @@ then create the localized display string.
 
 <!-- framework-test: react/src/examples/NumberExample.tsx -->
 ```tsx
-import { formatPercentage, percentageOfTotal } from "@sousaivan/kern/number"
+import { formatPercentage, percentageOfTotal } from "@lithekit/number"
 
 export function NumberExample() {
   const completed = 3
@@ -135,7 +135,7 @@ display and derive a readable route slug separately.
 
 <!-- framework-test: react/src/examples/StringExample.tsx -->
 ```tsx
-import { slugify } from "@sousaivan/kern/string"
+import { slugify } from "@lithekit/string"
 
 const product = { id: "course-1", name: "Crème Brûlée Course" }
 
@@ -155,7 +155,7 @@ Use [`array`](../../modules/array/) before JSX when the collection needs a seman
 
 <!-- framework-test: react/src/examples/ArrayExample.tsx -->
 ```tsx
-import { uniqueBy } from "@sousaivan/kern/array"
+import { uniqueBy } from "@lithekit/array"
 
 const inventory = [
   { id: "coffee", name: "Coffee" },
@@ -186,7 +186,7 @@ keeps an internal note out of the component's view model.
 
 <!-- framework-test: react/src/examples/ObjectExample.tsx -->
 ```tsx
-import { pick } from "@sousaivan/kern/object"
+import { pick } from "@lithekit/object"
 
 const account = {
   id: "user-1",
@@ -212,7 +212,7 @@ should be created once and cancelled when the component unmounts.
 <!-- framework-test: react/src/examples/AsyncExample.tsx -->
 ```tsx
 import { useEffect, useMemo, useState } from "react"
-import { debounce } from "@sousaivan/kern/async"
+import { debounce } from "@lithekit/async"
 
 export function AsyncExample() {
   const [query, setQuery] = useState("")
@@ -250,5 +250,5 @@ npx tsc --noEmit
 npm run build
 ```
 
-Kern's framework suite type-checks every mini-example against the packed package. It also builds
+Lithekit's framework suite type-checks every mini-example against the packed package. It also builds
 client and SSR bundles and exercises the validation example in Chromium.

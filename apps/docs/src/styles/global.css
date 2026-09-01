@@ -46,19 +46,19 @@
   --sl-color-accent-high: #f6b88d;
   --sl-color-text-accent: #f6b88d;
   --sl-color-bg-inline-code: #343438;
-  --kern-color-text-strong: #f4f4f5;
-  --kern-color-text-body: #d4d4d8;
-  --kern-color-text-muted: #a8a8b0;
-  --kern-color-text-elevated: #b8b8bd;
-  --kern-color-interactive: #f6b88d;
-  --kern-color-focus: #f6b88d;
-  --kern-color-functional-border: #85858d;
-  --kern-color-selection-bg: #713918;
-  --kern-color-selection-text: #ffffff;
-  --kern-color-syntax-keyword: #c6a0e8;
-  --kern-color-syntax-string: #d5a574;
-  --kern-color-syntax-function: #8dbde7;
-  --kern-color-syntax-number: #a3c985;
+  --lithekit-color-text-strong: #f4f4f5;
+  --lithekit-color-text-body: #d4d4d8;
+  --lithekit-color-text-muted: #a8a8b0;
+  --lithekit-color-text-elevated: #b8b8bd;
+  --lithekit-color-interactive: #f6b88d;
+  --lithekit-color-focus: #f6b88d;
+  --lithekit-color-functional-border: #85858d;
+  --lithekit-color-selection-bg: #713918;
+  --lithekit-color-selection-text: #ffffff;
+  --lithekit-color-syntax-keyword: #c6a0e8;
+  --lithekit-color-syntax-string: #d5a574;
+  --lithekit-color-syntax-function: #8dbde7;
+  --lithekit-color-syntax-number: #a3c985;
 }
 
 :root[data-theme="light"] {
@@ -83,29 +83,29 @@
   --sl-color-text-accent: #7c3214;
   --sl-color-text-invert: #ffffff;
   --sl-color-bg-inline-code: #f1ece7;
-  --kern-color-text-strong: #18181b;
-  --kern-color-text-body: #3f3f46;
-  --kern-color-text-muted: #52525b;
-  --kern-color-text-elevated: #52525b;
-  --kern-color-interactive: #7c3214;
-  --kern-color-focus: #7c3214;
-  --kern-color-functional-border: #71717a;
-  --kern-color-selection-bg: #f0aa7d;
-  --kern-color-selection-text: #18181b;
-  --kern-color-syntax-keyword: #694082;
-  --kern-color-syntax-string: #7a4f2b;
-  --kern-color-syntax-function: #245a86;
-  --kern-color-syntax-number: #365c26;
+  --lithekit-color-text-strong: #18181b;
+  --lithekit-color-text-body: #3f3f46;
+  --lithekit-color-text-muted: #52525b;
+  --lithekit-color-text-elevated: #52525b;
+  --lithekit-color-interactive: #7c3214;
+  --lithekit-color-focus: #7c3214;
+  --lithekit-color-functional-border: #71717a;
+  --lithekit-color-selection-bg: #f0aa7d;
+  --lithekit-color-selection-text: #18181b;
+  --lithekit-color-syntax-keyword: #694082;
+  --lithekit-color-syntax-string: #7a4f2b;
+  --lithekit-color-syntax-function: #245a86;
+  --lithekit-color-syntax-number: #365c26;
 }
 
 html {
   scroll-behavior: smooth;
-  scrollbar-color: var(--kern-color-functional-border) transparent;
+  scrollbar-color: var(--lithekit-color-functional-border) transparent;
 }
 
 body {
   background: var(--sl-color-bg);
-  color: var(--kern-color-text-body);
+  color: var(--lithekit-color-text-body);
   font-size: 1rem;
   text-rendering: optimizeLegibility;
 }
@@ -117,7 +117,7 @@ main .expressive-code:has(figure.frame button[data-code*="console.log"]) {
   gap: 0.75rem;
 }
 
-.kern-example-console {
+.lithekit-example-console {
   display: grid;
   overflow: hidden;
   box-sizing: border-box;
@@ -126,10 +126,10 @@ main .expressive-code:has(figure.frame button[data-code*="console.log"]) {
   border: 1px solid var(--sl-color-hairline-light);
   border-radius: 0.35rem;
   background: var(--sl-color-bg);
-  color: var(--kern-color-text-body);
+  color: var(--lithekit-color-text-body);
 }
 
-.kern-example-console__header {
+.lithekit-example-console__header {
   display: flex;
   min-width: 0;
   align-items: center;
@@ -140,8 +140,8 @@ main .expressive-code:has(figure.frame button[data-code*="console.log"]) {
   padding: 0.5rem 0.65rem 0.5rem 0.9rem;
 }
 
-.kern-example-console__label {
-  color: var(--kern-color-text-muted);
+.lithekit-example-console__label {
+  color: var(--lithekit-color-text-muted);
   font-family: var(--__sl-font-mono);
   font-size: 0.75rem;
   font-weight: 650;
@@ -149,40 +149,40 @@ main .expressive-code:has(figure.frame button[data-code*="console.log"]) {
   text-transform: uppercase;
 }
 
-.kern-example-console__run {
+.lithekit-example-console__run {
   min-width: 7.25rem;
   min-height: 2.1rem;
-  border: 1px solid var(--kern-color-functional-border);
+  border: 1px solid var(--lithekit-color-functional-border);
   border-radius: 0.3rem;
   background: transparent;
   padding: 0.35rem 0.65rem;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font: inherit;
   font-size: 0.8125rem;
   font-weight: 650;
   cursor: pointer;
 }
 
-.kern-example-console__run:hover:not(:disabled) {
-  border-color: var(--kern-color-interactive);
-  color: var(--kern-color-interactive);
+.lithekit-example-console__run:hover:not(:disabled) {
+  border-color: var(--lithekit-color-interactive);
+  color: var(--lithekit-color-interactive);
 }
 
-.kern-example-console__run:disabled {
+.lithekit-example-console__run:disabled {
   cursor: wait;
   opacity: 0.7;
 }
 
-.kern-example-console[data-state="unavailable"] .kern-example-console__run:disabled {
+.lithekit-example-console[data-state="unavailable"] .lithekit-example-console__run:disabled {
   cursor: not-allowed;
 }
 
-.kern-example-console__output {
+.lithekit-example-console__output {
   display: block;
   overflow: auto;
   min-width: 0;
   padding: 0.9rem;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font-family: var(--__sl-font-mono);
   font-size: 0.8125rem;
   line-height: 1.55;
@@ -202,12 +202,12 @@ html:not([data-has-sidebar]) main .content-panel > .sl-container {
 }
 
 ::selection {
-  background: var(--kern-color-selection-bg);
-  color: var(--kern-color-selection-text);
+  background: var(--lithekit-color-selection-bg);
+  color: var(--lithekit-color-selection-text);
 }
 
 :where(a, button, summary, select, input, textarea, [tabindex]):focus-visible {
-  outline: 3px solid var(--kern-color-focus);
+  outline: 3px solid var(--lithekit-color-focus);
   outline-offset: 3px;
 }
 
@@ -246,7 +246,7 @@ html:not([data-has-sidebar]) main .content-panel > .sl-container {
 }
 
 .sidebar-content .group-label > .large {
-  color: var(--kern-color-text-muted);
+  color: var(--lithekit-color-text-muted);
   font-size: 0.75rem;
   font-weight: 720;
   letter-spacing: 0.105em;
@@ -266,7 +266,7 @@ html:not([data-has-sidebar]) main .content-panel > .sl-container {
 .sidebar-content a[aria-current="page"] {
   box-shadow: inset 2px 0 0 var(--sl-color-accent);
   background: transparent;
-  color: var(--kern-color-interactive);
+  color: var(--lithekit-color-interactive);
   font-weight: 650;
 }
 
@@ -278,15 +278,15 @@ site-search button[data-open-modal] {
 }
 
 site-search button[data-open-modal]:hover {
-  border-color: var(--kern-color-functional-border);
+  border-color: var(--lithekit-color-functional-border);
 }
 
 site-search kbd {
-  border: 1px solid var(--kern-color-functional-border);
+  border: 1px solid var(--lithekit-color-functional-border);
   border-radius: 0.3rem;
   background: var(--sl-color-gray-6);
   padding: 0.08rem 0.3rem;
-  color: var(--kern-color-text-muted);
+  color: var(--lithekit-color-text-muted);
   font-size: 0.75rem;
   box-shadow: none;
 }
@@ -313,7 +313,7 @@ html[data-has-sidebar] main > .content-panel + .content-panel {
 }
 
 .sl-markdown-content > p:first-child:not(:where(.not-content *)) {
-  color: var(--kern-color-text-body);
+  color: var(--lithekit-color-text-body);
   font-size: 1.05rem;
   line-height: 1.75;
 }
@@ -329,7 +329,7 @@ html[data-has-sidebar] main > .content-panel + .content-panel {
 }
 
 .sl-markdown-content a:not(:where(.not-content *)) {
-  color: var(--kern-color-interactive);
+  color: var(--lithekit-color-interactive);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
@@ -337,7 +337,7 @@ html[data-has-sidebar] main > .content-panel + .content-panel {
 
 .sl-markdown-content code:not(:where(.not-content *)) {
   border-radius: 0.3rem;
-  color: var(--kern-color-interactive);
+  color: var(--lithekit-color-interactive);
   font-weight: 520;
 }
 
@@ -400,8 +400,12 @@ html[data-has-sidebar] main > .content-panel + .content-panel {
   border-inline-start-width: 3px;
 }
 
+:root:not([data-theme="light"]) .starlight-aside--caution code {
+  color: var(--sl-color-gray-1);
+}
+
 starlight-toc h2 {
-  color: var(--kern-color-text-muted);
+  color: var(--lithekit-color-text-muted);
   font-size: 0.75rem;
   font-weight: 720;
   letter-spacing: 0.1em;
@@ -409,7 +413,7 @@ starlight-toc h2 {
 }
 
 starlight-toc a[aria-current="true"] {
-  color: var(--kern-color-interactive);
+  color: var(--lithekit-color-interactive);
   font-weight: 620;
 }
 
@@ -473,9 +477,9 @@ starlight-toc a[aria-current="true"] {
 @media (prefers-contrast: more) {
   :root,
   :root[data-theme="light"] {
-    --kern-color-text-muted: var(--kern-color-text-body);
-    --sl-color-hairline: var(--kern-color-functional-border);
-    --sl-color-hairline-light: var(--kern-color-functional-border);
+    --lithekit-color-text-muted: var(--lithekit-color-text-body);
+    --sl-color-hairline: var(--lithekit-color-functional-border);
+    --sl-color-hairline-light: var(--lithekit-color-functional-border);
   }
 }
 
@@ -491,8 +495,8 @@ starlight-toc a[aria-current="true"] {
 
   :is(
     site-search button[data-open-modal],
-    .kern-install-command,
-    .kern-example,
+    .lithekit-install-command,
+    .lithekit-example,
     .sl-markdown-content .expressive-code figure,
     .sl-markdown-content table,
     .pagination-links a

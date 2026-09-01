@@ -1,3 +1,3 @@
-import { withoutNullish } from "@sousaivan/kern/array"
+import { withoutNullish } from "@lithekit/array"
 
 export const present = withoutNullish

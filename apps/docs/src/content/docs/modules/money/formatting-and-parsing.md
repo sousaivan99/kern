@@ -11,7 +11,7 @@ function converts currencies.
 ## Find the native currency precision
 
 ```ts
-import { currencyMinorUnitDigits } from "@sousaivan/kern/money"
+import { currencyMinorUnitDigits } from "@lithekit/money"
 
 console.log("EUR:", currencyMinorUnitDigits("EUR", "en-US")) // commonly 2
 console.log("JPY:", currencyMinorUnitDigits("JPY", "ja-JP")) // commonly 0
@@ -31,7 +31,7 @@ different storage scale; provider rules take precedence at that integration boun
 ## Format integer minor units
 
 ```ts
-import { formatMoney } from "@sousaivan/kern/money"
+import { formatMoney } from "@lithekit/money"
 
 console.log(formatMoney(1_099, "EUR", { locale: "en-US" }))
 console.log(formatMoney(1_099, "JPY", { locale: "ja-JP" }))
@@ -50,7 +50,7 @@ converting the integer to an imprecise floating-point major-unit number. Values 
 the safe-integer range.
 
 `MoneyFormatOptions` accepts `locale` plus native `Intl.NumberFormatOptions`, except `style` and
-`currency`, which Kern fixes to the supplied currency:
+`currency`, which Lithekit fixes to the supplied currency:
 
 | Category | Common options |
 | --- | --- |
@@ -61,7 +61,7 @@ the safe-integer range.
 | Notation | `notation`, `compactDisplay` |
 | Rounding/display | `roundingMode`, `roundingPriority`, `roundingIncrement`, `trailingZeroDisplay` when supported by the runtime |
 
-These are native **display options**, not Kern money-arithmetic options. For example, formatter
+These are native **display options**, not Lithekit money-arithmetic options. For example, formatter
 rounding changes displayed text; it does not return a new integer amount. Use `roundMoney` when the
 stored/settled amount itself must change.
 
@@ -72,7 +72,7 @@ used.
 ## Parse strict localized currency text
 
 ```ts
-import { parseMoney } from "@sousaivan/kern/money"
+import { parseMoney } from "@lithekit/money"
 
 console.log(parseMoney("1.234,56 €", "EUR", { locale: "de-DE" })) // 123456
 console.log(parseMoney("$1,234.56", "USD", { locale: "en-US" })) // 123456

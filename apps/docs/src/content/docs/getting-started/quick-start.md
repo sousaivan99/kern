@@ -11,7 +11,7 @@ person, and creates an estimated delivery date.
 ## 1. Describe valid input
 
 ```ts
-import { array, enumeration, number, object, string, unknown } from "@sousaivan/kern/validation"
+import { array, enumeration, number, object, string, unknown } from "@lithekit/validation"
 
 const Order = object({
   customer: object({
@@ -50,7 +50,7 @@ Network requests, JSON files, form submissions, and environment variables should
 `unknown` until they have been checked.
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Order = object({
   customer: object({ name: string(), email: string().email() }),
@@ -79,7 +79,7 @@ Use `safeParse()` when invalid input is expected and you want to show or return 
 ## 3. Calculate money in minor units
 
 ```ts
-import { applyDiscount, multiplyMoney, sumMoney } from "@sousaivan/kern/money"
+import { applyDiscount, multiplyMoney, sumMoney } from "@lithekit/money"
 
 const order = {
   items: [{ unitPriceMinor: 12_999, quantity: 1 }],
@@ -96,14 +96,14 @@ const total = applyDiscount(subtotal, order.discountPercent)
 Money values are integer minor units. For EUR, `12_999` means €129.99. Keeping integer units avoids
 the usual floating-point problem where values such as `0.1 + 0.2` are not exact.
 
-Kern validates every money input and result as a safe integer. Operations that can produce a
+Lithekit validates every money input and result as a safe integer. Operations that can produce a
 fraction use exact rounding; the default is nearest with ties away from zero.
 
 ## 4. Format output and calculate a date
 
 ```ts
-import { addDays, formatDate } from "@sousaivan/kern/date"
-import { formatMoney } from "@sousaivan/kern/money"
+import { addDays, formatDate } from "@lithekit/date"
+import { formatMoney } from "@lithekit/money"
 
 const order = { customer: { name: "Ada" }, currency: "EUR" }
 const total = 11_699
@@ -123,10 +123,10 @@ helper explicitly says UTC.
 ## Complete example
 
 ```ts
-import { addDays, formatDate } from "@sousaivan/kern/date"
-import { withoutNullish } from "@sousaivan/kern/array"
-import { applyDiscount, formatMoney, multiplyMoney, sumMoney } from "@sousaivan/kern/money"
-import { array, enumeration, number, object, string, unknown } from "@sousaivan/kern/validation"
+import { addDays, formatDate } from "@lithekit/date"
+import { withoutNullish } from "@lithekit/array"
+import { applyDiscount, formatMoney, multiplyMoney, sumMoney } from "@lithekit/money"
+import { array, enumeration, number, object, string, unknown } from "@lithekit/validation"
 
 const Order = object({
   customer: object({

@@ -9,7 +9,7 @@ sidebar:
 import ValidationPlayground from "../../../../components/ValidationPlayground.astro";
 
 TypeScript checks code while you develop, but its types disappear at runtime. Data from HTTP,
-forms, JSON, storage, and environment variables can still have the wrong shape. A Kern schema checks
+forms, JSON, storage, and environment variables can still have the wrong shape. A Lithekit schema checks
 that data at runtime and tells TypeScript the output type after success.
 
 ## Start here: a schema is a reusable set of rules
@@ -18,7 +18,7 @@ Imagine a form with one required name. The schema describes the rule; `safeParse
 real value:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Person = object({
   name: string().trim().min(1),
@@ -52,7 +52,7 @@ itself.
 ## Your first schema
 
 ```ts
-import { enumeration, number, object, string } from "@sousaivan/kern/validation"
+import { enumeration, number, object, string } from "@lithekit/validation"
 
 const User = object({
   name: string().trim().min(2),
@@ -79,7 +79,7 @@ You declared the rules once. That same `User` value provides:
 - schema composition methods;
 - Standard Schema V1 interoperability.
 
-Kern does not generate or auto-import a separate interface. Most code simply uses the type of the
+Lithekit does not generate or auto-import a separate interface. Most code simply uses the type of the
 parsed return value.
 
 ## `safeParse` or `parse`?
@@ -87,7 +87,7 @@ parsed return value.
 Use `safeParse()` when invalid input is an expected outcome:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const Login = object({ email: string().email() })
 const goodResult = Login.safeParse({ email: "ada@example.com" })
@@ -103,7 +103,7 @@ console.log("Failure:", badResult)
 Use `parse()` when invalid input means the current operation cannot continue:
 
 ```ts
-import { object, string, ValidationError } from "@sousaivan/kern/validation"
+import { object, string, ValidationError } from "@lithekit/validation"
 
 const Login = object({ email: string().email() })
 
@@ -133,7 +133,7 @@ Both methods infer the same output and accept `{ abortEarly?, maxIssues? }`.
 ## Schemas do not coerce by default
 
 ```ts
-import { number } from "@sousaivan/kern/validation"
+import { number } from "@lithekit/validation"
 
 console.log("Success:", number().safeParse(42))
 console.log("Failure:", number().safeParse("42"))
@@ -166,7 +166,7 @@ Every schema supports `.optional()`, `.nullable()`, `.default()`, `.refine()`, `
 Object schemas strip unknown keys by default:
 
 ```ts
-import { object, string } from "@sousaivan/kern/validation"
+import { object, string } from "@lithekit/validation"
 
 const User = object({ name: string() })
 
@@ -185,9 +185,9 @@ preserved when object schemas are composed.
    ordering, and input/output changes.
 4. [Errors and inference](./errors-and-inference/) explains issue metadata, issue limits, named
    types, and Standard Schema.
-5. [Validation benchmarks](../../measurements/validation-benchmarks/) records the equivalent Kern,
+5. [Validation benchmarks](../../measurements/validation-benchmarks/) records the equivalent Lithekit,
    Zod, and Valibot workloads, exact machine-local results, and reproduction protocol.
-6. [Performance internals](../../advanced/performance-internals/) explains Kern's private fast and
+6. [Performance internals](../../advanced/performance-internals/) explains Lithekit's private fast and
    diagnostic paths, safety boundaries, and bundle-size tradeoffs.
 
 ## Common beginner mistakes
@@ -212,7 +212,7 @@ preserved when object schemas are composed.
 Defaults and transforms can make a schema's accepted input different from its parsed output:
 
 ```ts
-import { type InferInput, type InferOutput, object, string } from "@sousaivan/kern/validation"
+import { type InferInput, type InferOutput, object, string } from "@lithekit/validation"
 
 const Settings = object({
   theme: string().default("system"),

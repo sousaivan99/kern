@@ -7,7 +7,7 @@ import { runWorkflow } from "../scripts/shared/workflow.js"
 const withWorker = async <T>(
   callback: (root: string, worker: string) => Promise<T>,
 ): Promise<T> => {
-  const root = await mkdtemp(join(tmpdir(), "kern-workflow-"))
+  const root = await mkdtemp(join(tmpdir(), "lithekit-workflow-"))
   const worker = join(root, "worker.mjs")
   await writeFile(
     worker,

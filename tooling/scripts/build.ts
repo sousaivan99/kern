@@ -8,7 +8,7 @@ await runWorkflow({
   cwd: repositoryRoot,
   name: "workspace builds",
   steps: [
-    { command: run("build:kern"), name: "Kern package" },
+    { command: run("build:packages"), name: "Lithekit packages" },
     { command: run("build:docs"), name: "Documentation site" },
   ],
 })

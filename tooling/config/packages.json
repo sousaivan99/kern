@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "id": "validation",
+      "name": "@lithekit/validation",
+      "directory": "packages/validation",
+      "docsRoute": "modules/validation",
+      "gzipBudgetBytes": 5120,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "validation",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "money",
+      "name": "@lithekit/money",
+      "directory": "packages/money",
+      "docsRoute": "modules/money",
+      "gzipBudgetBytes": 3200,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "money",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "date",
+      "name": "@lithekit/date",
+      "directory": "packages/date",
+      "docsRoute": "modules/date",
+      "gzipBudgetBytes": 2048,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "date",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "number",
+      "name": "@lithekit/number",
+      "directory": "packages/number",
+      "docsRoute": "modules/number",
+      "gzipBudgetBytes": 1500,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "number",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "string",
+      "name": "@lithekit/string",
+      "directory": "packages/string",
+      "docsRoute": "modules/string",
+      "gzipBudgetBytes": 2048,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "string",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "array",
+      "name": "@lithekit/array",
+      "directory": "packages/array",
+      "docsRoute": "modules/array",
+      "gzipBudgetBytes": 1500,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "array",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "object",
+      "name": "@lithekit/object",
+      "directory": "packages/object",
+      "docsRoute": "modules/object",
+      "gzipBudgetBytes": 2048,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "object",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "async",
+      "name": "@lithekit/async",
+      "directory": "packages/async",
+      "docsRoute": "modules/async",
+      "gzipBudgetBytes": 2500,
+      "runtime": "universal",
+      "runtimeTargets": ["node", "bun", "deno", "browser"],
+      "releaseGroup": "async",
+      "publishOrder": 10,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "form",
+      "name": "@lithekit/form",
+      "directory": "packages/form",
+      "docsRoute": "modules/form",
+      "gzipBudgetBytes": 8192,
+      "runtime": "browser",
+      "runtimeTargets": ["browser"],
+      "releaseGroup": "form",
+      "publishOrder": 20,
+      "frameworkPeers": {}
+    },
+    {
+      "id": "form-vue",
+      "name": "@lithekit/form-vue",
+      "directory": "packages/form-vue",
+      "docsRoute": "modules/form/vue",
+      "gzipBudgetBytes": 10240,
+      "runtime": "vue",
+      "runtimeTargets": ["node-ssr", "browser"],
+      "releaseGroup": "form",
+      "publishOrder": 30,
+      "externals": ["@lithekit/form", "vue"],
+      "frameworkPeers": { "vue": ">=3.3" }
+    },
+    {
+      "id": "form-react",
+      "name": "@lithekit/form-react",
+      "directory": "packages/form-react",
+      "docsRoute": "modules/form/react",
+      "gzipBudgetBytes": 10240,
+      "runtime": "react",
+      "runtimeTargets": ["node-ssr", "browser"],
+      "releaseGroup": "form",
+      "publishOrder": 30,
+      "externals": ["@lithekit/form", "react"],
+      "frameworkPeers": { "react": ">=18" }
+    }
+  ]
+}

@@ -4,13 +4,13 @@ import { scoreComparison } from "../benchmarks/score.js"
 describe("benchmark comparison score", () => {
   test("splits points inside the noise band and counts clear wins", () => {
     const score = scoreComparison([
-      { library: "Kern", medianNanoseconds: 100, scenario: "near tie" },
+      { library: "Lithekit", medianNanoseconds: 100, scenario: "near tie" },
       { library: "Zod", medianNanoseconds: 110, scenario: "near tie" },
       { library: "Valibot", medianNanoseconds: 150, scenario: "near tie" },
-      { library: "Kern", medianNanoseconds: 100, scenario: "clear winner" },
+      { library: "Lithekit", medianNanoseconds: 100, scenario: "clear winner" },
       { library: "Zod", medianNanoseconds: 130, scenario: "clear winner" },
       { library: "Valibot", medianNanoseconds: 90, scenario: "clear winner" },
-      { library: "Kern", medianNanoseconds: 80, scenario: "unsupported case" },
+      { library: "Lithekit", medianNanoseconds: 80, scenario: "unsupported case" },
       { library: "Zod", scenario: "unsupported case", unsupported: "not available" },
       { library: "Valibot", medianNanoseconds: 70, scenario: "unsupported case" },
     ])
@@ -26,7 +26,7 @@ describe("benchmark comparison score", () => {
         clearWinScenarios: [],
         clearWins: 0,
         coverage: 3,
-        library: "Kern",
+        library: "Lithekit",
         score: 0.5,
         slower: 1,
         tiedFastest: 1,
@@ -58,8 +58,8 @@ describe("benchmark comparison score", () => {
   test("rejects duplicate measurements and invalid tie bands", () => {
     expect(() =>
       scoreComparison([
-        { library: "Kern", medianNanoseconds: 1, scenario: "parse" },
-        { library: "Kern", medianNanoseconds: 2, scenario: "parse" },
+        { library: "Lithekit", medianNanoseconds: 1, scenario: "parse" },
+        { library: "Lithekit", medianNanoseconds: 2, scenario: "parse" },
       ]),
     ).toThrow("Duplicate comparison measurement")
     expect(() => scoreComparison([], -1)).toThrow(RangeError)

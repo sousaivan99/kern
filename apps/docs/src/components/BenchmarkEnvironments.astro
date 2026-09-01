@@ -21,9 +21,12 @@ const environments = [
 ] as const
 ---
 
-<section class="kern-benchmark-environments not-content" aria-labelledby="benchmark-environments">
+<section
+  class="lithekit-benchmark-environments not-content"
+  aria-labelledby="benchmark-environments"
+>
   <header>
-    <p class="kern-benchmark-environments__eyebrow">
+    <p class="lithekit-benchmark-environments__eyebrow">
       <Gauge aria-hidden="true" size={16} stroke-width={1.8} />
       Verified environments
     </p>
@@ -35,14 +38,14 @@ const environments = [
     </p>
   </header>
 
-  <div class="kern-benchmark-environments__grid">
+  <div class="lithekit-benchmark-environments__grid">
     {environments.map((environment) => (
       <article>
-        <div class="kern-benchmark-environments__card-topline">
+        <div class="lithekit-benchmark-environments__card-topline">
           <span>{environment.badge}</span>
           <small>{environment.label}</small>
         </div>
-        <div class="kern-benchmark-environments__cpu">
+        <div class="lithekit-benchmark-environments__cpu">
           <Cpu aria-hidden="true" size={20} stroke-width={1.7} />
           <h3>{environment.cpu}</h3>
         </div>
@@ -71,7 +74,7 @@ const environments = [
 
 <script>
 for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-content > table")) {
-  if (table.parentElement?.classList.contains("kern-benchmark-table-scroll")) continue
+  if (table.parentElement?.classList.contains("lithekit-benchmark-table-scroll")) continue
 
   let sibling: Element | null = table.previousElementSibling
   let heading: Element | null = null
@@ -82,7 +85,7 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
 
   const wrapper = document.createElement("div")
   const headingText = heading?.textContent?.trim()
-  wrapper.className = "kern-benchmark-table-scroll"
+  wrapper.className = "lithekit-benchmark-table-scroll"
   wrapper.dataset.columns = String(table.querySelectorAll("thead th").length)
   wrapper.tabIndex = 0
   wrapper.setAttribute("role", "region")
@@ -93,7 +96,7 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
 </script>
 
 <style>
-.kern-benchmark-environments {
+.lithekit-benchmark-environments {
   position: relative;
   overflow: hidden;
   margin-block: 2rem 2.75rem;
@@ -109,16 +112,16 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
   padding: clamp(1rem, 3vw, 1.5rem);
 }
 
-.kern-benchmark-environments > header {
+.lithekit-benchmark-environments > header {
   max-width: 46rem;
 }
 
-.kern-benchmark-environments__eyebrow {
+.lithekit-benchmark-environments__eyebrow {
   display: flex;
   align-items: center;
   gap: 0.45rem;
   margin: 0 0 0.45rem;
-  color: var(--kern-color-interactive);
+  color: var(--lithekit-color-interactive);
   font-family: var(--__sl-font-mono);
   font-size: 0.72rem;
   font-weight: 700;
@@ -126,27 +129,27 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
   text-transform: uppercase;
 }
 
-.kern-benchmark-environments h2 {
+.lithekit-benchmark-environments h2 {
   margin: 0;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font-size: clamp(1.35rem, 4vw, 1.8rem);
   letter-spacing: -0.035em;
 }
 
-.kern-benchmark-environments > header > p:last-child {
+.lithekit-benchmark-environments > header > p:last-child {
   margin: 0.7rem 0 0;
-  color: var(--kern-color-text-elevated);
+  color: var(--lithekit-color-text-elevated);
   font-size: 0.92rem;
   line-height: 1.65;
 }
 
-.kern-benchmark-environments__grid {
+.lithekit-benchmark-environments__grid {
   display: grid;
   gap: 0.8rem;
   margin-top: 1.35rem;
 }
 
-.kern-benchmark-environments article {
+.lithekit-benchmark-environments article {
   min-width: 0;
   border: 1px solid var(--sl-color-hairline-light);
   border-radius: 0.55rem;
@@ -154,18 +157,18 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
   padding: 1rem;
 }
 
-.kern-benchmark-environments article:last-child {
+.lithekit-benchmark-environments article:last-child {
   border-color: color-mix(in oklab, var(--sl-color-accent) 45%, var(--sl-color-hairline-light));
 }
 
-.kern-benchmark-environments__card-topline {
+.lithekit-benchmark-environments__card-topline {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
 
-.kern-benchmark-environments__card-topline span {
+.lithekit-benchmark-environments__card-topline span {
   border-radius: 999px;
   background: var(--sl-color-accent-low);
   padding: 0.25rem 0.5rem;
@@ -177,33 +180,33 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
   text-transform: uppercase;
 }
 
-.kern-benchmark-environments__card-topline small {
-  color: var(--kern-color-text-muted);
+.lithekit-benchmark-environments__card-topline small {
+  color: var(--lithekit-color-text-muted);
   font-size: 0.75rem;
 }
 
-.kern-benchmark-environments__cpu {
+.lithekit-benchmark-environments__cpu {
   display: flex;
   align-items: center;
   gap: 0.55rem;
   margin-top: 0.9rem;
-  color: var(--kern-color-interactive);
+  color: var(--lithekit-color-interactive);
 }
 
-.kern-benchmark-environments__cpu h3 {
+.lithekit-benchmark-environments__cpu h3 {
   margin: 0;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font-size: 1rem;
   letter-spacing: -0.015em;
 }
 
-.kern-benchmark-environments dl {
+.lithekit-benchmark-environments dl {
   display: grid;
   gap: 0.65rem;
   margin: 1rem 0 0;
 }
 
-.kern-benchmark-environments dl > div {
+.lithekit-benchmark-environments dl > div {
   display: grid;
   grid-template-columns: minmax(5.75rem, 0.38fr) minmax(0, 1fr);
   gap: 0.6rem;
@@ -211,19 +214,19 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
   padding-top: 0.6rem;
 }
 
-.kern-benchmark-environments dt {
+.lithekit-benchmark-environments dt {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  color: var(--kern-color-text-muted);
+  color: var(--lithekit-color-text-muted);
   font-size: 0.72rem;
   font-weight: 650;
 }
 
-.kern-benchmark-environments dd {
+.lithekit-benchmark-environments dd {
   min-width: 0;
   margin: 0;
-  color: var(--kern-color-text-body);
+  color: var(--lithekit-color-text-body);
   font-family: var(--__sl-font-mono);
   font-size: 0.72rem;
   overflow-wrap: anywhere;
@@ -231,46 +234,46 @@ for (const table of document.querySelectorAll<HTMLTableElement>(".sl-markdown-co
 }
 
 @media (min-width: 44rem) {
-  .kern-benchmark-environments__grid {
+  .lithekit-benchmark-environments__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 27rem) {
-  .kern-benchmark-environments dl > div {
+  .lithekit-benchmark-environments dl > div {
     grid-template-columns: 1fr;
     gap: 0.25rem;
   }
 
-  .kern-benchmark-environments dd {
+  .lithekit-benchmark-environments dd {
     text-align: left;
   }
 }
 </style>
 
 <style is:global>
-.kern-benchmark-table-scroll {
+.lithekit-benchmark-table-scroll {
   overflow-x: auto;
   margin-block: 1.25rem;
   border-radius: 0.25rem;
-  scrollbar-color: var(--kern-color-functional-border) transparent;
+  scrollbar-color: var(--lithekit-color-functional-border) transparent;
 }
 
-.kern-benchmark-table-scroll > table {
+.lithekit-benchmark-table-scroll > table {
   width: max-content;
   min-width: 100%;
   margin-block: 0;
 }
 
-.kern-benchmark-table-scroll[data-columns="4"] > table {
+.lithekit-benchmark-table-scroll[data-columns="4"] > table {
   min-width: 42rem;
 }
 
-.kern-benchmark-table-scroll[data-columns="5"] > table {
+.lithekit-benchmark-table-scroll[data-columns="5"] > table {
   min-width: 52rem;
 }
 
-.kern-benchmark-table-scroll[data-columns="6"] > table {
+.lithekit-benchmark-table-scroll[data-columns="6"] > table {
   min-width: 61rem;
 }
 </style>

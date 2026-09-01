@@ -1,4 +1,4 @@
-import * as validation from "@sousaivan/kern/validation"
+import * as validation from "@lithekit/validation"
 import typescript from "typescript"
 
 interface RunRequest {
@@ -15,7 +15,7 @@ interface RunResponse {
 
 type ConsoleWriter = (...values: readonly unknown[]) => void
 
-const allowedModule = "@sousaivan/kern/validation"
+const allowedModule = "@lithekit/validation"
 const blockedBrowserApi = /\b(?:fetch|WebSocket|EventSource|XMLHttpRequest|importScripts)\b/
 
 const normalizeForDisplay = (value: unknown, seen: WeakSet<object>): unknown => {
@@ -58,7 +58,7 @@ const validateSource = (source: string): void => {
 
 const rewriteImports = (javascript: string): string => {
   const rewritten = javascript.replace(
-    /\bimport\s*\{([\s\S]*?)\}\s*from\s*["']@sousaivan\/kern\/validation["'];?/g,
+    /\bimport\s*\{([\s\S]*?)\}\s*from\s*["']@lithekit\/validation["'];?/g,
     (_match, rawNames: string) => {
       const names = rawNames
         .split(",")
@@ -66,12 +66,12 @@ const rewriteImports = (javascript: string): string => {
         .filter(Boolean)
         .map((name) => name.replace(/\s+as\s+/g, ": "))
         .join(", ")
-      return `const { ${names} } = __kernValidation;`
+      return `const { ${names} } = __lithekitValidation;`
     },
   )
 
   if (/\b(?:import|export)\s/.test(rewritten)) {
-    throw new SyntaxError("Use a named import from @sousaivan/kern/validation.")
+    throw new SyntaxError("Use a named import from @lithekit/validation.")
   }
   return rewritten
 }
@@ -110,7 +110,7 @@ const execute = async (request: RunRequest): Promise<RunResponse> => {
     const AsyncFunction = Object.getPrototypeOf(async () => undefined).constructor as new (
       ...parameters: readonly string[]
     ) => (...arguments_: readonly unknown[]) => Promise<void>
-    const run = new AsyncFunction("__kernValidation", "console", `"use strict";\n${javascript}`)
+    const run = new AsyncFunction("__lithekitValidation", "console", `"use strict";\n${javascript}`)
     await run(validation, capturedConsole)
     return {
       id: request.id,

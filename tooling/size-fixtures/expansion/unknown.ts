@@ -1,3 +1,3 @@
-import { object, unknown } from "@sousaivan/kern/validation"
+import { object, unknown } from "@lithekit/validation"
 
 export const Envelope = object({ payload: unknown() })

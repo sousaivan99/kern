@@ -1,9 +1,9 @@
 ---
 title: Native first
-description: Understand when Kern helps and when plain JavaScript is already the better tool.
+description: Understand when Lithekit helps and when plain JavaScript is already the better tool.
 ---
 
-Kern builds on JavaScript and Web APIs instead of hiding them. A public helper is added only when it
+Lithekit builds on JavaScript and Web APIs instead of hiding them. A public helper is added only when it
 does at least one of these things:
 
 1. removes meaningful repeated boilerplate;
@@ -14,12 +14,12 @@ It must also remain small, predictable, framework-agnostic, and owned by one cle
 
 ## Learn the native foundation
 
-Kern relies on APIs such as `Intl`, `URL`, `AbortController`, `Promise`, `Map`, `Set`,
-`Object.hasOwn`, and `Array.prototype.at`. Knowing the native API makes Kern easier to understand.
+Lithekit relies on APIs such as `Intl`, `URL`, `AbortController`, `Promise`, `Map`, `Set`,
+`Object.hasOwn`, and `Array.prototype.at`. Knowing the native API makes Lithekit easier to understand.
 
 Some helpers are semantic names around short native expressions:
 
-| Kern | Native expression | Why Kern may read better |
+| Lithekit | Native expression | Why Lithekit may read better |
 | --- | --- | --- |
 | `first(values)` | `values[0]` | Communicates intent and improves known-tuple typing. |
 | `last(values)` | `values.at(-1)` | Avoids index arithmetic and improves known-tuple typing. |
@@ -29,7 +29,7 @@ Some helpers are semantic names around short native expressions:
 | `formatNumber(value)` | `new Intl.NumberFormat().format(value)` | Colocates locale with native options. |
 
 ```ts
-import { first, unique } from "@sousaivan/kern/array"
+import { first, unique } from "@lithekit/array"
 
 const runtimes = unique(["Bun", "Node", "Bun"])
 const primary = first(runtimes)
@@ -39,7 +39,7 @@ console.log(primary, runtimes)
 
 ## When plain JavaScript is better
 
-Do not search for a Kern helper when native code is already obvious:
+Do not search for a Lithekit helper when native code is already obvious:
 
 ```ts
 const values = [1, 2, 3]
@@ -55,11 +55,11 @@ const ids = new Set(users.map((user) => user.id))
 console.log(doubled, active, ids)
 ```
 
-Kern intentionally does not provide wrappers named `map`, `filter`, or `set` for these operations.
+Lithekit intentionally does not provide wrappers named `map`, `filter`, or `set` for these operations.
 
 ## Deliberate limits
 
-Kern is not a feature-for-feature replacement for Lodash, Zod, date-fns, a finance platform, or a
+Lithekit is not a feature-for-feature replacement for Lodash, Zod, date-fns, a finance platform, or a
 timezone engine. It avoids:
 
 - arbitrary object-path writes that can create prototype-pollution risks;

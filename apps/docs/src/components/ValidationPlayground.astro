@@ -1,5 +1,5 @@
 ---
-const initialSource = `import { object, string } from "@sousaivan/kern/validation"
+const initialSource = `import { object, string } from "@lithekit/validation"
 
 const User = object({
   name: string().min(2),
@@ -12,7 +12,7 @@ console.log(User.safeParse({
 }))`
 ---
 
-<section class="kern-playground not-content" data-validation-playground data-state="idle">
+<section class="lithekit-playground not-content" data-validation-playground data-state="idle">
   <header>
     <div>
       <h2 id="playground">Try it</h2>
@@ -20,8 +20,8 @@ console.log(User.safeParse({
     </div>
     <button type="button" data-playground-reset>Reset</button>
   </header>
-  <div class="kern-playground-grid">
-    <div class="kern-playground-editor">
+  <div class="lithekit-playground-grid">
+    <div class="lithekit-playground-editor">
       <label for="validation-playground-source">TypeScript</label>
       <textarea
         id="validation-playground-source"
@@ -33,7 +33,7 @@ console.log(User.safeParse({
         Runs after you stop typing. Press Control or Command + Enter to run immediately.
       </p>
     </div>
-    <div class="kern-playground-result">
+    <div class="lithekit-playground-result">
       <div>
         <span>Output</span>
         <span data-playground-status role="status" aria-live="polite">Waiting</span>
@@ -117,15 +117,15 @@ for (const playground of document.querySelectorAll<HTMLElement>("[data-validatio
 </script>
 
 <style>
-.kern-playground {
+.lithekit-playground {
   margin: 2rem 0 3rem;
   border: 1px solid var(--sl-color-hairline-light);
   border-radius: 0.35rem;
   background: var(--sl-color-bg);
 }
 
-.kern-playground > header,
-.kern-playground-result > div {
+.lithekit-playground > header,
+.lithekit-playground-result > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -134,69 +134,69 @@ for (const playground of document.querySelectorAll<HTMLElement>("[data-validatio
   background: var(--sl-color-gray-6);
 }
 
-.kern-playground > header {
+.lithekit-playground > header {
   padding: 0.8rem 1rem;
 }
 
-.kern-playground h2,
-.kern-playground p {
+.lithekit-playground h2,
+.lithekit-playground p {
   margin: 0;
 }
 
-.kern-playground h2 {
-  color: var(--kern-color-text-strong);
+.lithekit-playground h2 {
+  color: var(--lithekit-color-text-strong);
   font-size: 1rem;
   letter-spacing: -0.01em;
 }
 
-.kern-playground header p,
-.kern-playground-editor p {
-  color: var(--kern-color-text-muted);
+.lithekit-playground header p,
+.lithekit-playground-editor p {
+  color: var(--lithekit-color-text-muted);
   font-size: 0.75rem;
 }
 
-.kern-playground header p {
+.lithekit-playground header p {
   margin-top: 0.2rem;
 }
 
-.kern-playground button {
+.lithekit-playground button {
   min-height: 2.15rem;
-  border: 1px solid var(--kern-color-functional-border);
+  border: 1px solid var(--lithekit-color-functional-border);
   border-radius: 0.3rem;
   background: transparent;
   padding: 0.35rem 0.7rem;
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font: inherit;
   font-size: 0.8125rem;
   font-weight: 650;
   cursor: pointer;
 }
 
-.kern-playground button:hover {
-  border-color: var(--kern-color-interactive);
-  color: var(--kern-color-interactive);
+.lithekit-playground button:hover {
+  border-color: var(--lithekit-color-interactive);
+  color: var(--lithekit-color-interactive);
 }
 
-.kern-playground-grid {
+.lithekit-playground-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
   min-height: 24rem;
 }
 
-.kern-playground-editor,
-.kern-playground-result {
+.lithekit-playground-editor,
+.lithekit-playground-result {
   display: grid;
   min-width: 0;
 }
 
-.kern-playground-editor {
+.lithekit-playground-editor {
   grid-template-rows: auto minmax(20rem, 1fr) auto;
   border-right: 1px solid var(--sl-color-hairline);
 }
 
-.kern-playground-editor label,
-.kern-playground-result > div {
-  color: var(--kern-color-text-muted);
+.lithekit-playground-editor label,
+.lithekit-playground-result > div {
+  color: var(--lithekit-color-text-muted);
   font-family: var(--__sl-font-mono);
   font-size: 0.75rem;
   font-weight: 650;
@@ -204,24 +204,24 @@ for (const playground of document.querySelectorAll<HTMLElement>("[data-validatio
   text-transform: uppercase;
 }
 
-.kern-playground-editor label,
-.kern-playground-editor p,
-.kern-playground-result > div {
+.lithekit-playground-editor label,
+.lithekit-playground-editor p,
+.lithekit-playground-result > div {
   padding: 0.65rem 0.8rem;
 }
 
-.kern-playground-editor label {
+.lithekit-playground-editor label {
   border-bottom: 1px solid var(--sl-color-hairline);
   background: var(--sl-color-gray-6);
 }
 
-.kern-playground textarea,
-.kern-playground output {
+.lithekit-playground textarea,
+.lithekit-playground output {
   overflow: auto;
   min-width: 0;
   border: 0;
   background: var(--sl-color-bg);
-  color: var(--kern-color-text-strong);
+  color: var(--lithekit-color-text-strong);
   font-family: var(--__sl-font-mono);
   font-size: 0.8125rem;
   line-height: 1.65;
@@ -229,45 +229,45 @@ for (const playground of document.querySelectorAll<HTMLElement>("[data-validatio
   white-space: pre-wrap;
 }
 
-.kern-playground textarea {
+.lithekit-playground textarea {
   width: 100%;
   resize: vertical;
   padding: 1rem;
 }
 
-.kern-playground output {
+.lithekit-playground output {
   padding: 1rem;
   overflow-wrap: anywhere;
 }
 
-.kern-playground-editor p {
+.lithekit-playground-editor p {
   border-top: 1px solid var(--sl-color-hairline);
 }
 
-.kern-playground-result {
+.lithekit-playground-result {
   grid-template-rows: auto minmax(0, 1fr);
 }
 
-.kern-playground-result [data-playground-status] {
-  color: var(--kern-color-text-body);
+.lithekit-playground-result [data-playground-status] {
+  color: var(--lithekit-color-text-body);
   text-transform: none;
 }
 
-.kern-playground[data-state="error"] [data-playground-status] {
+.lithekit-playground[data-state="error"] [data-playground-status] {
   color: #dc6b6b;
 }
 
 @media (max-width: 44rem) {
-  .kern-playground-grid {
+  .lithekit-playground-grid {
     grid-template-columns: 1fr;
   }
 
-  .kern-playground-editor {
+  .lithekit-playground-editor {
     border-right: 0;
     border-bottom: 1px solid var(--sl-color-hairline);
   }
 
-  .kern-playground-result {
+  .lithekit-playground-result {
     min-height: 14rem;
   }
 }

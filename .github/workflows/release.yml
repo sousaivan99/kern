@@ -1,12 +1,17 @@
-name: Release
+name: Release packages
 
 on:
   workflow_dispatch:
     inputs:
       release_sha:
-        description: Commit that passed CI and should be released
+        description: Commit on prod that passed the complete CI gate
         required: true
         type: string
+      bootstrap_all:
+        description: First release only—publish every @lithekit package
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: release-prod
@@ -23,58 +28,38 @@ env:
 
 jobs:
   publish:
-    name: Publish @sousaivan/kern
+    name: Publish affected Lithekit packages
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     environment:
       name: production
-      url: https://www.npmjs.com/package/@sousaivan/kern
+      url: https://www.npmjs.com/org/lithekit
     steps:
       - name: Check out the tested commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.inputs.release_sha }}
+          ref: ${{ inputs.release_sha }}
           fetch-depth: 0
-      - name: Set up Node and npm registry
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - name: Install release tooling
         run: npm install --global npm@${NPM_VERSION}
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
-      - name: Read and validate release version
-        id: package
-        shell: bash
-        run: |
-          bun tooling/scripts/kern/release-contract.ts --check-npm
-          NAME=$(node --input-type=module --eval "import manifest from './packages/kern/package.json' with { type: 'json' }; process.stdout.write(manifest.name)")
-          VERSION=$(node --input-type=module --eval "import manifest from './packages/kern/package.json' with { type: 'json' }; process.stdout.write(manifest.version)")
-          node --eval "if (!/^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$/.test(process.argv[1])) process.exit(1)" "$VERSION"
-          echo "name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-      - name: Verify release artifact
-        run: bun run package:check
-      - name: Publish package with provenance
-        working-directory: packages/kern
+      - name: Require the tested prod commit
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance --ignore-scripts
-      - name: Create GitHub release
+          RELEASE_SHA: ${{ inputs.release_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "$RELEASE_SHA")"
+          git merge-base --is-ancestor HEAD origin/prod
+      - name: Build, verify, publish, tag, and create releases
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_SHA: ${{ github.event.inputs.release_sha }}
-          RELEASE_TAG: ${{ steps.package.outputs.tag }}
-          RELEASE_VERSION: ${{ steps.package.outputs.version }}
-        run: >-
-          gh release create "$RELEASE_TAG"
-          --target "$RELEASE_SHA"
-          --title "@sousaivan/kern $RELEASE_VERSION"
-          --generate-notes
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: bun tooling/scripts/packages/release.ts --publish ${{ inputs.bootstrap_all && '--all' || '' }}

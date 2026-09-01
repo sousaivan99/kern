@@ -7,9 +7,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping improve Kern. You do not need to know why the bug happens. A small example showing what you expected and what happened is enough to start.
+        Thanks for helping improve Lithekit. You do not need to know why the bug happens. A small example showing what you expected and what happened is enough to start.
 
-        **Security warning:** do not report vulnerabilities here. Use GitHub's [private vulnerability reporting form](https://github.com/sousaivan99/kern/security/advisories/new).
+        **Security warning:** do not report vulnerabilities here. Use GitHub's [private vulnerability reporting form](https://github.com/sousaivan99/lithekit/security/advisories/new).
 
   - type: checkboxes
     id: checks
@@ -35,6 +35,7 @@ body:
         - Array
         - Object
         - Async
+        - Form, Vue, or React
         - Package or TypeScript declarations
         - Documentation or examples
         - Framework compatibility
@@ -45,8 +46,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Kern version
-      description: Run `bun pm ls @sousaivan/kern`, `npm ls @sousaivan/kern`, or check package.json. Use “workspace” if testing the repository directly.
+      label: Lithekit package and version
+      description: Include the exact @lithekit package and version, or use “workspace” when testing the repository directly.
       placeholder: "1.0.0"
     validations:
       required: true
@@ -57,7 +58,7 @@ body:
       label: Minimal reproduction
       description: Paste the smallest TypeScript or JavaScript example that still shows the problem. Remove application secrets and unrelated code.
       placeholder: |
-        import { addMoney } from "@sousaivan/kern/money"
+        import { addMoney } from "@lithekit/money"
 
         console.log(addMoney(100, 50))
       render: typescript

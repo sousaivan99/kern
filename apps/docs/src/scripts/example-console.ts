@@ -1,15 +1,15 @@
 type ConsoleWriter = (...values: readonly unknown[]) => void
 
 const supportedModules = [
-  "@sousaivan/kern",
-  "@sousaivan/kern/array",
-  "@sousaivan/kern/async",
-  "@sousaivan/kern/date",
-  "@sousaivan/kern/money",
-  "@sousaivan/kern/number",
-  "@sousaivan/kern/object",
-  "@sousaivan/kern/string",
-  "@sousaivan/kern/validation",
+  "@lithekit/array",
+  "@lithekit/async",
+  "@lithekit/date",
+  "@lithekit/form",
+  "@lithekit/money",
+  "@lithekit/number",
+  "@lithekit/object",
+  "@lithekit/string",
+  "@lithekit/validation",
 ] as const
 
 type SupportedModule = (typeof supportedModules)[number]
@@ -62,26 +62,26 @@ const formatThrownError = (error: unknown): string => {
   return `${summary}\nIssues: ${formatConsoleValue(error.issues)}`
 }
 
-const loadKernModule = async (specifier: string): Promise<Record<string, unknown>> => {
+const loadLithekitModule = async (specifier: string): Promise<Record<string, unknown>> => {
   switch (specifier as SupportedModule) {
-    case "@sousaivan/kern":
-      return import("@sousaivan/kern")
-    case "@sousaivan/kern/array":
-      return import("@sousaivan/kern/array")
-    case "@sousaivan/kern/async":
-      return import("@sousaivan/kern/async")
-    case "@sousaivan/kern/date":
-      return import("@sousaivan/kern/date")
-    case "@sousaivan/kern/money":
-      return import("@sousaivan/kern/money")
-    case "@sousaivan/kern/number":
-      return import("@sousaivan/kern/number")
-    case "@sousaivan/kern/object":
-      return import("@sousaivan/kern/object")
-    case "@sousaivan/kern/string":
-      return import("@sousaivan/kern/string")
-    case "@sousaivan/kern/validation":
-      return import("@sousaivan/kern/validation")
+    case "@lithekit/array":
+      return import("@lithekit/array")
+    case "@lithekit/async":
+      return import("@lithekit/async")
+    case "@lithekit/date":
+      return import("@lithekit/date")
+    case "@lithekit/form":
+      return import("@lithekit/form")
+    case "@lithekit/money":
+      return import("@lithekit/money")
+    case "@lithekit/number":
+      return import("@lithekit/number")
+    case "@lithekit/object":
+      return import("@lithekit/object")
+    case "@lithekit/string":
+      return import("@lithekit/string")
+    case "@lithekit/validation":
+      return import("@lithekit/validation")
     default:
       throw new TypeError(`The interactive console cannot load ${JSON.stringify(specifier)}.`)
   }
@@ -134,7 +134,7 @@ const rewriteImports = (javascript: string): string => {
         .filter(Boolean)
         .map((name) => name.replace(/\s+as\s+/g, ": "))
         .join(", ")
-      return `const { ${names} } = await __kernImport(${JSON.stringify(specifier)});`
+      return `const { ${names} } = await __lithekitImport(${JSON.stringify(specifier)});`
     },
   )
 
@@ -154,7 +154,7 @@ const transpileExample = async (source: string): Promise<string> => {
       target: typescript.ScriptTarget.ES2022,
       verbatimModuleSyntax: true,
     },
-    fileName: "kern-documentation-example.ts",
+    fileName: "lithekit-documentation-example.ts",
     reportDiagnostics: true,
   })
 
@@ -193,25 +193,25 @@ const createInlineConsole = (figure: HTMLElement, cannotRun: string | undefined)
   consoleIndex += 1
 
   const container = document.createElement("section")
-  container.className = "kern-example-console not-content"
+  container.className = "lithekit-example-console not-content"
   container.dataset.state = cannotRun ? "unavailable" : "idle"
 
   const header = document.createElement("div")
-  header.className = "kern-example-console__header"
+  header.className = "lithekit-example-console__header"
 
   const label = document.createElement("span")
-  label.className = "kern-example-console__label"
+  label.className = "lithekit-example-console__label"
   label.textContent = "Console output"
 
   const button = document.createElement("button")
-  button.className = "kern-example-console__run"
+  button.className = "lithekit-example-console__run"
   button.type = "button"
   button.textContent = cannotRun ? "Needs app" : "Run example"
   button.disabled = cannotRun !== undefined
 
   const output = document.createElement("output")
-  output.id = `kern-example-output-${consoleIndex}`
-  output.className = "kern-example-console__output"
+  output.id = `lithekit-example-output-${consoleIndex}`
+  output.className = "lithekit-example-console__output"
   output.setAttribute("aria-live", "polite")
   output.setAttribute("aria-atomic", "true")
   output.textContent = cannotRun ?? "Select “Run example” to see exactly what console.log() prints."
@@ -251,8 +251,8 @@ const runCodeExample = async (source: string, console: InlineConsole): Promise<v
     const AsyncFunction = Object.getPrototypeOf(async () => undefined).constructor as new (
       ...parameters: readonly string[]
     ) => (...arguments_: readonly unknown[]) => Promise<void>
-    const execute = new AsyncFunction("__kernImport", "console", `"use strict";\n${javascript}`)
-    await execute(loadKernModule, capturedConsole)
+    const execute = new AsyncFunction("__lithekitImport", "console", `"use strict";\n${javascript}`)
+    await execute(loadLithekitModule, capturedConsole)
 
     console.container.dataset.state = "success"
     console.output.textContent =

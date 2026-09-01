@@ -5,17 +5,17 @@ sidebar:
   order: 6
 ---
 
-Import array helpers from `@sousaivan/kern/array`. Every helper returns a new value and leaves the input
+Import array helpers from `@lithekit/array`. Every helper returns a new value and leaves the input
 array unchanged.
 
 ## Start here: an array is an ordered list
 
 An array stores values in order and uses zero-based positions: the first item is at position `0`.
-Kern's array helpers help you read, split, group, or copy that list. They do not change the input
+Lithekit's array helpers help you read, split, group, or copy that list. They do not change the input
 array.
 
 ```ts
-import { first, unique } from "@sousaivan/kern/array"
+import { first, unique } from "@lithekit/array"
 
 const names = ["Ada", "Grace", "Ada"]
 
@@ -45,7 +45,7 @@ these and other terms.
 ## `first(values)`
 
 ```ts
-import { first } from "@sousaivan/kern/array"
+import { first } from "@lithekit/array"
 
 const queue = ["build", "test", "deploy"]
 
@@ -59,7 +59,7 @@ is the semantic form of `values[0]`: use it when the name “first” makes the 
 For a known non-empty tuple, TypeScript knows the exact first-element type:
 
 ```ts
-import { first } from "@sousaivan/kern/array"
+import { first } from "@lithekit/array"
 
 const status = first(["draft", 1] as const)
 // status has the exact type "draft"
@@ -68,7 +68,7 @@ const status = first(["draft", 1] as const)
 ## `last(values)`
 
 ```ts
-import { last } from "@sousaivan/kern/array"
+import { last } from "@lithekit/array"
 
 const queue = ["build", "test", "deploy"]
 
@@ -85,7 +85,7 @@ Use `unique(values)` when equality should follow JavaScript `Set` rules. The fir
 and order is preserved.
 
 ```ts
-import { unique } from "@sousaivan/kern/array"
+import { unique } from "@lithekit/array"
 
 console.log(unique(["vue", "react", "vue"])) // ["vue", "react"]
 console.log(unique([1, 1, 2, Number.NaN, Number.NaN])) // [1, 2, NaN]
@@ -100,7 +100,7 @@ Use `uniqueBy()` when objects should be considered duplicates because one calcul
 as an ID, is the same.
 
 ```ts
-import { uniqueBy } from "@sousaivan/kern/array"
+import { uniqueBy } from "@lithekit/array"
 
 const users = [
   { id: 1, name: "Ada" },
@@ -124,7 +124,7 @@ passes through to the caller.
 ## `groupBy(values, selector)`
 
 ```ts
-import { groupBy } from "@sousaivan/kern/array"
+import { groupBy } from "@lithekit/array"
 
 const events = [
   { id: "evt-1", category: "billing" },
@@ -145,13 +145,13 @@ groupBy(events, () => {
 strings, numbers, or symbols. It returns a **null-prototype object**, so an input key such as
 `"__proto__"` is treated as data and cannot change the result's prototype.
 
-The closest native API is `Object.groupBy(values, selector)`. Kern provides predictable typing and
+The closest native API is `Object.groupBy(values, selector)`. Lithekit provides predictable typing and
 the same safe result shape across its supported runtimes.
 
 ## `partition(values, predicate)`
 
 ```ts
-import { partition } from "@sousaivan/kern/array"
+import { partition } from "@lithekit/array"
 
 const [adults, minors] = partition(
   [12, 21, 17, 40],
@@ -177,7 +177,7 @@ that did not match. An empty input returns `[[], []]`.
 ## Create batches with `chunk`
 
 ```ts
-import { chunk } from "@sousaivan/kern/array"
+import { chunk } from "@lithekit/array"
 
 console.log("Success:", chunk([1, 2, 3, 4, 5], 2)) // [[1, 2], [3, 4], [5]]
 console.log("Empty array:", chunk([], 3)) // []
@@ -194,7 +194,7 @@ The returned chunks are new arrays. Their contained values are not cloned.
 ## Remove falsy values
 
 ```ts
-import { withoutFalsy } from "@sousaivan/kern/array"
+import { withoutFalsy } from "@lithekit/array"
 
 console.log(withoutFalsy([0, 1, false, "ready", "", null, undefined]))
 // [1, "ready"]
@@ -209,7 +209,7 @@ union. TypeScript cannot represent `NaN` as its own literal type, so runtime rem
 more precise than static narrowing for that value.
 
 ```ts
-import { type NonFalsy, withoutFalsy } from "@sousaivan/kern/array"
+import { type NonFalsy, withoutFalsy } from "@lithekit/array"
 
 type Input = string | null | undefined
 type Present = NonFalsy<Input> // string
@@ -222,14 +222,14 @@ const names: Present[] = withoutFalsy(["Ada", null, "Grace", undefined])
 Use `withoutNullish()` when zero, `false`, an empty string, or `NaN` are valid data:
 
 ```ts
-import { withoutNullish } from "@sousaivan/kern/array"
+import { withoutNullish } from "@lithekit/array"
 
 const values = withoutNullish([0, null, false, undefined, "", Number.NaN])
 // Array<number | false | string>: [0, false, "", NaN]
 ```
 
 It removes only `null` and `undefined`, preserves order and duplicates, and returns a new array.
-Its result uses TypeScript's built-in `NonNullable<T>` type; Kern adds no extra public type.
+Its result uses TypeScript's built-in `NonNullable<T>` type; Lithekit adds no extra public type.
 
 ## Mutation and errors
 
@@ -246,7 +246,7 @@ Its result uses TypeScript's built-in `NonNullable<T>` type; Kern adds no extra 
 - `withoutFalsy()` removes useful numeric zeroes as well as missing values. Do not use it when `0`
   is valid data; use `withoutNullish()` for that case.
 - `chunk(values, 0)` cannot make progress and throws. The size must be a positive safe integer.
-- Selector and predicate callbacks are your application code. If one throws, Kern does not hide
+- Selector and predicate callbacks are your application code. If one throws, Lithekit does not hide
   that error.
 - Returned arrays are new containers, but objects inside them are shared. Changing a contained
   object can still be observed through the original array.
@@ -258,7 +258,7 @@ Its result uses TypeScript's built-in `NonNullable<T>` type; Kern adds no extra 
 A TypeScript type guard lets `partition()` give each returned array a more precise type:
 
 ```ts
-import { partition } from "@sousaivan/kern/array"
+import { partition } from "@lithekit/array"
 
 const values: Array<string | number> = ["Ada", 42, "Grace", 7]
 const [names, numbers] = partition(
@@ -276,7 +276,7 @@ numbers.map((number) => number.toFixed(2))
 does not inherit methods such as `.hasOwnProperty()`:
 
 ```ts
-import { groupBy } from "@sousaivan/kern/array"
+import { groupBy } from "@lithekit/array"
 
 const grouped = groupBy(["constructor", "safe"], (value) => value)
 
