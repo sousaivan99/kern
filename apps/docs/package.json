@@ -13,7 +13,7 @@
     "check": "bun ../../tooling/scripts/docs/check.ts"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.41.7",
+    "@astrojs/starlight": "^0.42.0",
     "@astrojs/starlight-tailwind": "^5.0.0",
     "@sousaivan/kern": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
